@@ -1,0 +1,5 @@
+# Everyday applications.
+konsole
+dolphin
+ark
+firefox
