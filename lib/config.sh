@@ -60,7 +60,7 @@ configure_default_session() {
 
 # Installs the tracked KDE configuration files into the user's config directory.
 configure_kde_configs() {
-    local src="${SCRIPT_DIR}/config/kde/setup.sh"
+    local src="${SCRIPT_DIR}/config/setup.sh"
 
     if [ "${DRY_RUN:-0}" -eq 1 ]; then
         info "Would install KDE configuration files into ${XDG_CONFIG_HOME:-$HOME/.config}"
@@ -77,5 +77,10 @@ configure_kde_configs() {
         return 0
     }
 
-    ok "KDE configuration files installed"
+    if command -v systemctl >/dev/null 2>&1; then
+        systemctl --user daemon-reload >/dev/null 2>&1 \
+            || warn "Could not reload the user systemd manager"
+    fi
+
+    ok "KDE and systemd-user configuration files installed"
 }

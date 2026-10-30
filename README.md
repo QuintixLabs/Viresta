@@ -120,15 +120,15 @@ platform theme).
 The browser add-on itself has to be removed inside Firefox/Chrome if it is
 already installed.
 
-The installer copies the tracked KDE configuration files into `~/.config`.
+The installer copies the tracked KDE and systemd-user configuration files into `~/.config`.
 The repository keeps them grouped under `config/kde/appearance/`,
-`config/kde/plasma/`, `config/kde/shortcuts/`, and `config/kde/taskbar/`. Run `config/kde/setup.sh`
+`config/kde/plasma/`, `config/kde/shortcuts/`, and `config/kde/taskbar/`. Run `config/setup.sh`
 again to reinstall them manually.
 
 Re-run by hand:
 
 ```sh
-bash config/kde/setup.sh
+bash config/setup.sh
 ```
 
 ## Logs
