@@ -1,6 +1,7 @@
 [ActivityManager]
 _k_friendly_name=Activity Manager
 switch-to-activity-233c9bd2-d7e2-4f5a-8789-593376e31e92=none,none,Switch to activity "Default"
+switch-to-activity-f0dbf1e3-1e6d-4d94-a37c-52916b6cae6b=none,none,Switch to activity "Default"
 
 [KDE Keyboard Layout Switcher]
 Switch to Last-Used Keyboard Layout=Meta+Alt+L,Meta+Alt+L,
@@ -10,13 +11,13 @@ _k_friendly_name=Keyboard Layout Switcher
 [kmix]
 _k_friendly_name=Audio Volume
 decrease_microphone_volume=Microphone Volume Down,Microphone Volume Down,Decrease Microphone Volume
-decrease_volume=Volume Down,Volume Down,Decrease Volume
+decrease_volume=Ctrl+Alt+Down,Volume Down,Decrease Volume
 decrease_volume_small=Shift+Volume Down,Shift+Volume Down,Decrease Volume by 1%
 increase_microphone_volume=Microphone Volume Up,Microphone Volume Up,Increase Microphone Volume
-increase_volume=Volume Up,Volume Up,Increase Volume
+increase_volume=Volume Up\tCtrl+Alt+Up,Volume Up,Increase Volume
 increase_volume_small=Shift+Volume Up,Shift+Volume Up,Increase Volume by 1%
-mic_mute=Microphone Mute\tMeta+Volume Mute,Microphone Mute\tMeta+Volume Mute,Mute Microphone
-mute=Volume Mute,Volume Mute,Mute
+mic_mute=Ins,Microphone Mute\tMeta+Volume Mute,Mute Microphone
+mute=Pause,Volume Mute,Mute
 push_to_talk=none,none,Push to talk
 
 [ksmserver]
@@ -36,10 +37,6 @@ Cycle Overview=none,none,Cycle through Overview and Grid View
 Cycle Overview Opposite=none,none,Cycle through Grid View and Overview
 Decrease Opacity=none,none,Decrease Opacity of Active Window by 5%
 Edit Tiles=Meta+T,Meta+T,Toggle Tiles Editor
-Expose=Ctrl+F9\tMeta+F9,Ctrl+F9\tMeta+F9,Toggle Present Windows (Current desktop)
-ExposeAll=Launch (C)\tCtrl+F10\tMeta+F10,Launch (C)\tCtrl+F10\tMeta+F10,Toggle Present Windows (All desktops)
-ExposeClass=Ctrl+F7\tMeta+F7,Ctrl+F7\tMeta+F7,Toggle Present Windows (Window class)
-ExposeClassCurrentDesktop=none,none,Toggle Present Windows (Window class on current desktop)
 Grid View=Meta+G,Meta+G,Toggle Grid View
 Increase Opacity=none,none,Increase Opacity of Active Window by 5%
 Kill Window=Meta+Ctrl+Esc,Meta+Ctrl+Esc,Kill Window
@@ -202,34 +199,34 @@ view_zoom_in=Meta++\tMeta+=,Meta++\tMeta+=,Zoom In
 view_zoom_out=Meta+-,Meta+-,Zoom Out
 
 [kwin][$InverseAction]
-Cycle Overview Opposite=Cycle Overview
+Cycle Overview=Cycle Overview Opposite
 Decrease Opacity=Increase Opacity
-MoveZoomRight=MoveZoomLeft
-MoveZoomUp=MoveZoomDown
+MoveZoomDown=MoveZoomUp
+MoveZoomLeft=MoveZoomRight
 Switch One Desktop Down=Switch One Desktop Up
-Switch One Desktop to the Right=Switch One Desktop to the Left
+Switch One Desktop to the Left=Switch One Desktop to the Right
 Switch Window Down=Switch Window Up
-Switch Window Left=Switch Window Right
-Switch to Next Desktop=Switch to Previous Desktop
+Switch Window Right=Switch Window Left
 Switch to Next Screen=Switch to Previous Screen
-Switch to Screen Above=Switch to Screen Below
+Switch to Previous Desktop=Switch to Next Desktop
+Switch to Screen Below=Switch to Screen Above
 Switch to Screen to the Right=Switch to Screen to the Left
-Walk Through Windows (Reverse)=Walk Through Windows
-Walk Through Windows Alternative (Reverse)=Walk Through Windows Alternative
-Walk Through Windows of Current Application=Walk Through Windows of Current Application (Reverse)
-Walk Through Windows of Current Application Alternative=Walk Through Windows of Current Application Alternative (Reverse)
+Walk Through Windows=Walk Through Windows (Reverse)
+Walk Through Windows Alternative=Walk Through Windows Alternative (Reverse)
+Walk Through Windows of Current Application (Reverse)=Walk Through Windows of Current Application
+Walk Through Windows of Current Application Alternative (Reverse)=Walk Through Windows of Current Application Alternative
 Window Grow Horizontal=Window Shrink Horizontal
-Window Lower=Window Raise
+Window Grow Vertical=Window Shrink Vertical
 Window One Desktop Up=Window One Desktop Down
 Window One Desktop to the Left=Window One Desktop to the Right
 Window One Screen Down=Window One Screen Up
 Window One Screen to the Left=Window One Screen to the Right
-Window Pack Left=Window Pack Right
-Window Pack Up=Window Pack Down
-Window Shrink Vertical=Window Grow Vertical
-Window to Next Screen=Window to Previous Screen
+Window Pack Down=Window Pack Up
+Window Pack Right=Window Pack Left
+Window Raise=Window Lower
 Window to Previous Desktop=Window to Next Desktop
-view_zoom_out=view_zoom_in
+Window to Previous Screen=Window to Next Screen
+view_zoom_in=view_zoom_out
 
 [mediacontrol]
 _k_friendly_name=Media Controller
@@ -298,5 +295,27 @@ switch to next activity=none,none,Switch to Next Activity
 switch to previous activity=none,none,Switch to Previous Activity
 toggle do not disturb=none,none,Toggle do not disturb
 
+[services][codium.desktop]
+_launch=Alt+C
+
+[services][firefox.desktop]
+_launch=Alt+F
+
+[services][net.local.vicinae.desktop]
+_launch=Meta+.
+
+[services][org.kde.dolphin.desktop]
+_launch=Alt+E
+
+[services][org.kde.konsole.desktop]
+_launch=Alt+T
+
+[services][org.kde.plasma.emojier.desktop]
+_launch=none
+
 [services][viresta-vicinae.desktop]
 _launch=Meta
+
+[viresta-vicinae.desktop]
+_k_friendly_name=Vicinae
+_launch=Meta,none,Vicinae

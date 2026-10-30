@@ -31,17 +31,20 @@ install_tree() {
 }
 
 install_configs() {
-    local category target minimum_depth strip_category
+    local category category_name target minimum_depth strip_category
 
     while IFS= read -r -d '' category; do
-        target="$CONFIG_DIR"
-        minimum_depth=2
-        strip_category=1
+        category_name="$(basename "$category")"
+        target="$CONFIG_DIR/$category_name"
+        minimum_depth=1
+        strip_category=0
 
-        if [ "$(basename "$category")" = "systemd" ]; then
+        if [ "$category_name" = "kde" ]; then
+            target="$CONFIG_DIR"
+            minimum_depth=2
+            strip_category=1
+        elif [ "$category_name" = "systemd" ]; then
             target="$CONFIG_DIR/systemd/user"
-            minimum_depth=1
-            strip_category=0
         fi
 
         install_tree "$category" "$target" "$minimum_depth" "$strip_category"
