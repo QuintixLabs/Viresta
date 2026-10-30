@@ -99,12 +99,13 @@ main() {
     step "Installing VM extras"
     install_vm_extras
 
-    step "Services, login & KDE config"
+    step "Services, login & desktop config"
     configure_networkmanager
     configure_vm_services
     configure_sddm
     configure_default_session
     configure_kde_configs
+    configure_vscodium
 
     summary
 }

@@ -30,11 +30,34 @@ install_tree() {
     done < <(find "$source_root" -mindepth "$minimum_depth" -type f -print0)
 }
 
+configure_wallpaper() {
+    local config_file="$CONFIG_DIR/plasma-org.kde.plasma.desktop-appletsrc"
+    local wallpaper="$HOME/Pictures/Wallpapers/Viresta/01. Viresta.jpg"
+    local image_url="file://${wallpaper}"
+
+    [ -f "$config_file" ] || return 0
+
+    image_url="${image_url// /%20}"
+    sed -i "s|^Image=file:///VIRESTA_WALLPAPER$|Image=$image_url|" "$config_file"
+}
+
 install_configs() {
-    local category category_name target minimum_depth strip_category
+    local category category_name source_root target minimum_depth strip_category
 
     while IFS= read -r -d '' category; do
         category_name="$(basename "$category")"
+
+        if [ "$category_name" = "vscodium" ]; then
+            if [ -f "$category/settings.json" ]; then
+                install -Dm644 \
+                    "$category/settings.json" \
+                    "$CONFIG_DIR/VSCodium/User/settings.json"
+                printf 'Installed %s\n' "$CONFIG_DIR/VSCodium/User/settings.json"
+            fi
+            continue
+        fi
+
+        source_root="$category"
         target="$CONFIG_DIR/$category_name"
         minimum_depth=1
         strip_category=0
@@ -45,10 +68,22 @@ install_configs() {
             strip_category=1
         elif [ "$category_name" = "systemd" ]; then
             target="$CONFIG_DIR/systemd/user"
+        elif [ "$category_name" = "wallpapers" ]; then
+            target="$HOME/Pictures/Wallpapers/Viresta"
+            if [ -f "$category/rename_wallpapers.py" ]; then
+                install -Dm644 \
+                    "$category/rename_wallpapers.py" \
+                    "$HOME/Pictures/Wallpapers/rename_wallpapers.py"
+                printf 'Installed %s\n' "$HOME/Pictures/Wallpapers/rename_wallpapers.py"
+            fi
+            source_root="$category/Viresta"
         fi
 
-        install_tree "$category" "$target" "$minimum_depth" "$strip_category"
+        [ -d "$source_root" ] || continue
+        install_tree "$source_root" "$target" "$minimum_depth" "$strip_category"
     done < <(find "$SCRIPT_DIR" -mindepth 1 -maxdepth 1 -type d -print0)
+
+    configure_wallpaper
 }
 
 case "${1:-}" in

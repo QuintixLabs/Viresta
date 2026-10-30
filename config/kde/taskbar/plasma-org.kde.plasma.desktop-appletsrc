@@ -4,17 +4,6 @@ RightButton;NoModifier=org.kde.contextmenu
 [ActionPlugins][1]
 RightButton;NoModifier=org.kde.contextmenu
 
-[Containments][1]
-ItemGeometries-1718x920=
-ItemGeometriesHorizontal=
-activityId=233c9bd2-d7e2-4f5a-8789-593376e31e92
-formfactor=0
-immutability=1
-lastScreen=0
-location=0
-plugin=org.kde.plasma.folder
-wallpaperplugin=org.kde.image
-
 [Containments][2]
 activityId=
 floating=0
@@ -140,6 +129,18 @@ shownItems=
 AppletOrder=4;5;6;7;22
 floating=0
 floatingApplets=0
+
+[Containments][23]
+activityId=f0dbf1e3-1e6d-4d94-a37c-52916b6cae6b
+formfactor=0
+immutability=1
+lastScreen=0
+location=0
+plugin=org.kde.plasma.folder
+wallpaperplugin=org.kde.image
+
+[Containments][23][Wallpaper][org.kde.image][General]
+Image=file:///VIRESTA_WALLPAPER
 
 [ScreenMapping]
 itemsOnDisabledScreens=

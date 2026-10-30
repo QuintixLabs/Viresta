@@ -84,3 +84,37 @@ configure_kde_configs() {
 
     ok "KDE and systemd-user configuration files installed"
 }
+
+configure_vscodium() {
+    local file="${SCRIPT_DIR}/config/vscodium/extensions.txt"
+    local command_name=""
+    local extension
+
+    [ -f "$file" ] || return 0
+
+    if [ "${DRY_RUN:-0}" -eq 1 ]; then
+        info "Would install VSCodium extensions from $file"
+        return 0
+    fi
+
+    if command -v codium >/dev/null 2>&1; then
+        command_name="codium"
+    elif command -v vscodium >/dev/null 2>&1; then
+        command_name="vscodium"
+    else
+        warn "VSCodium command not found; skipping extensions"
+        return 0
+    fi
+
+    while IFS= read -r extension || [ -n "$extension" ]; do
+        extension="${extension%%#*}"
+        extension="$(printf '%s' "$extension" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+        [ -n "$extension" ] || continue
+
+        "$command_name" --install-extension "$extension" \
+            >/dev/null 2>&1 \
+            || warn "Could not install VSCodium extension: $extension"
+    done <"$file"
+
+    ok "VSCodium extensions installed"
+}
