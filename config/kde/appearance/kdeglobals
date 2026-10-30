@@ -1,0 +1,222 @@
+[ColorEffects:Disabled]
+ChangeSelectionColor=
+Color=56,56,56
+ColorAmount=0
+ColorEffect=0
+ContrastAmount=0.65
+ContrastEffect=1
+Enable=
+IntensityAmount=0.1
+IntensityEffect=2
+
+[ColorEffects:Inactive]
+ChangeSelectionColor=true
+Color=112,111,110
+ColorAmount=0.025
+ColorEffect=2
+ContrastAmount=0.1
+ContrastEffect=2
+Enable=false
+IntensityAmount=0
+IntensityEffect=0
+
+[Colors:Button]
+BackgroundAlternate=30,87,116
+BackgroundNormal=41,44,48
+DecorationFocus=61,174,233
+DecorationHover=61,174,233
+ForegroundActive=61,174,233
+ForegroundInactive=161,169,177
+ForegroundLink=29,153,243
+ForegroundNegative=218,68,83
+ForegroundNeutral=246,116,0
+ForegroundNormal=252,252,252
+ForegroundPositive=39,174,96
+ForegroundVisited=155,89,182
+
+[Colors:Complementary]
+BackgroundAlternate=30,87,116
+BackgroundNormal=32,35,38
+DecorationFocus=61,174,233
+DecorationHover=61,174,233
+ForegroundActive=61,174,233
+ForegroundInactive=161,169,177
+ForegroundLink=29,153,243
+ForegroundNegative=218,68,83
+ForegroundNeutral=246,116,0
+ForegroundNormal=252,252,252
+ForegroundPositive=39,174,96
+ForegroundVisited=155,89,182
+
+[Colors:Header]
+BackgroundAlternate=32,35,38
+BackgroundNormal=41,44,48
+DecorationFocus=61,174,233
+DecorationHover=61,174,233
+ForegroundActive=61,174,233
+ForegroundInactive=161,169,177
+ForegroundLink=29,153,243
+ForegroundNegative=218,68,83
+ForegroundNeutral=246,116,0
+ForegroundNormal=252,252,252
+ForegroundPositive=39,174,96
+ForegroundVisited=155,89,182
+
+[Colors:Header][Inactive]
+BackgroundAlternate=41,44,48
+BackgroundNormal=32,35,38
+DecorationFocus=61,174,233
+DecorationHover=61,174,233
+ForegroundActive=61,174,233
+ForegroundInactive=161,169,177
+ForegroundLink=29,153,243
+ForegroundNegative=218,68,83
+ForegroundNeutral=246,116,0
+ForegroundNormal=252,252,252
+ForegroundPositive=39,174,96
+ForegroundVisited=155,89,182
+
+[Colors:Header\x5d\x5bInactive]
+BackgroundAlternate=41,44,48
+BackgroundNormal=32,35,38
+DecorationFocus=61,174,233
+DecorationHover=61,174,233
+ForegroundActive=61,174,233
+ForegroundInactive=161,169,177
+ForegroundLink=29,153,243
+ForegroundNegative=218,68,83
+ForegroundNeutral=246,116,0
+ForegroundNormal=252,252,252
+ForegroundPositive=39,174,96
+ForegroundVisited=155,89,182
+
+[Colors:Selection]
+BackgroundAlternate=30,87,116
+BackgroundNormal=61,174,233
+DecorationFocus=61,174,233
+DecorationHover=61,174,233
+ForegroundActive=252,252,252
+ForegroundInactive=161,169,177
+ForegroundLink=253,188,75
+ForegroundNegative=176,55,69
+ForegroundNeutral=198,92,0
+ForegroundNormal=252,252,252
+ForegroundPositive=23,104,57
+ForegroundVisited=155,89,182
+
+[Colors:Tooltip]
+BackgroundAlternate=32,35,38
+BackgroundNormal=41,44,48
+DecorationFocus=61,174,233
+DecorationHover=61,174,233
+ForegroundActive=61,174,233
+ForegroundInactive=161,169,177
+ForegroundLink=29,153,243
+ForegroundNegative=218,68,83
+ForegroundNeutral=246,116,0
+ForegroundNormal=252,252,252
+ForegroundPositive=39,174,96
+ForegroundVisited=155,89,182
+
+[Colors:View]
+BackgroundAlternate=29,31,34
+BackgroundNormal=20,22,24
+DecorationFocus=61,174,233
+DecorationHover=61,174,233
+ForegroundActive=61,174,233
+ForegroundInactive=161,169,177
+ForegroundLink=29,153,243
+ForegroundNegative=218,68,83
+ForegroundNeutral=246,116,0
+ForegroundNormal=252,252,252
+ForegroundPositive=39,174,96
+ForegroundVisited=155,89,182
+
+[Colors:Window]
+BackgroundAlternate=41,44,48
+BackgroundNormal=32,35,38
+DecorationFocus=61,174,233
+DecorationHover=61,174,233
+ForegroundActive=61,174,233
+ForegroundInactive=161,169,177
+ForegroundLink=29,153,243
+ForegroundNegative=218,68,83
+ForegroundNeutral=246,116,0
+ForegroundNormal=252,252,252
+ForegroundPositive=39,174,96
+ForegroundVisited=155,89,182
+
+[General]
+ColorSchemeHash=27363f5706202c1c8261fbda7381ddaab8ad48f3
+Name=Breeze Dark
+Name\x5bar\x5d=نسيم داكن
+Name\x5baz\x5d=Breeze - Tünd
+Name\x5bbg\x5d=Breeze Тъмен
+Name\x5bbs\x5d=Breeze tamna
+Name\x5bca@valencia\x5d=Brisa fosca
+Name\x5bca\x5d=Brisa fosca
+Name\x5bcs\x5d=Breeze Tmavé
+Name\x5bda\x5d=Breeze Dark
+Name\x5bde\x5d=Breeze Dunkel
+Name\x5bel\x5d=Breeze σκούρο
+Name\x5ben_GB\x5d=Breeze Dark
+Name\x5beo\x5d=Breeze Dark
+Name\x5bes\x5d=Brisa oscuro
+Name\x5bet\x5d=Breeze tume
+Name\x5beu\x5d=Breeze iluna
+Name\x5bfi\x5d=Tumma Breeze
+Name\x5bfr\x5d=Brise sombre
+Name\x5bgl\x5d=Brisa escura
+Name\x5bhe\x5d=בריזה כהה
+Name\x5bhi\x5d=ब्रीज़ गहरा
+Name\x5bhu\x5d=Breeze Dark
+Name\x5bia\x5d=Brisa obscure
+Name\x5bid\x5d=Breeze Gelap
+Name\x5bis\x5d=Breeze dökkt
+Name\x5bit\x5d=Brezza scuro
+Name\x5bja\x5d=Breeze Dark
+Name\x5bka\x5d=Breeze მუქი
+Name\x5bko\x5d=어두운 Breeze
+Name\x5blt\x5d=Breeze tamsus
+Name\x5blv\x5d=„Breeze“ tumšais
+Name\x5bnb\x5d=Breeze mørk
+Name\x5bnl\x5d=Breeze Dark
+Name\x5bnn\x5d=Breeze mørk
+Name\x5bpa\x5d=ਬਰੀਜ਼ ਗੂੜ੍ਹਾ
+Name\x5bpl\x5d=Ciemna Bryza
+Name\x5bpt\x5d=Brisa Escuro
+Name\x5bpt_BR\x5d=Breeze Dark
+Name\x5bro\x5d=Briză, întunecat
+Name\x5bru\x5d=Breeze, тёмный вариант
+Name\x5bsa\x5d=वायुः अन्धकारः
+Name\x5bsk\x5d=Tmavý vánok
+Name\x5bsl\x5d=Sapica, temna
+Name\x5bsr@ijekavian\x5d=Поветарац тамни
+Name\x5bsr@ijekavianlatin\x5d=Povetarac tamni
+Name\x5bsr@latin\x5d=Povetarac tamni
+Name\x5bsr\x5d=Поветарац тамни
+Name\x5bsv\x5d=Breeze mörk
+Name\x5bta\x5d=கரும் பிரீஸ்
+Name\x5btg\x5d=Насими торик
+Name\x5btr\x5d=Esinti Koyu
+Name\x5bug\x5d=مەيىن شامال قاراڭغۇ
+Name\x5buk\x5d=Темна Breeze
+Name\x5bzh_CN\x5d=Breeze 微风深色
+Name\x5bzh_TW\x5d=Breeze Dark
+shadeSortColumn=true
+
+[Icons]
+Theme=breeze
+
+[KDE]
+LookAndFeelPackage=org.kde.breezedark.desktop
+contrast=4
+frameContrast=0.2
+
+[WM]
+activeBackground=39,44,49
+activeBlend=252,252,252
+activeForeground=252,252,252
+inactiveBackground=32,36,40
+inactiveBlend=161,169,177
+inactiveForeground=161,169,177

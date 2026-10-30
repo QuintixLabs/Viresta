@@ -10,6 +10,10 @@ source "$SCRIPT_DIR/lib/ui.sh"
 source "$SCRIPT_DIR/lib/system.sh"
 # shellcheck source=lib/packages.sh
 source "$SCRIPT_DIR/lib/packages.sh"
+# shellcheck source=lib/aur.sh
+source "$SCRIPT_DIR/lib/aur.sh"
+# shellcheck source=lib/config.sh
+source "$SCRIPT_DIR/lib/config.sh"
 
 usage() {
     cat <<'EOF'
@@ -95,12 +99,12 @@ main() {
     step "Installing VM extras"
     install_vm_extras
 
-    step "Services, theme & login"
+    step "Services, login & KDE config"
     configure_networkmanager
     configure_vm_services
     configure_sddm
     configure_default_session
-    apply_dark_theme
+    configure_kde_configs
 
     summary
 }

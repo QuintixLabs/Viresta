@@ -53,8 +53,8 @@ The install moves through these phases in order:
 6. Installs everyday apps.
 7. Builds `paru` and installs packages from `packages/aur.txt`.
 8. Installs VM extras (repository tools + VM-only AUR packages).
-9. Enables NetworkManager/SDDM, sets Plasma Wayland as the default session, and
-   applies the Breeze Dark theme.
+9. Enables NetworkManager/SDDM, sets Plasma Wayland as the default session,
+   applies Breeze Dark, and installs the tracked KDE configuration files.
 
 ## AUR packages
 
@@ -99,7 +99,39 @@ validated with `visudo` before being installed.
 Downloads are serialized using a temporary pacman config; your real
 `/etc/pacman.conf` is never modified.
 
-Logs:
+## KDE configuration
+
+Viresta does **not** reuse the KDE Application Launcher (Kickoff) widget. It
+installs a small desktop entry named **Vicinae** (`vicinae toggle`) and pins,
+left to right: **Vicinae**, **Dolphin**, **Firefox**.
+
+**Meta** (the Super/Windows key, by itself) is bound to that Vicinae desktop
+file, so the key and the icon run the same command. Kickoff is removed from
+the panel; Alt+F1 stays as Plasma's fallback.
+
+Panel floating is turned off completely: `floating=0` and `floatingApplets=0`
+on the panel containment (Disabled, not “Applets only”). Peek at Desktop (the
+panel widget), Clipboard, and Screen Brightness are removed or hidden. The
+Plasma Browser Integration *reminder* is turned off in Background Services
+(`kded5rc`). Do not uninstall `plasma-browser-integration` (plasma-meta
+depends on it) and do not remove `plasma-integration` (that is the Qt
+platform theme).
+
+The browser add-on itself has to be removed inside Firefox/Chrome if it is
+already installed.
+
+The installer copies the tracked KDE configuration files into `~/.config`.
+The repository keeps them grouped under `config/kde/appearance/`,
+`config/kde/plasma/`, `config/kde/shortcuts/`, and `config/kde/taskbar/`. Run `config/kde/setup.sh`
+again to reinstall them manually.
+
+Re-run by hand:
+
+```sh
+bash config/kde/setup.sh
+```
+
+## Logs
 
 - Install log: `/tmp/viresta-install.log`
 - AUR build logs: `~/.local/state/viresta/`
@@ -112,7 +144,16 @@ Viresta/
 ├── lib/
 │   ├── ui.sh         # colors, logging, prompts, cleanup registry
 │   ├── system.sh     # checks, VM detection, sudo handling
-│   └── packages.sh   # installs, paru/AUR, SDDM/session, dark theme
+│   ├── packages.sh   # pacman config and package list installs
+│   ├── aur.sh        # paru bootstrap, AUR and VM extras
+│   └── config.sh     # services, SDDM session, theme, launcher
+├── config/
+│   └── kde/
+│       ├── setup.sh     # installs the KDE config files
+│       ├── appearance/   # KDE appearance settings
+│       ├── plasma/      # Plasma settings
+│       ├── shortcuts/   # KDE global shortcuts
+│       └── taskbar/     # Plasma panel and taskbar settings
 ├── packages/
 │   ├── base.txt
 │   ├── kde.txt

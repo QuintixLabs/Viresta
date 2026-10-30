@@ -3,3 +3,4 @@ konsole
 dolphin
 ark
 firefox
+vim
