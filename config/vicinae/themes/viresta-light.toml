@@ -1,0 +1,80 @@
+[meta]
+version = 1
+name = "Viresta Light"
+description = "Minimal warm light theme"
+variant = "light"
+inherits = "viresta-light"
+icon = "icons/viresta.svg"
+
+[colors.core]
+accent = "#A66F4F"
+accent_foreground = "#FFFFFF"
+background = "#F2F0EC"
+foreground = "#292724"
+secondary_background = "#EAE7E1"
+border = "#D8D3CA"
+
+[colors.main_window]
+border = "#D8D3CA"
+footer = { background = "#EAE7E1" }
+
+[colors.settings_window]
+border = "#D8D3CA"
+
+[colors.accents]
+blue = "#6687A8"
+green = "#718D70"
+magenta = "#A7839C"
+orange = "#B77D57"
+red = "#B66F69"
+yellow = "#A68D55"
+cyan = "#6D9693"
+purple = "#8D80A8"
+
+[colors.shortcut]
+border = "colors.core.border"
+
+[colors.text]
+default = "colors.core.foreground"
+muted = "#77736C"
+danger = "#B66F69"
+success = "#718D70"
+placeholder = "#A6A198"
+selection = { background = "#DCC5B5", foreground = "#292724" }
+
+[colors.text.links]
+default = "#A66F4F"
+visited = "#8D80A8"
+
+[colors.input]
+border = "#D8D3CA"
+border_focus = "#A66F4F"
+border_error = "#B66F69"
+
+[colors.button.primary]
+background = "#E5E0D8"
+foreground = "#292724"
+hover = { background = "#DCD6CC" }
+focus = { outline = "colors.core.accent" }
+
+[colors.list.item.hover]
+foreground = "#292724"
+secondary_foreground = "#77736C"
+
+[colors.list.item.selection]
+background = "#E5DED5"
+foreground = "#292724"
+secondary_background = "#E5DED5"
+secondary_foreground = "#77736C"
+
+[colors.grid.item]
+background = "#EAE7E1"
+hover = { outline = "#A66F4F" }
+selection = { outline = "#A66F4F" }
+
+[colors.scrollbars]
+background = "#C9C3B9"
+
+[colors.loading]
+bar = "#A66F4F"
+spinner = "#77736C"

@@ -94,6 +94,25 @@ install_vicinae() {
     fi
 }
 
+install_vicinae_themes() {
+    local source_root="$SCRIPT_DIR/vicinae/themes"
+    local source relative target
+
+    [ -d "$source_root" ] || return 0
+
+    if ! command -v sudo >/dev/null 2>&1; then
+        printf 'sudo is required to install Vicinae themes\n' >&2
+        return 1
+    fi
+
+    while IFS= read -r -d '' source; do
+        relative="${source#"$source_root/"}"
+        target="/usr/share/vicinae/themes/$relative"
+        sudo install -Dm644 "$source" "$target"
+        printf 'Installed %s\n' "$target"
+    done < <(find "$source_root" -type f -print0)
+}
+
 install_wallpapers() {
     local source_root="$REPO_DIR/wallpapers"
     local source target
@@ -154,6 +173,7 @@ install_configs() {
     done < <(find "$SCRIPT_DIR" -mindepth 1 -maxdepth 1 -type d -print0)
 
     install_vicinae
+    install_vicinae_themes
     install_wallpapers
     configure_wallpaper
 }

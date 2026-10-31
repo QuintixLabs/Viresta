@@ -1,0 +1,80 @@
+[meta]
+version = 1
+name = "Viresta Dark"
+description = "Minimal cozy dark theme"
+variant = "dark"
+inherits = "viresta-dark"
+icon = "icons/viresta.svg"
+
+[colors.core]
+accent = "#D6A078"
+accent_foreground = "#0A0A0A"
+background = "#0A0A0A"
+foreground = "#E6E6E6"
+secondary_background = "#111111"
+border = "#252525"
+
+[colors.main_window]
+border = "#252525"
+footer = { background = "#111111" }
+
+[colors.settings_window]
+border = "#252525"
+
+[colors.accents]
+blue = "#82A8D8"
+green = "#91B58D"
+magenta = "#B99ACB"
+orange = "#D6A078"
+red = "#CF8585"
+yellow = "#D6BD83"
+cyan = "#83B6B5"
+purple = "#A99BCB"
+
+[colors.shortcut]
+border = "colors.core.border"
+
+[colors.text]
+default = "colors.core.foreground"
+muted = "#999999"
+danger = "#CF8585"
+success = "#91B58D"
+placeholder = "#666666"
+selection = { background = "#D6A078", foreground = "#0A0A0A" }
+
+[colors.text.links]
+default = "#D6A078"
+visited = "#B99ACB"
+
+[colors.input]
+border = "#252525"
+border_focus = "#D6A078"
+border_error = "#CF8585"
+
+[colors.button.primary]
+background = "#1A1A1A"
+foreground = "#E6E6E6"
+hover = { background = "#252525" }
+focus = { outline = "colors.core.accent" }
+
+[colors.list.item.hover]
+foreground = "#E6E6E6"
+secondary_foreground = "#999999"
+
+[colors.list.item.selection]
+background = "#202020"
+foreground = "#E6E6E6"
+secondary_background = "#202020"
+secondary_foreground = "#999999"
+
+[colors.grid.item]
+background = "#111111"
+hover = { outline = "#D6A078" }
+selection = { outline = "#D6A078" }
+
+[colors.scrollbars]
+background = "#333333"
+
+[colors.loading]
+bar = "#D6A078"
+spinner = "#E6E6E6"
