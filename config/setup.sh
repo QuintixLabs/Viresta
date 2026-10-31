@@ -167,13 +167,22 @@ install_icon_themes() {
 }
 
 apply_panel_colorizer_preset() {
-    local preset="$CONFIG_DIR/panel-colorizer/presets/Transparent/"
+    local preset="$CONFIG_DIR/panel-colorizer/presets/Transparent"
 
-    [ -f "${preset}settings.json" ] || return 0
-    command -v qdbus6 >/dev/null 2>&1 || return 0
+    [ -f "$preset/settings.json" ] || {
+        printf 'Panel Colorizer preset not found: %s\n' "$preset" >&2
+        return 0
+    }
 
-    if qdbus6 luisbocanegra.panel.colorizer.c337.w2346 \
-        /preset preset "$preset" >/dev/null 2>&1; then
+    command -v dbus-send >/dev/null 2>&1 || {
+        printf 'dbus-send is unavailable, skipping Panel Colorizer preset\n' >&2
+        return 0
+    }
+
+    if dbus-send --session --type=signal \
+        /preset \
+        luisbocanegra.panel.colorizer.all.preset \
+        string:"$preset/"; then
         printf 'Applied Panel Colorizer preset: Transparent\n'
     else
         printf 'Could not apply Panel Colorizer preset: Transparent\n' >&2
