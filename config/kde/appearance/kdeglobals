@@ -206,7 +206,7 @@ Name\x5bzh_TW\x5d=Breeze Dark
 shadeSortColumn=true
 
 [Icons]
-Theme=breeze
+Theme=YAMIS
 
 [KDE]
 LookAndFeelPackage=org.kde.breezedark.desktop

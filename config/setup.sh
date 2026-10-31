@@ -28,7 +28,7 @@ install_tree() {
         target="$target_root/$relative"
         install -Dm644 "$source" "$target"
         printf 'Installed %s\n' "$target"
-    done < <(find "$source_root" -mindepth "$minimum_depth" -type f -print0)
+    done < <(find "$source_root" -mindepth "$minimum_depth" \( -type f -o -type l \) -print0)
 }
 
 configure_wallpaper() {
@@ -113,6 +113,73 @@ install_vicinae_themes() {
     done < <(find "$source_root" -type f -print0)
 }
 
+install_icon_themes() {
+    local archive="$SCRIPT_DIR/icons/yet-another-monochrome-icon-set.tar.gz"
+    local source_root="$SCRIPT_DIR/icons/YAMIS"
+    local source target temp_dir nested_tar inner_dir extracted_theme
+
+    if [ -f "$archive" ]; then
+        command -v tar >/dev/null 2>&1 || {
+            printf 'tar is required to install the YAMIS icon theme\n' >&2
+            return 1
+        }
+
+        temp_dir="$(mktemp -d)"
+        if ! tar -xzf "$archive" -C "$temp_dir"; then
+            rm -rf "$temp_dir"
+            printf 'Could not extract YAMIS icon theme archive\n' >&2
+            return 1
+        fi
+
+        nested_tar="$(find "$temp_dir" -type f -name '*.tar' -print -quit)"
+        if [ -n "$nested_tar" ]; then
+            inner_dir="$temp_dir/inner"
+            mkdir -p "$inner_dir"
+            if ! tar -xf "$nested_tar" -C "$inner_dir"; then
+                rm -rf "$temp_dir"
+                printf 'Could not extract the inner YAMIS icon theme archive\n' >&2
+                return 1
+            fi
+        fi
+
+        extracted_theme="$(find "$temp_dir" -type d -name YAMIS -print -quit)"
+        if [ -n "$extracted_theme" ]; then
+            source_root="$extracted_theme"
+        fi
+    fi
+
+    [ -d "$source_root" ] || {
+        [ -n "${temp_dir:-}" ] && rm -rf "$temp_dir"
+        return 0
+    }
+
+    install_tree "$source_root" "$HOME/.local/share/icons/YAMIS" 1 0
+
+    [ -n "${temp_dir:-}" ] && rm -rf "$temp_dir"
+
+    # Fix Dolphin's KDE application icon name
+    local yamis_apps="$HOME/.local/share/icons/YAMIS/apps/scalable"
+
+    if [ -f "$yamis_apps/dolphin.svg" ]; then
+        ln -sfn dolphin.svg "$yamis_apps/org.kde.dolphin.svg"
+        printf 'Created Dolphin icon alias\n'
+    fi
+}
+
+apply_panel_colorizer_preset() {
+    local preset="$CONFIG_DIR/panel-colorizer/presets/Transparent/"
+
+    [ -f "${preset}settings.json" ] || return 0
+    command -v qdbus6 >/dev/null 2>&1 || return 0
+
+    if qdbus6 luisbocanegra.panel.colorizer.c337.w2346 \
+        /preset preset "$preset" >/dev/null 2>&1; then
+        printf 'Applied Panel Colorizer preset: Transparent\n'
+    else
+        printf 'Could not apply Panel Colorizer preset: Transparent\n' >&2
+    fi
+}
+
 install_wallpapers() {
     local source_root="$REPO_DIR/wallpapers"
     local source target
@@ -166,6 +233,8 @@ install_configs() {
             strip_category=1
         elif [ "$category_name" = "systemd" ]; then
             target="$CONFIG_DIR/systemd/user"
+        elif [ "$category_name" = "cursors" ]; then
+            target="$HOME/.local/share/icons"
         fi
 
         [ -d "$source_root" ] || continue
@@ -174,7 +243,9 @@ install_configs() {
 
     install_vicinae
     install_vicinae_themes
+    install_icon_themes
     install_wallpapers
+    apply_panel_colorizer_preset
     configure_wallpaper
 }
 

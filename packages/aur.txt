@@ -1,3 +1,4 @@
 # AUR packages installed on every system, one per line.
 vscodium-bin
 vicinae-bin
+plasma6-applets-panel-colorizer

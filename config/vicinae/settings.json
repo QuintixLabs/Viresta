@@ -16,7 +16,8 @@
    },
    "theme": {
       "dark": {
-         "name": "viresta-dark"
+         "name": "viresta-dark",
+         "icon_theme": "YAMIS"
       }
    },
    "telemetry": {
