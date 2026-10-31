@@ -301,10 +301,10 @@ _launch=Alt+C
 [services][firefox.desktop]
 _launch=Alt+F
 
-[services][net.local.vicinae-2.desktop]
+[services][viresta-vicinae-clipboard.desktop]
 _launch=Meta+V
 
-[services][net.local.vicinae.desktop]
+[services][viresta-vicinae-emojis.desktop]
 _launch=Meta+.
 
 [services][org.kde.dolphin.desktop]
