@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Vicinae
+Comment=Application launcher
+Exec=sh -c "systemctl --user start vicinae.service && vicinae toggle"
+Icon=vicinae
+Terminal=false
+StartupNotify=false
+Categories=Utility;

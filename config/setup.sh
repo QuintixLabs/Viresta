@@ -92,6 +92,10 @@ install_vicinae() {
             printf 'Installed %s\n' "$target"
         done < <(find "$source_root/applications" -maxdepth 1 -type f -name '*.desktop' -print0)
     fi
+
+    if command -v kbuildsycoca6 >/dev/null 2>&1; then
+        kbuildsycoca6 --noincremental >/dev/null 2>&1 || true
+    fi
 }
 
 install_vicinae_themes() {

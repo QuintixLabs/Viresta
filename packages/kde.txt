@@ -1,6 +1,7 @@
 # KDE Plasma 6 - full working desktop.
 plasma-meta
 sddm
+sddm-kcm
 plasma-nm
 plasma-pa
 polkit-kde-agent
