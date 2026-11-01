@@ -1,5 +1,8 @@
+# Fonts
+ttf-jetbrains-mono
+
 # Everyday applications.
-konsole
+kitty
 dolphin
 ark
 firefox

@@ -215,6 +215,34 @@ install_wallpapers() {
     fi
 }
 
+install_kde_configs() {
+    local source_root="$SCRIPT_DIR/kde"
+    local excluded_root="$source_root/appearance/color-schemes"
+    local source relative target
+
+    [ -d "$source_root" ] || return 0
+
+    while IFS= read -r -d '' source; do
+        relative="${source#"$source_root/"}"
+        relative="${relative#*/}"
+        target="$CONFIG_DIR/$relative"
+        install -Dm644 "$source" "$target"
+        printf 'Installed %s\n' "$target"
+    done < <(
+        find "$source_root" -mindepth 2 \
+            \( -type f -o -type l \) \
+            ! -path "$excluded_root/*" \
+            -print0
+    )
+}
+
+install_color_schemes() {
+    local source_root="$SCRIPT_DIR/kde/appearance/color-schemes"
+
+    [ -d "$source_root" ] || return 0
+    install_tree "$source_root" "$HOME/.local/share/color-schemes" 1 0
+}
+
 install_configs() {
     local category category_name source_root target minimum_depth strip_category
 
@@ -235,16 +263,27 @@ install_configs() {
             continue
         fi
 
+        if [ "$category_name" = "kitty" ]; then
+            if [ -f "$category/kitty.conf" ]; then
+                install -Dm644 \
+                    "$category/kitty.conf" \
+                    "$CONFIG_DIR/kitty/kitty.conf"
+                printf 'Installed %s\n' "$CONFIG_DIR/kitty/kitty.conf"
+            fi
+            continue
+        fi
+
+        if [ "$category_name" = "kde" ]; then
+            install_kde_configs
+            continue
+        fi
+
         source_root="$category"
         target="$CONFIG_DIR/$category_name"
         minimum_depth=1
         strip_category=0
 
-        if [ "$category_name" = "kde" ]; then
-            target="$CONFIG_DIR"
-            minimum_depth=2
-            strip_category=1
-        elif [ "$category_name" = "systemd" ]; then
+        if [ "$category_name" = "systemd" ]; then
             target="$CONFIG_DIR/systemd/user"
         elif [ "$category_name" = "cursors" ]; then
             target="$HOME/.local/share/icons"
@@ -258,6 +297,7 @@ install_configs() {
     install_vicinae_themes
     install_icon_themes
     install_wallpapers
+    install_color_schemes
     apply_panel_colorizer_preset
     configure_wallpaper
 }

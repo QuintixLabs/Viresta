@@ -1,3 +1,6 @@
+# Fonts
+outfit-font
+
 # AUR packages installed on every system, one per line.
 vscodium-bin
 vicinae-bin

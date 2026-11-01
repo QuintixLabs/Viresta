@@ -310,7 +310,7 @@ _launch=Meta+.
 [services][org.kde.dolphin.desktop]
 _launch=Alt+E
 
-[services][org.kde.konsole.desktop]
+[services][kitty.desktop]
 _launch=Alt+T
 
 [services][org.kde.plasma.emojier.desktop]
