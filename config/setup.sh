@@ -32,38 +32,62 @@ install_tree() {
 }
 
 configure_wallpaper() {
-    local wallpaper_path="$HOME/Pictures/Wallpapers/Viresta/01. Viresta.jpg"
+    local config_file="$CONFIG_DIR/plasma-org.kde.plasma.desktop-appletsrc"
+    local wallpaper_path="/usr/share/wallpapers/Viresta/Viresta_Dark.jpg"
+    local wallpaper_script
 
     [ -f "$wallpaper_path" ] || {
         printf 'Viresta wallpaper not found at %s\n' "$wallpaper_path" >&2
         return 1
     }
 
-    mkdir -p "$HOME/.config/autostart-scripts"
-    cat <<'EOF' > "$HOME/.config/autostart-scripts/set_wallpaper.sh"
-#!/usr/bin/env bash
-wallpaper_path="$HOME/Pictures/Wallpapers/Viresta/01. Viresta.jpg"
-script_file="$HOME/.config/autostart-scripts/set_wallpaper.sh"
-desktop_wrapper="$HOME/.config/autostart/set_wallpaper.sh.desktop"
+    rm -f \
+        "$CONFIG_DIR/autostart-scripts/set_wallpaper.sh" \
+        "$CONFIG_DIR/Viresta/set_wallpaper.sh" \
+        "$CONFIG_DIR/autostart/set_wallpaper.sh.desktop"
 
-if [ -f "$wallpaper_path" ] && command -v qdbus6 &>/dev/null; then
-    qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "
-        var allDesktops = desktops();
-        for (i=0; i<allDesktops.length;i++) {
-            d = allDesktops[i];
-            d.wallpaperPlugin = 'org.kde.image';
-            d.currentConfigGroup = Array('Wallpaper', 'org.kde.image', 'General');
-            d.writeConfig('Image', 'file://${wallpaper_path}');
-        }
-    "
-    # Delete both the script and KDE's auto-generated desktop wrapper
-    rm -f "$script_file"
-    rm -f "$desktop_wrapper"
-fi
-EOF
-    chmod +x "$HOME/.config/autostart-scripts/set_wallpaper.sh"
+    if [ -f "$config_file" ]; then
+        sed -i "s|^Image=.*|Image=file://$wallpaper_path|" "$config_file"
+        printf 'Configured Plasma wallpaper: %s\n' "$wallpaper_path"
+    fi
 
-    printf 'Configured Plasma wallpaper one-time autostart script\n'
+    wallpaper_script="var desktopList = desktops(); for (var i = 0; i < desktopList.length; i++) { var desktop = desktopList[i]; desktop.wallpaperPlugin = 'org.kde.image'; desktop.currentConfigGroup = ['Wallpaper', 'org.kde.image', 'General']; desktop.writeConfig('Image', 'file://$wallpaper_path'); }"
+
+    if command -v qdbus6 >/dev/null 2>&1 &&
+       qdbus6 org.kde.plasmashell /PlasmaShell \
+           org.kde.PlasmaShell.evaluateScript \
+           "$wallpaper_script" >/dev/null 2>&1; then
+        printf 'Applied Plasma wallpaper to the current session\n'
+    elif command -v gdbus >/dev/null 2>&1 &&
+         gdbus call --session --dest org.kde.plasmashell \
+             --object-path /PlasmaShell \
+             --method org.kde.PlasmaShell.evaluateScript \
+             "$wallpaper_script" >/dev/null 2>&1; then
+        printf 'Applied Plasma wallpaper to the current session\n'
+    else
+        printf 'Plasma session unavailable; wallpaper will apply at login\n'
+    fi
+}
+
+apply_plasma_panel() {
+    local plasma_script
+
+    plasma_script="var panelList = panels(); for (var p = 0; p < panelList.length; p++) { var panel = panelList[p]; try { panel.floating = false; panel.floatingApplets = false; } catch (e) {} var widgets = panel.widgets(); var task = null; var remove = []; for (var w = 0; w < widgets.length; w++) { var widget = widgets[w]; if (widget.type === 'org.kde.plasma.icontasks' || widget.type === 'org.kde.plasma.taskmanager') { if (!task) task = widget; } if (widget.type === 'org.kde.plasma.kickoff' || widget.type === 'org.kde.plasma.kicker' || widget.type === 'org.kde.plasma.showdesktop') { remove.push(widget); } } for (var r = 0; r < remove.length; r++) { try { remove[r].remove(); } catch (e2) {} } if (task) { task.currentConfigGroup = ['General']; task.writeConfig('launchers', ['applications:viresta-vicinae.desktop', 'applications:org.kde.dolphin.desktop', 'applications:firefox.desktop']); task.reloadConfig(); } }"
+
+    if command -v qdbus6 >/dev/null 2>&1 &&
+       qdbus6 org.kde.plasmashell /PlasmaShell \
+           org.kde.PlasmaShell.evaluateScript \
+           "$plasma_script" >/dev/null 2>&1; then
+        printf 'Applied Plasma panel configuration\n'
+    elif command -v gdbus >/dev/null 2>&1 &&
+         gdbus call --session --dest org.kde.plasmashell \
+             --object-path /PlasmaShell \
+             --method org.kde.PlasmaShell.evaluateScript \
+             "$plasma_script" >/dev/null 2>&1; then
+        printf 'Applied Plasma panel configuration\n'
+    else
+        printf 'Plasma session unavailable; panel configuration will apply at login\n'
+    fi
 }
 
 install_vicinae() {
@@ -377,6 +401,7 @@ install_configs() {
     install_color_schemes
     install_firefox_policy
     configure_wallpaper
+    apply_plasma_panel
     apply_panel_colorizer_preset
 }
 
