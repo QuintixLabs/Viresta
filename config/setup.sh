@@ -171,7 +171,8 @@ install_icon_themes() {
 }
 
 apply_panel_colorizer_preset() {
-    local preset="$CONFIG_DIR/panel-colorizer/presets/Transparent"
+    local preset="$CONFIG_DIR/panel-colorizer/presets/Viresta-Dark"
+    local attempt
 
     [ -f "$preset/settings.json" ] || {
         printf 'Panel Colorizer preset not found: %s\n' "$preset" >&2
@@ -183,14 +184,18 @@ apply_panel_colorizer_preset() {
         return 0
     }
 
-    if dbus-send --session --type=signal \
-        /preset \
-        luisbocanegra.panel.colorizer.all.preset \
-        string:"$preset/"; then
-        printf 'Applied Panel Colorizer preset: Transparent\n'
-    else
-        printf 'Could not apply Panel Colorizer preset: Transparent\n' >&2
-    fi
+    for attempt in 1 2 3 4 5; do
+        if dbus-send --session --type=signal \
+            /preset \
+            luisbocanegra.panel.colorizer.all.preset \
+            string:"$preset/"; then
+            printf 'Applied Panel Colorizer preset: Viresta-Dark\n'
+            return 0
+        fi
+        sleep 1
+    done
+
+    printf 'Could not apply Panel Colorizer preset: Viresta-Dark\n' >&2
 }
 
 install_wallpapers() {
@@ -313,8 +318,8 @@ install_configs() {
     install_wallpapers
     install_color_schemes
     install_firefox_policy
-    apply_panel_colorizer_preset
     configure_wallpaper
+    apply_panel_colorizer_preset
 }
 
 case "${1:-}" in
