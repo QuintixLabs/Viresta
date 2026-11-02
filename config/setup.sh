@@ -220,6 +220,58 @@ install_wallpapers() {
     fi
 }
 
+install_sddm_config() {
+    local source_wallpaper="$REPO_DIR/wallpapers/Viresta/01. Viresta.jpg"
+    local target_wallpaper="/usr/share/wallpapers/Viresta/Viresta_Dark.jpg"
+    local theme_user="$SCRIPT_DIR/sddm/theme.conf.user"
+    local sddm_config="$SCRIPT_DIR/sddm/viresta.conf"
+
+    if ! command -v sudo >/dev/null 2>&1; then
+        printf 'sudo is required to install the SDDM configuration\n' >&2
+        return 1
+    fi
+
+    [ -f "$source_wallpaper" ] || {
+        printf 'Viresta SDDM wallpaper not found at %s\n' "$source_wallpaper" >&2
+        return 1
+    }
+
+    sudo install -Dm644 "$source_wallpaper" "$target_wallpaper"
+    printf 'Installed %s\n' "$target_wallpaper"
+
+    if [ -d /usr/share/sddm/themes/breeze ]; then
+        if [ -f "$theme_user" ]; then
+            sudo install -Dm644 \
+                "$theme_user" \
+                /usr/share/sddm/themes/breeze/theme.conf.user
+            printf 'Installed /usr/share/sddm/themes/breeze/theme.conf.user\n'
+        fi
+    else
+        printf 'Breeze SDDM theme is not installed; skipping theme override\n' >&2
+    fi
+
+    if [ -f "$sddm_config" ]; then
+        sudo install -Dm644 "$sddm_config" /etc/sddm.conf.d/viresta.conf
+        printf 'Installed /etc/sddm.conf.d/viresta.conf\n'
+    fi
+}
+
+remove_unsupported_sddm_themes() {
+    local theme
+
+    if ! command -v sudo >/dev/null 2>&1; then
+        printf 'sudo is required to remove unsupported SDDM themes\n' >&2
+        return 1
+    fi
+
+    for theme in elarun maya maldives; do
+        if [ -d "/usr/share/sddm/themes/$theme" ]; then
+            sudo rm -rf "/usr/share/sddm/themes/$theme"
+            printf 'Removed unsupported SDDM theme: %s\n' "$theme"
+        fi
+    done
+}
+
 install_kde_configs() {
     local source_root="$SCRIPT_DIR/kde"
     local excluded_root="$source_root/appearance/color-schemes"
@@ -297,6 +349,10 @@ install_configs() {
             continue
         fi
 
+        if [ "$category_name" = "sddm" ]; then
+            continue
+        fi
+
         source_root="$category"
         target="$CONFIG_DIR/$category_name"
         minimum_depth=1
@@ -316,6 +372,8 @@ install_configs() {
     install_vicinae_themes
     install_icon_themes
     install_wallpapers
+    install_sddm_config
+    remove_unsupported_sddm_themes
     install_color_schemes
     install_firefox_policy
     configure_wallpaper

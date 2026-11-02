@@ -54,7 +54,7 @@ configure_default_session() {
 
     sudo mkdir -p /etc/sddm.conf.d
     printf '[Users]\nDefaultSession=%s\n' "$sess" |
-        sudo tee /etc/sddm.conf.d/10-viresta.conf >/dev/null
+        sudo tee /etc/sddm.conf.d/viresta.conf >/dev/null
     ok "Default session: $sess (Wayland)"
 }
 
