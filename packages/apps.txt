@@ -1,9 +1,12 @@
 # Fonts
 ttf-jetbrains-mono
 
-# Everyday applications.
+# Default Applications
 kitty
 dolphin
 ark
 firefox
 vim
+haruna
+merkuro
+gwenview

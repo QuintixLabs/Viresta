@@ -1,7 +1,10 @@
 # Fonts
 outfit-font
 
-# AUR packages installed on every system, one per line.
+# Default Applications
 vscodium-bin
 vicinae-bin
+fooyin
+
+# KDE Plasma Components
 plasma6-applets-panel-colorizer

@@ -243,6 +243,20 @@ install_color_schemes() {
     install_tree "$source_root" "$HOME/.local/share/color-schemes" 1 0
 }
 
+install_firefox_policy() {
+    local policy="$SCRIPT_DIR/firefox/policies.json"
+
+    [ -f "$policy" ] || return 0
+
+    if ! command -v sudo >/dev/null 2>&1; then
+        printf 'sudo is required to install Firefox policies\n' >&2
+        return 1
+    fi
+
+    sudo install -Dm644 "$policy" /etc/firefox/policies/policies.json
+    printf 'Installed /etc/firefox/policies/policies.json\n'
+}
+
 install_configs() {
     local category category_name source_root target minimum_depth strip_category
 
@@ -298,6 +312,7 @@ install_configs() {
     install_icon_themes
     install_wallpapers
     install_color_schemes
+    install_firefox_policy
     apply_panel_colorizer_preset
     configure_wallpaper
 }

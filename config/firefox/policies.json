@@ -1,0 +1,115 @@
+
+{
+  "policies": {
+    "OverrideFirstRunPage": "",
+    "OverridePostUpdatePage": "",
+    "DontCheckDefaultBrowser": true,
+    "DisplayBookmarksToolbar": "never",
+    "SearchEngines": {
+      "Default": "DuckDuckGo"
+    },
+    "ExtensionSettings": {
+      "uBlock0@raymondhill.net": {
+        "installation_mode": "normal_installed"
+      },
+      "{03f7f700-a42f-4841-8dfc-c33894bd52d3}": {
+        "installation_mode": "normal_installed"
+      }
+    },
+    "FirefoxHome": {
+      "Search": true,
+      "Weather": false,
+      "IPProtectionAvailable": false,
+      "TopSites": false,
+      "SponsoredTopSites": false,
+      "Highlights": false,
+      "Pocket": false,
+      "SponsoredPocket": false,
+      "Stories": false,
+      "SponsoredStories": false
+    },
+    "Homepage": {
+      "StartPage": "previous-session",
+      "NewTabOnRestore": false
+    },
+    "Preferences": {
+      "sidebar.revamp": {
+        "Value": false,
+        "Status": "default"
+      },
+      "identity.fxaccounts.toolbar.enabled": {
+        "Value": false,
+        "Status": "default"
+      },
+      "browser.newtabpage.activity-stream.widgets.enabled": {
+        "Value": false,
+        "Status": "user",
+        "Type": "boolean"
+      },
+      "browser.urlbar.suggest.history": {
+        "Value": true,
+        "Status": "user",
+        "Type": "boolean"
+      },
+      "browser.urlbar.suggest.recentsearches": {
+        "Value": true,
+        "Status": "user",
+        "Type": "boolean"
+      },
+      "browser.urlbar.recentsearches.featureGate": {
+        "Value": true,
+        "Status": "user",
+        "Type": "boolean"
+      },
+      "browser.urlbar.suggest.bookmark": {
+        "Value": false,
+        "Status": "user",
+        "Type": "boolean"
+      },
+      "browser.urlbar.suggest.openpage": {
+        "Value": false,
+        "Status": "user",
+        "Type": "boolean"
+      },
+      "browser.urlbar.suggest.engines": {
+        "Value": false,
+        "Status": "user",
+        "Type": "boolean"
+      },
+      "browser.urlbar.suggest.topsites": {
+        "Value": false,
+        "Status": "user",
+        "Type": "boolean"
+      },
+      "browser.urlbar.suggest.searches": {
+        "Value": false,
+        "Status": "user",
+        "Type": "boolean"
+      },
+      "browser.search.suggest.enabled": {
+        "Value": false,
+        "Status": "user",
+        "Type": "boolean"
+      },
+      "browser.urlbar.quicksuggest.enabled": {
+        "Value": false,
+        "Status": "user",
+        "Type": "boolean"
+      },
+      "browser.urlbar.suggest.trending": {
+        "Value": false,
+        "Status": "user",
+        "Type": "boolean"
+      },
+      "browser.urlbar.suggest.quickactions": {
+        "Value": false,
+        "Status": "user",
+        "Type": "boolean"
+      }
+    },
+    "DisableTelemetry": true,
+    "DisableFirefoxStudies": true,
+    "DisableFirefoxScreenshots": true,
+    "DisableFeedbackCommands": true
+  }
+}
