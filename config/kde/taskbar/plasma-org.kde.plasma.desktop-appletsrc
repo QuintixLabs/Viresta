@@ -156,7 +156,7 @@ floating=0
 floatingApplets=0
 
 [Containments][23]
-activityId=
+activityId=f0dbf1e3-1e6d-4d94-a37c-52916b6cae6b
 formfactor=0
 immutability=1
 lastScreen=0
@@ -165,7 +165,7 @@ plugin=org.kde.plasma.folder
 wallpaperplugin=org.kde.image
 
 [Containments][23][Wallpaper][org.kde.image][General]
-Image=file:///usr/share/wallpapers/Viresta/Viresta_Dark.jpg
+Image=file:///usr/share/wallpapers/Viresta/Viresta Dark.jpg
 
 [ScreenMapping]
 itemsOnDisabledScreens=

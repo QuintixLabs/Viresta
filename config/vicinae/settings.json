@@ -15,6 +15,10 @@
       "enabled": false
    },
    "theme": {
+      "light": {
+         "name": "viresta-light",
+         "icon_theme": "YAMIS-Light"
+      },
       "dark": {
          "name": "viresta-dark",
          "icon_theme": "YAMIS"

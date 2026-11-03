@@ -1,0 +1,117 @@
+#!/usr/bin/env bash
+# Applies what Plasma's global themes do not: the theme's wallpaper on the desktop,
+# lock screen and login screen, its colors on the login screen, and its profile
+# picture. Started by viresta-theme-sync.path when kdeglobals changes. These come from
+# the theme's package; themes without a wallpaper path or picture keep the current one.
+set -euo pipefail
+
+LOGIN_WALLPAPER="/var/lib/viresta/login-wallpaper.jpg"
+LOGIN_COLORS="/var/lib/viresta/login-colors"
+LOGIN_PROFILE_PICTURE="/var/lib/viresta/login-profile"
+
+DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}/viresta"
+STATE_FILE="$STATE_HOME/applied-theme"
+THEME_DIRS=("$DATA_HOME/plasma/look-and-feel" "/usr/share/plasma/look-and-feel")
+COLOR_SCHEME_DIRS=("$DATA_HOME/color-schemes" "/usr/share/color-schemes")
+
+USER_PICTURE="$HOME/.face.icon"
+# Where System Settings saves the picture a user chooses.
+SETTINGS_PICTURE="/var/lib/AccountsService/icons/$(id -un)"
+# The last picture this script applied.
+APPLIED_PICTURE="$STATE_HOME/applied-profile"
+
+# replace_file <source> <target>: other programs must never see a half-written file.
+replace_file() {
+    cp "$1" "$2.new"
+    mv -f "$2.new" "$2"
+}
+
+# True if the file is a picture Viresta put there, not one the user chose.
+is_viresta_picture() {
+    local picture
+
+    if [ -f "$APPLIED_PICTURE" ] && cmp -s "$1" "$APPLIED_PICTURE"; then
+        return 0
+    fi
+    for picture in "$DATA_HOME"/plasma/look-and-feel/org.viresta.*/contents/profile.png; do
+        if [ -f "$picture" ] && cmp -s "$1" "$picture"; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+# apply_profile_picture <picture>: leaves a picture the user chose alone.
+apply_profile_picture() {
+    [ -f "$1" ] || return 0
+
+    # Plasma and the login screen already prefer the picture from Settings.
+    if [ -e "$SETTINGS_PICTURE" ]; then
+        [ -e "$LOGIN_PROFILE_PICTURE" ] || replace_file "$1" "$LOGIN_PROFILE_PICTURE"
+        return 0
+    fi
+
+    # The login screen usually cannot read a home folder, so it gets its own copy.
+    if [ -e "$USER_PICTURE" ] && ! is_viresta_picture "$USER_PICTURE"; then
+        replace_file "$USER_PICTURE" "$LOGIN_PROFILE_PICTURE"
+        return 0
+    fi
+
+    replace_file "$1" "$USER_PICTURE"
+    replace_file "$1" "$LOGIN_PROFILE_PICTURE"
+    mkdir -p "$STATE_HOME"
+    replace_file "$1" "$APPLIED_PICTURE"
+}
+
+# setup.sh uses this so the install follows the same rule as a theme change.
+if [ "${1:-}" = "--profile" ]; then
+    apply_profile_picture "$2"
+    exit 0
+fi
+
+theme="$(kreadconfig6 --file kdeglobals --group KDE --key LookAndFeelPackage)"
+
+# kdeglobals changes for many reasons, and a wallpaper the user picked must survive them.
+[ -n "$theme" ] || exit 0
+[ "$theme" != "$(cat "$STATE_FILE" 2>/dev/null || true)" ] || exit 0
+
+image=""
+color_scheme=""
+profile_picture=""
+for dir in "${THEME_DIRS[@]}"; do
+    if [ -f "$dir/$theme/contents/defaults" ]; then
+        profile_picture="$dir/$theme/contents/profile.png"
+        image="$(kreadconfig6 --file "$dir/$theme/contents/defaults" --group Wallpaper --key Image)"
+        color_scheme="$(kreadconfig6 --file "$dir/$theme/contents/defaults" --group kdeglobals --group General --key ColorScheme)"
+        break
+    fi
+done
+
+if [ "${image#/}" != "$image" ] && [ -f "$image" ]; then
+    plasma-apply-wallpaperimage "$image"
+
+    for key in Image PreviewImage; do
+        kwriteconfig6 --file kscreenlockerrc \
+            --group Greeter --group Wallpaper --group org.kde.image --group General \
+            --key "$key" "file://$image"
+    done
+
+    ln -sfn "$image" "$LOGIN_WALLPAPER.new"
+    mv -Tf "$LOGIN_WALLPAPER.new" "$LOGIN_WALLPAPER"
+fi
+
+for dir in "${COLOR_SCHEME_DIRS[@]}"; do
+    if [ -n "$color_scheme" ] && [ -f "$dir/$color_scheme.colors" ]; then
+        cp "$dir/$color_scheme.colors" "$LOGIN_COLORS.new"
+        # A color scheme has no font, and this file is the login screen's kdeglobals.
+        printf '\n[General]\nfont=%s\n' "$(kreadconfig6 --file kdeglobals --group General --key font)" >>"$LOGIN_COLORS.new"
+        mv -f "$LOGIN_COLORS.new" "$LOGIN_COLORS"
+        break
+    fi
+done
+
+apply_profile_picture "$profile_picture"
+
+mkdir -p "$STATE_HOME"
+printf '%s\n' "$theme" >"$STATE_FILE"

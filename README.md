@@ -37,13 +37,32 @@ Preview what it would do without changing anything:
 ./install.sh --dry-run
 ```
 
+Skip the slow parts when testing:
+
+```sh
+./install.sh --fast      # same as --no-aur --no-vm
+./install.sh --no-aur    # skip paru and packages/aur.txt
+./install.sh --no-vm     # skip VM packages and services
+```
+
+Anything in `packages/aur.txt` will be missing after `--no-aur` or `--fast`,
+unless it is already installed. That includes Panel Colorizer and Vicinae.
+
+Before installing, a menu lets you turn off Vicinae and `rename_wallpapers.py`.
+You can skip the question for either one with `--no-vicinae` and
+`--no-rename-wallpapers`. Without Vicinae, whether by choice, with `--no-aur` or
+`--fast`, or because its build failed, you get the normal KDE app launcher.
+
+Your choices are saved in `~/.config/viresta/options`. The menu starts from them
+next time, and `config/setup.sh` follows them too.
+
 After it finishes, reboot. SDDM will start and you can log into Plasma (Wayland).
 
 ## What it does
 
 The install moves through these phases in order:
 
-1. Preflight checks (Arch, x86_64, sudo, internet, VM detection).
+1. Checks your system (Arch, x86_64, sudo, internet, VM detection).
 2. Asks for your password **once** and adds a temporary `NOPASSWD` sudo rule so
    the install (including AUR builds) never asks again.
 3. Updates the system and the keyring. Downloads are limited to one at a time
@@ -131,9 +150,51 @@ Re-run by hand:
 bash config/setup.sh
 ```
 
+## Themes
+
+Viresta installs two global themes, **Viresta Dark** and **Viresta Light**, next
+to Breeze Light and Breeze Dark. Apply one in System Settings > Colors & Themes >
+Global Theme, or with:
+
+```sh
+plasma-apply-lookandfeel -a org.viresta.light.desktop
+```
+
+| Part | How it follows the theme |
+|---|---|
+| Colors, icons, cursor, window borders | The global theme |
+| Panel | The Panel Colorizer preset uses system colors |
+| Vicinae | `theme.light` and `theme.dark` in its settings. Light mode uses `YAMIS-Light`, a dark-icon copy of YAMIS made at install |
+| Kitty | `light-theme.auto.conf` and `dark-theme.auto.conf` |
+| VSCodium | `window.autoDetectColorScheme` |
+| Desktop, lock and login wallpaper, login screen colors, profile picture | `viresta-theme-sync`, a user service that reads the wallpaper and color scheme from the theme's `contents/defaults`, and the picture from its `contents/profile.png` |
+
+Breeze themes keep whatever wallpaper is currently set.
+
+A profile picture you choose yourself, in System Settings or as `~/.face.icon`, is
+never replaced, by a theme change or by reinstalling. To get the Viresta pictures
+back, remove your picture in Settings or delete `~/.face.icon`, then switch theme.
+
+Each Viresta theme has its own Plasma style and its own "Desktop and window
+layout", generated from `config/themes/org.kde.plasma.desktop-layout.js`. Ticking
+that option rebuilds the Viresta panel. Change the panel there as well as in the
+tracked appletsrc.
+
+Application style and window decoration stay on Breeze, which draws with the
+Viresta colors.
+
+Air, Breeze Twilight, Oxygen and Plastik are removed, along with the Oxygen and
+Breeze Classic color schemes and the Oxygen icons and cursors. A pacman hook,
+`/etc/pacman.d/hooks/viresta-remove-themes.hook`, removes them again after updates.
+Fusion, MS Windows 9x and Union are only hidden from System Settings.
+
 ## Logs
 
-- Install log: `/tmp/viresta-install.log`
+The installer only shows its steps and what went wrong. Add `--verbose` to see
+everything on screen.
+
+- What failed in the last install: `./install.sh --logs`
+- Install log: `~/.local/state/viresta/install.log`
 - AUR build logs: `~/.local/state/viresta/`
 
 ## Layout

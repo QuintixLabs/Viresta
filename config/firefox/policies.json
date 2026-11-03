@@ -11,9 +11,6 @@
     "ExtensionSettings": {
       "uBlock0@raymondhill.net": {
         "installation_mode": "normal_installed"
-      },
-      "{03f7f700-a42f-4841-8dfc-c33894bd52d3}": {
-        "installation_mode": "normal_installed"
       }
     },
     "FirefoxHome": {

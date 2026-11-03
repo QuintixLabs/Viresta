@@ -4,3 +4,4 @@ git
 base-devel
 networkmanager
 curl
+jq

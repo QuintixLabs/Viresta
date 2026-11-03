@@ -10,7 +10,7 @@ configure_networkmanager() {
     fi
     sudo systemctl enable NetworkManager.service >/dev/null 2>&1 \
         && ok "NetworkManager enabled" \
-        || warn "Could not enable NetworkManager"
+        || failure "Could not enable NetworkManager"
 }
 
 configure_vm_services() {
@@ -25,7 +25,7 @@ configure_vm_services() {
 
     sudo systemctl enable "$svc" >/dev/null 2>&1 \
         && ok "Enabled $svc" \
-        || warn "Could not enable $svc"
+        || failure "Could not enable $svc"
 }
 
 configure_sddm() {
@@ -72,14 +72,32 @@ configure_kde_configs() {
         return 0
     fi
 
-    bash "$src" || {
-        warn "Could not install KDE configuration files"
+    # setup.sh reports what it could not do on stderr without stopping.
+    local errors line setup_status=0
+    local -a setup_args=()
+    [ "${INSTALL_VICINAE:-1}" -eq 1 ] || setup_args+=(--no-vicinae)
+    [ "${INSTALL_RENAME_WALLPAPERS:-1}" -eq 1 ] || setup_args+=(--no-rename-wallpapers)
+
+    errors="$(mktemp)"
+    if [ "$VERBOSE" -eq 1 ]; then
+        bash "$src" "${setup_args[@]}" 2>"$errors" || setup_status=$?
+    else
+        bash "$src" "${setup_args[@]}" >>"$LOG_FILE" 2>"$errors" || setup_status=$?
+    fi
+
+    while IFS= read -r line; do
+        failure "$line"
+    done <"$errors"
+    rm -f "$errors"
+
+    if [ "$setup_status" -ne 0 ]; then
+        failure "Could not install KDE configuration files"
         return 0
-    }
+    fi
 
     if command -v systemctl >/dev/null 2>&1; then
         systemctl --user daemon-reload >/dev/null 2>&1 \
-            || warn "Could not reload the user systemd manager"
+            || failure "Could not reload the user systemd manager"
     fi
 
     ok "KDE and systemd-user configuration files installed"
@@ -113,7 +131,7 @@ configure_vscodium() {
 
         "$command_name" --install-extension "$extension" \
             >/dev/null 2>&1 \
-            || warn "Could not install VSCodium extension: $extension"
+            || failure "Could not install VSCodium extension: $extension"
     done <"$file"
 
     ok "VSCodium extensions installed"

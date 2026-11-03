@@ -1,0 +1,15 @@
+{
+    "KPackageStructure": "Plasma/LookAndFeel",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "fr0st"
+            }
+        ],
+        "Category": "",
+        "Description": "Minimal cozy dark theme",
+        "Id": "org.viresta.dark.desktop",
+        "License": "GPLv2+",
+        "Name": "Viresta Dark"
+    }
+}

@@ -32,13 +32,19 @@ prepare_pacman_conf() {
 }
 
 # run_pacman <pacman args...>
-# Runs pacman inside a pseudo-terminal so progress streams live, and tees it.
+# Normally writes only to the log. With --verbose it runs inside a pseudo-terminal
+# so progress streams live.
 run_pacman() {
     local -a args=(pacman)
     if [ -n "${PACMAN_CONF:-}" ]; then
         args+=(--config "$PACMAN_CONF")
     fi
     args+=("$@")
+
+    if [ "$VERBOSE" -eq 0 ]; then
+        sudo "${args[@]}" >>"$LOG_FILE" 2>&1 </dev/null
+        return
+    fi
 
     if command -v script >/dev/null 2>&1; then
         script -q -e -c "sudo ${args[*]}" /dev/null | tee -a "$LOG_FILE"
@@ -86,18 +92,50 @@ _install_array() {
     ok "$label installed"
 }
 
+# _install_array_optional <label> <pkg...>
+# One bad package makes pacman refuse the whole list, so after a failure the
+# packages are tried one at a time to install everything that can be.
+_install_array_optional() {
+    local label="$1" pkg
+    shift
+
+    if [ "$#" -eq 0 ] || [ "${DRY_RUN:-0}" -eq 1 ]; then
+        _install_array "$label" "$@"
+        return 0
+    fi
+
+    info "$label: $*"
+    if run_pacman -S --needed --noconfirm "$@"; then
+        ok "$label installed"
+        return 0
+    fi
+
+    for pkg in "$@"; do
+        run_pacman -S --needed --noconfirm "$pkg" || failure "$pkg: install failed - see $LOG_FILE"
+    done
+}
+
+# _read_package_list <file>
+_read_package_list() {
+    [ -f "$1" ] || return 0
+    sed -e 's/#.*//' -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' "$1" | grep -v '^$' || true
+}
+
+# install_group_optional <label> <package-list-file>
+# For packages the desktop can work without: failures are listed, not fatal.
+install_group_optional() {
+    local -a pkgs=()
+    mapfile -t pkgs < <(_read_package_list "$2")
+    _install_array_optional "$1" "${pkgs[@]}"
+}
+
 # install_group <label> <package-list-file>
+# For packages the desktop needs: a failure stops the install.
 install_group() {
     local label="$1" file="$2"
     local -a pkgs=()
 
-    if [ -f "$file" ]; then
-        mapfile -t pkgs < <(
-            sed -e 's/#.*//' -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' "$file" |
-                grep -v '^$'
-        )
-    fi
-
+    mapfile -t pkgs < <(_read_package_list "$file")
     _install_array "$label" "${pkgs[@]}"
 }
 

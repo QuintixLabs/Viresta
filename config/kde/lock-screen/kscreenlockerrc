@@ -2,5 +2,5 @@
 WallpaperPlugin=org.kde.image
 
 [Greeter][Wallpaper][org.kde.image][General]
-Image=file:///usr/share/wallpapers/Viresta/Viresta_Dark.jpg
-PreviewImage=file:///usr/share/wallpapers/Viresta/Viresta_Dark.jpg
+Image=file:///usr/share/wallpapers/Viresta/Viresta Dark.jpg
+PreviewImage=file:///usr/share/wallpapers/Viresta/Viresta Dark.jpg

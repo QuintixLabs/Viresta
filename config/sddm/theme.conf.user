@@ -1,4 +1,4 @@
 [General]
-background=/usr/share/wallpapers/Viresta/Viresta_Dark.jpg
+background=/var/lib/viresta/login-wallpaper.jpg
 showClock=true
 type=image

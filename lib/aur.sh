@@ -19,7 +19,7 @@ _aur_install_one() {
     fi
 
     if ! command -v paru >/dev/null 2>&1; then
-        warn "$pkg: paru is not available"
+        failure "$pkg: paru is not available"
         return 1
     fi
 
@@ -32,7 +32,7 @@ _aur_install_one() {
         return 0
     fi
 
-    warn "$pkg: install failed - see $log"
+    failure "$pkg: install failed - see $log"
     return 1
 }
 
@@ -53,6 +53,9 @@ install_aur() {
         [ -n "$line" ] || continue
 
         pkg="$line"
+        if [ "$pkg" = "vicinae-bin" ] && [ "${INSTALL_VICINAE:-1}" -eq 0 ]; then
+            continue
+        fi
         _aur_install_one "$pkg" || true
     done <"$file"
 
@@ -81,7 +84,7 @@ install_vm_extras() {
                 continue
             fi
             info "$pkg: installing"
-            run_pacman -S --needed --noconfirm "$pkg" || die "Failed to install $pkg."
+            run_pacman -S --needed --noconfirm "$pkg" || failure "$pkg: install failed - see $LOG_FILE"
         else
             _aur_install_one "$pkg" || true
         fi
@@ -119,6 +122,6 @@ bootstrap_paru() {
     fi
 
     rm -rf "$tmp"
-    warn "paru: build failed - see $log"
+    failure "paru: build failed - see $log"
     return 1
 }

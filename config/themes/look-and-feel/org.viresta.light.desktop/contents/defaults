@@ -1,0 +1,21 @@
+[kdeglobals][KDE]
+widgetStyle=Breeze
+
+[kdeglobals][General]
+ColorScheme=VirestaLight
+
+[kdeglobals][Icons]
+Theme=YAMIS
+
+[plasmarc][Theme]
+name=viresta-light
+
+[Wallpaper]
+Image=/usr/share/wallpapers/Viresta/Viresta Light.jpg
+
+[kcminputrc][Mouse]
+cursorTheme=Bibata
+
+[kwinrc][org.kde.kdecoration2]
+library=org.kde.breeze
+theme=Breeze

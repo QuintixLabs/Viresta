@@ -1,0 +1,16 @@
+{
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "fr0st"
+            }
+        ],
+        "Category": "",
+        "Description": "Minimal cozy dark theme",
+        "EnabledByDefault": true,
+        "Id": "viresta-dark",
+        "License": "LGPL",
+        "Name": "Viresta Dark"
+    },
+    "X-Plasma-API": "5.0"
+}

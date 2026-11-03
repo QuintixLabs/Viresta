@@ -10,3 +10,6 @@ vim
 haruna
 merkuro
 gwenview
+
+# Everyday Applications
+kcolorchooser

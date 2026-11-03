@@ -1,0 +1,16 @@
+{
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "fr0st"
+            }
+        ],
+        "Category": "",
+        "Description": "Minimal warm light theme",
+        "EnabledByDefault": true,
+        "Id": "viresta-light",
+        "License": "LGPL",
+        "Name": "Viresta Light"
+    },
+    "X-Plasma-API": "5.0"
+}

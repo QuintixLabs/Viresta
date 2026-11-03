@@ -178,7 +178,9 @@ toolBarFont=Outfit,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1,,0,0
 Theme=YAMIS
 
 [KDE]
-LookAndFeelPackage=org.kde.breezedark.desktop
+DefaultDarkLookAndFeel=org.viresta.dark.desktop
+DefaultLightLookAndFeel=org.viresta.light.desktop
+LookAndFeelPackage=org.viresta.dark.desktop
 contrast=7
 frameContrast=0.2
 

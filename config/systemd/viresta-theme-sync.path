@@ -1,0 +1,8 @@
+[Unit]
+Description=Watch for Plasma global theme changes
+
+[Path]
+PathChanged=%E/kdeglobals
+
+[Install]
+WantedBy=graphical-session.target

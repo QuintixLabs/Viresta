@@ -1,0 +1,15 @@
+{
+    "KPackageStructure": "Plasma/LookAndFeel",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "fr0st"
+            }
+        ],
+        "Category": "",
+        "Description": "Minimal warm light theme",
+        "Id": "org.viresta.light.desktop",
+        "License": "GPLv2+",
+        "Name": "Viresta Light"
+    }
+}

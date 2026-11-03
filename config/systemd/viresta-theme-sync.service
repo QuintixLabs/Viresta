@@ -1,0 +1,7 @@
+[Unit]
+Description=Apply the Plasma global theme's wallpaper
+StartLimitIntervalSec=0
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/viresta-theme-sync
