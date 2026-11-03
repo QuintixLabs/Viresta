@@ -8,6 +8,4 @@
 
 # Archives
 *.gz binary
-
-# Cursor files have no extension, so Git would have to guess
-config/cursors/**/cursors/* binary
+*.xz binary

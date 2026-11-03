@@ -14,8 +14,6 @@ track() {
 
 # Everything that is not put in place by install_file or sudo_install_file.
 track_other_files() {
-    local theme
-
     track "$CONFIG_DIR/kactivitymanagerdrc"
     track "$STATE_DIR/kactivitymanagerdstaterc"
     track "$POWER_CONFIG_FILE"
@@ -28,9 +26,7 @@ track_other_files() {
     track "$VICINAE_UNIT_LINK"
     track "$ICONS_DIR/$ICON_THEME"
     track "$ICONS_DIR/$ICON_THEME_LIGHT"
-    for theme in "$CURSORS_SOURCE_DIR"/*/; do
-        track "$CURSORS_DIR/$(basename "$theme")"
-    done
+    track "$CURSORS_DIR/$CURSOR_THEME"
     track "$FASTFETCH_DIR/logo.png"
     track "$USER_WALLPAPERS_DIR/rename_wallpapers.py"
     track "$(dirname "$LOGIN_WALLPAPER")"

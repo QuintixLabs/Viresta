@@ -57,23 +57,19 @@ install_light_icon_theme() {
 # ------------------------------------------------------------
 
 install_cursor_themes() {
-    local theme target
+    local target="$CURSORS_DIR/$CURSOR_THEME"
 
-    # One copy per theme, instead of starting sudo for every file.
-    for theme in "$CURSORS_SOURCE_DIR"/*/; do
-        target="$CURSORS_DIR/$(basename "$theme")"
-        sudo mkdir -p "$target"
-        sudo cp -rL "$theme." "$target/"
-        sudo chmod -R u=rwX,go=rX "$target"
-        printf 'Installed %s\n' "$target"
-    done
+    sudo mkdir -p "$CURSORS_DIR"
+    sudo tar -xJf "$CURSORS_ARCHIVE" --no-same-owner -C "$CURSORS_DIR"
+    sudo chmod -R u=rwX,go=rX "$target"
+    printf 'Installed %s\n' "$target"
 }
 
 # SDDM 0.21 cannot pass its CursorTheme setting to Qt, so the login screen uses the
 # system's default cursor. default-cursors owns that file, so a pacman hook puts
 # Bibata back after that package updates.
 install_default_cursor() {
-    local source="$CURSORS_DIR/Bibata/default-index.theme"
+    local source="$CURSORS_DIR/$CURSOR_THEME/default-index.theme"
     local target="$CURSORS_DIR/default/index.theme"
 
     sudo_install_file "$source" "$target"
