@@ -7,7 +7,7 @@
 # Settings
 # ------------------------------------------------------------
 
-FAILURE_LOG="$STATE_DIR/failures.log"
+FAILURE_LOG="${FAILURE_LOG:-$VIRESTA_STATE_DIR/failures.log}"
 
 # ------------------------------------------------------------
 # Recording
@@ -37,6 +37,14 @@ failure_count() {
         wc -l <"$FAILURE_LOG"
     else
         printf '0\n'
+    fi
+}
+
+print_failures() {
+    if [ "$(failure_count)" -gt 0 ]; then
+        printf '\n'
+        _emit "$C_WARN" "! $(failure_count) failed:"
+        sed 's/^/  - /' "$FAILURE_LOG"
     fi
 }
 

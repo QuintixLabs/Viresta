@@ -6,7 +6,7 @@
 install_vicinae() {
     local source
 
-    install_file "$VICINAE_SOURCE_DIR/settings.json" "$CONFIG_DIR/vicinae/settings.json"
+    install_shared_file "$VICINAE_SOURCE_DIR/settings.json" "$CONFIG_DIR/vicinae/settings.json"
 
     while IFS= read -r -d '' source; do
         install_file "$source" "$DATA_DIR/applications/$(basename "$source")"
@@ -15,6 +15,13 @@ install_vicinae() {
     if command -v kbuildsycoca6 >/dev/null 2>&1; then
         kbuildsycoca6 --noincremental >/dev/null 2>&1 || true
     fi
+}
+
+# Starts the server at login, so the first press of Meta can open the window.
+enable_vicinae() {
+    mkdir -p "$(dirname "$VICINAE_UNIT_LINK")"
+    ln -sfn "$VICINAE_UNIT_FILE" "$VICINAE_UNIT_LINK"
+    printf 'Enabled %s\n' "$VICINAE_UNIT"
 }
 
 install_vicinae_themes() {

@@ -2,7 +2,7 @@
 Type=Application
 Name=Vicinae
 Comment=Application launcher
-Exec=sh -c "systemctl --user start vicinae.service && vicinae toggle"
+Exec=sh -c "vicinae ping || { systemctl --user start vicinae.service; timeout 5 sh -c 'until vicinae ping; do sleep 0.1; done'; }; vicinae toggle"
 Icon=vicinae
 Terminal=false
 StartupNotify=false

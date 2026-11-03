@@ -1,5 +1,6 @@
 # Fonts
 ttf-jetbrains-mono
+ttf-jetbrains-mono-nerd
 
 # Default Applications
 kitty
@@ -13,3 +14,6 @@ gwenview
 
 # Everyday Applications
 kcolorchooser
+fastfetch
+obs-studio
+filelight

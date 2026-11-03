@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # menu.sh
-# Shows the menu for choosing what to install.
+# Shows the menu for choosing what to install, and asks yes or no questions.
 
 # ------------------------------------------------------------
 # Settings
@@ -90,4 +90,26 @@ choose_options() {
     for i in "${!OPTION_NAMES[@]}"; do
         _log "Option ${OPTION_NAMES[$i]}: ${OPTION_STATES[$i]}"
     done
+}
+
+# ------------------------------------------------------------
+# Questions
+# ------------------------------------------------------------
+
+# The default is used for a plain Enter, or without a terminal to answer from.
+ask_yes_no() {
+    local question="$1" default="$2" hint='[y/N]' answer=''
+
+    [ "$default" != "y" ] || hint='[Y/n]'
+
+    if [ -t 0 ] && [ -t 1 ] && [ -r /dev/tty ]; then
+        printf '%b?%b %s %s ' "$C_ACCENT" "$C_RESET" "$question" "$hint"
+        IFS= read -r answer </dev/tty || answer=''
+    fi
+    _log "$question $hint: ${answer:-$default}"
+
+    case "${answer:-$default}" in
+        y|Y|yes|Yes|YES) return 0 ;;
+        *) return 1 ;;
+    esac
 }

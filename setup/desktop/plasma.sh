@@ -7,18 +7,35 @@
 # KDE configs
 # ------------------------------------------------------------
 
+kde_config_sources() {
+    find "$KDE_SOURCE_DIR" -mindepth 2 \
+        \( -type f -o -type l \) \
+        ! -path "$COLOR_SCHEMES_SOURCE_DIR/*" \
+        ! -path "$POWER_SOURCE_DIR/*" \
+        -print0
+}
+
+kde_config_target() {
+    local relative="${1#"$KDE_SOURCE_DIR/"}"
+
+    printf '%s\n' "$CONFIG_DIR/${relative#*/}"
+}
+
 install_kde_configs() {
-    local source relative
+    local source
 
     while IFS= read -r -d '' source; do
-        relative="${source#"$KDE_SOURCE_DIR/"}"
-        install_file "$source" "$CONFIG_DIR/${relative#*/}"
-    done < <(
-        find "$KDE_SOURCE_DIR" -mindepth 2 \
-            \( -type f -o -type l \) \
-            ! -path "$COLOR_SCHEMES_SOURCE_DIR/*" \
-            -print0
-    )
+        install_file "$source" "$(kde_config_target "$source")"
+    done < <(kde_config_sources)
+}
+
+# An update never changes these, but uninstall.sh still has to know about them.
+track_kept_configs() {
+    local source
+
+    while IFS= read -r -d '' source; do
+        track "$(kde_config_target "$source")"
+    done < <(kde_config_sources)
 }
 
 # ------------------------------------------------------------
@@ -76,6 +93,7 @@ use_kde_launcher() {
     local temp_file
 
     rm -rf "$CONFIG_DIR/systemd/user/vicinae.service.d"
+    rm -f "$VICINAE_UNIT_LINK"
 
     temp_file="$(mktemp)"
     awk '

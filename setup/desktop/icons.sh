@@ -18,7 +18,11 @@ install_icon_themes() {
         return 1
     fi
 
-    install_tree "$temp_dir/$ICON_THEME" "$target_root"
+    # One copy of the whole folder, since there are about 6,000 files.
+    mkdir -p "$target_root"
+    cp -rL "$temp_dir/$ICON_THEME/." "$target_root/"
+    chmod -R u=rwX,go=rX "$target_root"
+    printf 'Installed %s\n' "$target_root"
     rm -rf "$temp_dir"
 
     # Fix Dolphin's KDE application icon name
@@ -53,11 +57,16 @@ install_light_icon_theme() {
 # ------------------------------------------------------------
 
 install_cursor_themes() {
-    local source
+    local theme target
 
-    while IFS= read -r -d '' source; do
-        sudo_install_file "$source" "$CURSORS_DIR/${source#"$CURSORS_SOURCE_DIR/"}"
-    done < <(find "$CURSORS_SOURCE_DIR" -type f -print0)
+    # One copy per theme, instead of starting sudo for every file.
+    for theme in "$CURSORS_SOURCE_DIR"/*/; do
+        target="$CURSORS_DIR/$(basename "$theme")"
+        sudo mkdir -p "$target"
+        sudo cp -rL "$theme." "$target/"
+        sudo chmod -R u=rwX,go=rX "$target"
+        printf 'Installed %s\n' "$target"
+    done
 }
 
 # SDDM 0.21 cannot pass its CursorTheme setting to Qt, so the login screen uses the

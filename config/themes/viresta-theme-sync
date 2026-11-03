@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 # viresta-theme-sync
-# Changes the wallpaper, login screen and profile picture when the theme changes.
+# Changes the wallpaper, login screen, profile picture, fastfetch logo and OBS theme
+# when the theme changes.
 # Started by viresta-theme-sync.path when kdeglobals changes. Themes without a
 # wallpaper path or picture keep the current one.
 
@@ -20,6 +21,12 @@ STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}/viresta"
 STATE_FILE="$STATE_HOME/applied-theme"
 THEME_DIRS=("$DATA_HOME/plasma/look-and-feel" "/usr/share/plasma/look-and-feel")
 COLOR_SCHEME_DIRS=("$DATA_HOME/color-schemes" "/usr/share/color-schemes")
+
+FASTFETCH_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/fastfetch"
+
+OBS_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/obs-studio/user.ini"
+OBS_THEME_DARK="com.obsproject.Yami.Acri"
+OBS_THEME_LIGHT="com.obsproject.Yami.Light"
 
 USER_PICTURE="$HOME/.face.icon"
 # Where System Settings saves the picture a user chooses.
@@ -71,6 +78,23 @@ apply_profile_picture() {
     replace_file "$1" "$LOGIN_PROFILE_PICTURE"
     mkdir -p "$STATE_HOME"
     replace_file "$1" "$APPLIED_PICTURE"
+}
+
+# ------------------------------------------------------------
+# OBS
+# ------------------------------------------------------------
+
+# Only replaces the theme line, since OBS keeps its other settings in this file. A theme
+# the user picked in OBS stays. The pattern allows for a byte order mark at the start.
+apply_obs_theme() {
+    local current
+
+    [ -f "$OBS_CONFIG" ] || return 0
+
+    current="$(sed -n '/\[Appearance\]\s*$/,/^\[/ s/^Theme=//p' "$OBS_CONFIG")"
+    [ "$current" = "$OBS_THEME_DARK" ] || [ "$current" = "$OBS_THEME_LIGHT" ] || return 0
+
+    sed -i "/\[Appearance\]\s*\$/,/^\[/ s/^Theme=.*/Theme=$1/" "$OBS_CONFIG"
 }
 
 # setup.sh uses this so the install follows the same rule as a theme change.
@@ -125,6 +149,21 @@ for dir in "${COLOR_SCHEME_DIRS[@]}"; do
 done
 
 apply_profile_picture "$profile_picture"
+
+# Other themes keep the current logo, like they keep the current wallpaper.
+case "$theme" in
+    org.viresta.dark.desktop) fastfetch_logo="$FASTFETCH_DIR/pngs/viresta-dark.png" ;;
+    org.viresta.light.desktop) fastfetch_logo="$FASTFETCH_DIR/pngs/viresta-light.png" ;;
+    *) fastfetch_logo="" ;;
+esac
+if [ -f "$fastfetch_logo" ]; then
+    replace_file "$fastfetch_logo" "$FASTFETCH_DIR/logo.png"
+fi
+
+case "$theme" in
+    org.viresta.dark.desktop) apply_obs_theme "$OBS_THEME_DARK" ;;
+    org.viresta.light.desktop) apply_obs_theme "$OBS_THEME_LIGHT" ;;
+esac
 
 mkdir -p "$STATE_HOME"
 printf '%s\n' "$theme" >"$STATE_FILE"

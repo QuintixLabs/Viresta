@@ -25,26 +25,8 @@ SAVED_OPTIONS_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/viresta/options"
 # Libraries
 # ------------------------------------------------------------
 
-# shellcheck source=lib/ui/messages.sh
-source "$SCRIPT_DIR/lib/ui/messages.sh"
-# shellcheck source=lib/ui/steps.sh
-source "$SCRIPT_DIR/lib/ui/steps.sh"
-# shellcheck source=lib/ui/menu.sh
-source "$SCRIPT_DIR/lib/ui/menu.sh"
-# shellcheck source=lib/ui/failures.sh
-source "$SCRIPT_DIR/lib/ui/failures.sh"
-# shellcheck source=lib/system/checks.sh
-source "$SCRIPT_DIR/lib/system/checks.sh"
-# shellcheck source=lib/system/sudo.sh
-source "$SCRIPT_DIR/lib/system/sudo.sh"
-# shellcheck source=lib/system/services.sh
-source "$SCRIPT_DIR/lib/system/services.sh"
-# shellcheck source=lib/installers/pacman.sh
-source "$SCRIPT_DIR/lib/installers/pacman.sh"
-# shellcheck source=lib/installers/aur.sh
-source "$SCRIPT_DIR/lib/installers/aur.sh"
-# shellcheck source=lib/installers/vm.sh
-source "$SCRIPT_DIR/lib/installers/vm.sh"
+# shellcheck source=lib/load.sh
+source "$SCRIPT_DIR/lib/load.sh"
 
 # ------------------------------------------------------------
 # Flags and saved choices
@@ -109,16 +91,7 @@ done
 export DRY_RUN
 TOTAL_STEPS=$((TOTAL_STEPS - SKIP_AUR - SKIP_VM))
 
-# ------------------------------------------------------------
-# Startup
-# ------------------------------------------------------------
-
-ui_init
-
-trap run_cleanups EXIT
-trap 'exit 130' INT
-trap 'exit 143' TERM
-trap 'exit 129' HUP
+start_script
 
 # ------------------------------------------------------------
 # Menu
@@ -156,6 +129,28 @@ ask_options() {
 
     if [ "$SKIP_AUR" -eq 1 ]; then
         INSTALL_VICINAE=0
+    fi
+}
+
+# ------------------------------------------------------------
+# Backup
+# ------------------------------------------------------------
+
+# Only asks if there is something to lose. Once Viresta is installed, those configs
+# are its own, and update.sh looks after them.
+offer_backup() {
+    local setup="$SCRIPT_DIR/setup/setup.sh"
+    local count
+
+    [ "$DRY_RUN" -eq 0 ] || return 0
+    [ ! -e "$VIRESTA_STATE_DIR/installed-files" ] || return 0
+
+    count="$(bash "$setup" --list-replaced 2>/dev/null | grep -c '^/' || true)"
+    [ "${count:-0}" -gt 0 ] || return 0
+
+    if ask_yes_no "Found $count of your configs that Viresta will replace. Back them up first?" y; then
+        bash "$setup" --back-up >>"$LOG_FILE" 2>&1 || die "Could not back up your configs."
+        ok "Configs backed up. uninstall.sh puts them back."
     fi
 }
 
@@ -200,6 +195,7 @@ main() {
     fi
 
     ask_options
+    offer_backup
 
     step "Checking your system"
     preflight
@@ -215,6 +211,8 @@ main() {
     # Starts here so the time spent typing the password does not count.
     SECONDS=0
 
+    save_packages_before
+
     step "Updating system"
     update_system
 
@@ -226,6 +224,8 @@ main() {
 
     step "Installing apps"
     install_group_optional "Applications" "$SCRIPT_DIR/packages/apps.txt"
+
+    set_build_jobs
 
     if [ "$SKIP_AUR" -eq 1 ]; then
         step_finish
@@ -255,6 +255,7 @@ main() {
     configure_sddm
     configure_kde_configs
     configure_vscodium
+    save_known_packages
 
     step_finish
     summary

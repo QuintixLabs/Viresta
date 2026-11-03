@@ -8,8 +8,8 @@
 # ------------------------------------------------------------
 
 # Kept outside /tmp so both are still there after the reboot.
-STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/viresta"
-LOG_FILE="${LOG_FILE:-$STATE_DIR/install.log}"
+VIRESTA_STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/viresta"
+LOG_FILE="${LOG_FILE:-$VIRESTA_STATE_DIR/install.log}"
 
 # 1 shows everything on screen, 0 shows only the steps and what went wrong.
 VERBOSE=0

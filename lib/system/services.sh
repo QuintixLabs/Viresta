@@ -46,6 +46,7 @@ configure_kde_configs() {
     local -a setup_args=()
     [ "${INSTALL_VICINAE:-1}" -eq 1 ] || setup_args+=(--no-vicinae)
     [ "${INSTALL_RENAME_WALLPAPERS:-1}" -eq 1 ] || setup_args+=(--no-rename-wallpapers)
+    [ "$#" -eq 0 ] || setup_args+=("$@")
 
     errors="$(mktemp)"
     if [ "$VERBOSE" -eq 1 ]; then

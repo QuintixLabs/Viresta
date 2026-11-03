@@ -4,5 +4,8 @@
     "window.autoDetectColorScheme": true,
     "workbench.colorTheme": "Vesper",
     "workbench.preferredDarkColorTheme": "Vesper",
-    "workbench.preferredLightColorTheme": "Light 2026"
+    "workbench.preferredLightColorTheme": "Light 2026",
+    "editor.fontFamily": "'JetBrainsMono Nerd Font Mono'",
+    "editor.fontLigatures": true,
+    "terminal.integrated.fontFamily": "JetBrainsMono Nerd Font Mono"
 }

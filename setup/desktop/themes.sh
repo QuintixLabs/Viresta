@@ -75,13 +75,15 @@ hide_app_styles() {
 # Plasma does not apply a global theme's wallpaper, so this service does it.
 # kdeglobals is installed with the dark theme, which is what the state file records.
 install_theme_sync() {
-    local wants_dir="$CONFIG_DIR/systemd/user/graphical-session.target.wants"
-
     install -Dm755 "$THEMES_SOURCE_DIR/viresta-theme-sync" "$THEME_SYNC_SCRIPT"
     sed -i "s|^LOGIN_WALLPAPER=.*|LOGIN_WALLPAPER=\"$LOGIN_WALLPAPER\"|" "$THEME_SYNC_SCRIPT"
     sed -i "s|^LOGIN_COLORS=.*|LOGIN_COLORS=\"$LOGIN_COLORS\"|" "$THEME_SYNC_SCRIPT"
     sed -i "s|^LOGIN_PROFILE_PICTURE=.*|LOGIN_PROFILE_PICTURE=\"$LOGIN_PROFILE_PICTURE\"|" "$THEME_SYNC_SCRIPT"
     printf 'Installed %s\n' "$THEME_SYNC_SCRIPT"
+}
+
+enable_theme_sync() {
+    local wants_dir="$CONFIG_DIR/systemd/user/graphical-session.target.wants"
 
     mkdir -p "$(dirname "$THEME_SYNC_STATE_FILE")" "$wants_dir"
     printf '%s\n' "$THEME_DARK" >"$THEME_SYNC_STATE_FILE"
@@ -92,10 +94,12 @@ install_theme_sync() {
 # Each theme carries its picture, and viresta-theme-sync decides whether to apply it,
 # since a picture the user chose must survive both this install and theme changes.
 install_profile_pictures() {
-    local theme_faces="$SDDM_THEMES_DIR/$SDDM_THEME/faces"
-
     install_file "$PROFILE_SOURCE_DIR/viresta-dark-profile.png" "$THEMES_DIR/$THEME_DARK/contents/profile.png"
     install_file "$PROFILE_SOURCE_DIR/viresta-light-profile.png" "$THEMES_DIR/$THEME_LIGHT/contents/profile.png"
+}
+
+apply_profile_picture() {
+    local theme_faces="$SDDM_THEMES_DIR/$SDDM_THEME/faces"
 
     "$THEME_SYNC_SCRIPT" --profile "$THEMES_DIR/$THEME_DARK/contents/profile.png"
     printf 'Configured the profile picture\n'

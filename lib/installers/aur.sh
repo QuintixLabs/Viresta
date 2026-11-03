@@ -10,6 +10,32 @@
 AUR_LOG_DIR="${AUR_LOG_DIR:-$HOME/.local/state/viresta}"
 
 # ------------------------------------------------------------
+# Build speed
+# ------------------------------------------------------------
+
+# make uses one core unless told otherwise. This only lasts for this install, and a
+# MAKEFLAGS set in makepkg.conf still wins. Allowing 1 GB per job stops machines with
+# little RAM running out while compiling.
+set_build_jobs() {
+    local jobs ram_gb
+
+    if [ -n "${MAKEFLAGS:-}" ]; then
+        return 0
+    fi
+
+    jobs="$(nproc)"
+    ram_gb="$(awk '/^MemTotal:/ { print int($2 / 1024 / 1024) }' /proc/meminfo)"
+    if [ "$ram_gb" -lt "$jobs" ]; then
+        jobs="$ram_gb"
+    fi
+    if [ "$jobs" -lt 1 ]; then
+        jobs=1
+    fi
+
+    export MAKEFLAGS="-j$jobs"
+}
+
+# ------------------------------------------------------------
 # AUR packages
 # ------------------------------------------------------------
 

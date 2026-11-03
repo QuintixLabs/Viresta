@@ -51,9 +51,11 @@ spinner_start() {
         i=0
         # Stops by itself if the installer is killed too hard to clean up.
         while kill -0 "$$" 2>/dev/null; do
-            line="$(_step_line "${frames:i++%4:1}" "$(format_duration "$((EPOCHSECONDS - STEP_STARTED))")")"
+            line="$(_step_line "${frames:i%4:1}" "$(format_duration "$((EPOCHSECONDS - STEP_STARTED))")")"
             # One write that overwrites the old text, since clearing first would flicker.
             printf '\r%s\e[K' "$line"
+            # Counted out here, because a change made inside $(...) would be lost.
+            i=$((i + 1))
             sleep 0.2
         done
     ) &

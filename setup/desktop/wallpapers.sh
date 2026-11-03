@@ -16,6 +16,22 @@ install_wallpapers() {
     install_tree "$WALLPAPERS_SOURCE_DIR/Viresta Light" "$USER_WALLPAPERS_DIR/Viresta Light"
 }
 
+# Only wallpapers that are new in this version, so one the user deleted stays deleted.
+install_new_wallpapers() {
+    local folder source target
+
+    for folder in "Viresta Dark" "Viresta Light"; do
+        while IFS= read -r -d '' source; do
+            target="$USER_WALLPAPERS_DIR/$folder/$(basename "$source")"
+            if [ ! -e "$target" ] && ! grep -qxF "$target" "$INSTALLED_FILES" 2>/dev/null; then
+                install_file "$source" "$target"
+            else
+                track "$target"
+            fi
+        done < <(find "$WALLPAPERS_SOURCE_DIR/$folder" -type f -print0)
+    done
+}
+
 # A failed download should not stop the install, since nothing else needs this script.
 download_rename_wallpapers() {
     local temp_file

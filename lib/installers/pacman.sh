@@ -8,6 +8,11 @@
 # ------------------------------------------------------------
 
 PACMAN_CONF=""
+# What was already on the system, so uninstall.sh keeps it.
+PACKAGES_BEFORE_FILE="$VIRESTA_STATE_DIR/packages-before"
+# What Viresta has offered, so update.sh only adds new ones and does not bring back
+# an app the user removed.
+KNOWN_PACKAGES_FILE="$VIRESTA_STATE_DIR/known-packages"
 
 # ------------------------------------------------------------
 # Pacman
@@ -22,7 +27,7 @@ cleanup_pacman_conf() {
 # Uses a temporary config, so the real /etc/pacman.conf is never modified.
 prepare_pacman_conf() {
     if [ "${DRY_RUN:-0}" -eq 1 ]; then
-        info "Would limit downloads to one at a time"
+        info "Would download 5 packages at a time"
         return 0
     fi
 
@@ -30,13 +35,13 @@ prepare_pacman_conf() {
     cp /etc/pacman.conf "$PACMAN_CONF"
 
     if grep -qE '^[#[:space:]]*ParallelDownloads' "$PACMAN_CONF"; then
-        sed -i -E 's|^[#[:space:]]*ParallelDownloads.*|ParallelDownloads = 1|' "$PACMAN_CONF"
+        sed -i -E 's|^[#[:space:]]*ParallelDownloads.*|ParallelDownloads = 5|' "$PACMAN_CONF"
     else
-        printf '\nParallelDownloads = 1\n' >>"$PACMAN_CONF"
+        printf '\nParallelDownloads = 5\n' >>"$PACMAN_CONF"
     fi
 
     register_cleanup cleanup_pacman_conf
-    ok "Downloads limited to one at a time"
+    ok "Downloading 5 packages at a time"
 }
 
 # Normally writes only to the log. With --verbose it runs inside a pseudo-terminal
@@ -147,6 +152,31 @@ install_group() {
 
     mapfile -t pkgs < <(_read_package_list "$file")
     _install_array "$label" "${pkgs[@]}"
+}
+
+# ------------------------------------------------------------
+# Package records
+# ------------------------------------------------------------
+
+save_packages_before() {
+    [ "${DRY_RUN:-0}" -eq 0 ] || return 0
+    [ ! -e "$PACKAGES_BEFORE_FILE" ] || return 0
+    mkdir -p "$(dirname "$PACKAGES_BEFORE_FILE")"
+    pacman -Qq >"$PACKAGES_BEFORE_FILE" 2>/dev/null || true
+}
+
+listed_packages() {
+    local list
+
+    for list in base kde apps aur; do
+        _read_package_list "$SCRIPT_DIR/packages/$list.txt"
+    done
+}
+
+save_known_packages() {
+    [ "${DRY_RUN:-0}" -eq 0 ] || return 0
+    mkdir -p "$(dirname "$KNOWN_PACKAGES_FILE")"
+    listed_packages | sort -u >"$KNOWN_PACKAGES_FILE"
 }
 
 # ------------------------------------------------------------

@@ -11,6 +11,8 @@
 # Set from what install.sh saved and the flags in setup.sh.
 USE_VICINAE=1
 USE_RENAME_WALLPAPERS=1
+# "update" leaves out what belongs to the user and merges the shared configs.
+SETUP_MODE="install"
 
 # ------------------------------------------------------------
 # Repository
@@ -39,14 +41,25 @@ USER_WALLPAPERS_DIR="$HOME/Pictures/Wallpapers"
 SAVED_OPTIONS_FILE="$CONFIG_DIR/viresta/options"
 
 # ------------------------------------------------------------
+# Tracking
+# ------------------------------------------------------------
+
+VIRESTA_STATE_DIR="$STATE_DIR/viresta"
+INSTALLED_FILES="$VIRESTA_STATE_DIR/installed-files"
+BASE_DIR="$VIRESTA_STATE_DIR/base"
+BACKUP_DIR="$VIRESTA_STATE_DIR/backup"
+UPDATE_NOTES_FILE="$VIRESTA_STATE_DIR/update-notes"
+
+# ------------------------------------------------------------
 # Plasma
 # ------------------------------------------------------------
 
 PLASMA_LAYOUT_FILE="$CONFIG_DIR/plasma-org.kde.plasma.desktop-appletsrc"
 LOCK_SCREEN_FILE="$CONFIG_DIR/kscreenlockerrc"
 SHORTCUTS_FILE="$CONFIG_DIR/kglobalshortcutsrc"
+PANEL_COLORIZER_DIR="$CONFIG_DIR/panel-colorizer"
 # Used by both themes: it takes its colors from the color scheme.
-PANEL_COLORIZER_PRESET_DIR="$CONFIG_DIR/panel-colorizer/presets/Viresta"
+PANEL_COLORIZER_PRESET_DIR="$PANEL_COLORIZER_DIR/presets/Viresta"
 
 # ------------------------------------------------------------
 # Global themes
@@ -58,7 +71,8 @@ THEME_LAYOUT_NAME="org.kde.plasma.desktop-layout.js"
 THEME_DARK="org.viresta.dark.desktop"
 THEME_LIGHT="org.viresta.light.desktop"
 THEME_SYNC_SCRIPT="$HOME/.local/bin/viresta-theme-sync"
-THEME_SYNC_STATE_FILE="$STATE_DIR/viresta/applied-theme"
+THEME_SYNC_STATE_FILE="$VIRESTA_STATE_DIR/applied-theme"
+APPLIED_PROFILE_PICTURE="$VIRESTA_STATE_DIR/applied-profile"
 THEME_SYNC_UNIT="viresta-theme-sync.path"
 
 # ------------------------------------------------------------
@@ -73,6 +87,8 @@ REMOVED_THEMES=(
     /usr/share/plasma/look-and-feel/org.kde.oxygenlight
     /usr/share/plasma/desktoptheme/air
     /usr/share/plasma/desktoptheme/oxygen
+    /usr/share/wallpapers/Air
+    /usr/share/wallpapers/Horos
     /usr/share/color-schemes/BreezeClassic.colors
     /usr/share/color-schemes/Oxygen.colors
     /usr/share/color-schemes/OxygenCold.colors
@@ -103,7 +119,7 @@ REMOVED_THEMES_HOOK="/etc/pacman.d/hooks/viresta-remove-themes.hook"
 
 # This is the only place that sets their names. The installed Plasma,
 # lock screen, SDDM and global theme configs all get these paths written into them.
-WALLPAPER_DARK_SOURCE="$WALLPAPERS_SOURCE_DIR/Viresta Dark/01. Viresta.jpg"
+WALLPAPER_DARK_SOURCE="$WALLPAPERS_SOURCE_DIR/Viresta Dark/01. Viresta Dark.jpg"
 WALLPAPER_LIGHT_SOURCE="$WALLPAPERS_SOURCE_DIR/Viresta Light/01. Viresta Light.jpg"
 WALLPAPER_DIR="/usr/share/wallpapers/Viresta"
 WALLPAPER_DARK="$WALLPAPER_DIR/Viresta Dark.jpg"
@@ -129,6 +145,9 @@ DEFAULT_CURSOR_HOOK="/etc/pacman.d/hooks/viresta-default-cursor.hook"
 # ------------------------------------------------------------
 
 VICINAE_SYSTEM_THEMES_DIR="/usr/share/vicinae/themes"
+VICINAE_UNIT="vicinae.service"
+VICINAE_UNIT_FILE="/usr/lib/systemd/user/$VICINAE_UNIT"
+VICINAE_UNIT_LINK="$CONFIG_DIR/systemd/user/graphical-session.target.wants/$VICINAE_UNIT"
 
 # ------------------------------------------------------------
 # Login screen
@@ -145,7 +164,40 @@ LOGIN_COLORS="/var/lib/viresta/login-colors"
 LOGIN_PROFILE_PICTURE="/var/lib/viresta/login-profile"
 
 # ------------------------------------------------------------
+# Power
+# ------------------------------------------------------------
+
+POWER_SOURCE_DIR="$KDE_SOURCE_DIR/power"
+POWER_CONFIG_FILE="$CONFIG_DIR/powerdevilrc"
+POWER_SUPPLY_DIR="/sys/class/power_supply"
+# Empty means it is detected. --power-profile in setup.sh sets it.
+POWER_PROFILE=""
+# Matches when the screen turns off while plugged in.
+LAPTOP_LOCK_MINUTES=20
+
+# ------------------------------------------------------------
+# Sound
+# ------------------------------------------------------------
+
+# 75% on the slider. The slider works on a curve, so this is 0.75 cubed.
+NOTIFICATION_VOLUME="0.421875"
+NOTIFICATION_VOLUME_KEY="Output/Audio:media.role:Notification"
+WIREPLUMBER_STREAMS_FILE="$STATE_DIR/wireplumber/stream-properties"
+
+# ------------------------------------------------------------
 # Firefox
 # ------------------------------------------------------------
 
 FIREFOX_POLICY_FILE="/etc/firefox/policies/policies.json"
+
+# ------------------------------------------------------------
+# Fastfetch
+# ------------------------------------------------------------
+
+FASTFETCH_DIR="$CONFIG_DIR/fastfetch"
+
+# ------------------------------------------------------------
+# OBS
+# ------------------------------------------------------------
+
+OBS_CONFIG_FILE="$CONFIG_DIR/obs-studio/user.ini"
