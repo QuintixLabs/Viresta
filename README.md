@@ -54,7 +54,7 @@ You can skip the question for either one with `--no-vicinae` and
 `--fast`, or because its build failed, you get the normal KDE app launcher.
 
 Your choices are saved in `~/.config/viresta/options`. The menu starts from them
-next time, and `config/setup.sh` follows them too.
+next time, and `setup/setup.sh` follows them too.
 
 After it finishes, reboot. SDDM will start and you can log into Plasma (Wayland).
 
@@ -73,7 +73,7 @@ The install moves through these phases in order:
 7. Builds `paru` and installs packages from `packages/aur.txt`.
 8. Installs VM extras (repository tools + VM-only AUR packages).
 9. Enables NetworkManager/SDDM, sets Plasma Wayland as the default session,
-   applies Breeze Dark, and installs the tracked KDE configuration files.
+   and puts the dots in place with Viresta Dark as the starting theme.
 
 ## AUR packages
 
@@ -120,34 +120,20 @@ Downloads are serialized using a temporary pacman config; your real
 
 ## KDE configuration
 
-Viresta does **not** reuse the KDE Application Launcher (Kickoff) widget. It
-installs a small desktop entry named **Vicinae** (`vicinae toggle`) and pins,
-left to right: **Vicinae**, **Dolphin**, **Firefox**.
+With Vicinae, the panel pins, left to right: **Vicinae**, **Dolphin**, **Firefox**.
+**Meta** (the Super/Windows key, by itself) opens Vicinae, so the key and the icon
+run the same command. Without it, Kickoff is on the panel and Meta opens that.
 
-**Meta** (the Super/Windows key, by itself) is bound to that Vicinae desktop
-file, so the key and the icon run the same command. Kickoff is removed from
-the panel; Alt+F1 stays as Plasma's fallback.
+The panel does not float: `floating=0` and `floatingApplets=0` on the panel
+containment (Disabled, not "Applets only").
 
-Panel floating is turned off completely: `floating=0` and `floatingApplets=0`
-on the panel containment (Disabled, not “Applets only”). Peek at Desktop (the
-panel widget), Clipboard, and Screen Brightness are removed or hidden. The
-Plasma Browser Integration *reminder* is turned off in Background Services
-(`kded5rc`). Do not uninstall `plasma-browser-integration` (plasma-meta
-depends on it) and do not remove `plasma-integration` (that is the Qt
-platform theme).
+Do not uninstall `plasma-browser-integration` (plasma-meta depends on it) and do
+not remove `plasma-integration` (that is the Qt platform theme).
 
-The browser add-on itself has to be removed inside Firefox/Chrome if it is
-already installed.
-
-The installer copies the tracked KDE, Vicinae, and systemd-user configuration files into `~/.config`.
-The repository keeps them grouped under `config/kde/appearance/`,
-`config/kde/plasma/`, `config/kde/shortcuts/`, and `config/kde/taskbar/`. Run `config/setup.sh`
-again to reinstall them manually.
-
-Re-run by hand:
+To put the dots in place again without reinstalling packages:
 
 ```sh
-bash config/setup.sh
+bash setup/setup.sh
 ```
 
 ## Themes
@@ -188,6 +174,10 @@ Breeze Classic color schemes and the Oxygen icons and cursors. A pacman hook,
 `/etc/pacman.d/hooks/viresta-remove-themes.hook`, removes them again after updates.
 Fusion, MS Windows 9x and Union are only hidden from System Settings.
 
+The login screen gets its cursor from the system default in
+`/usr/share/icons/default/index.theme`, which Viresta sets to Bibata. A second
+hook, `/etc/pacman.d/hooks/viresta-default-cursor.hook`, sets it again after updates.
+
 ## Logs
 
 The installer only shows its steps and what went wrong. Add `--verbose` to see
@@ -201,33 +191,47 @@ everything on screen.
 
 ```
 Viresta/
-├── install.sh        # entrypoint: flow, steps, summary
-├── lib/
-│   ├── ui.sh         # colors, logging, prompts, cleanup registry
-│   ├── system.sh     # checks, VM detection, sudo handling
-│   ├── packages.sh   # pacman config and package list installs
-│   ├── aur.sh        # paru bootstrap, AUR and VM extras
-│   └── config.sh     # services, SDDM session, theme, launcher
-├── config/
-│   └── kde/
-│       ├── setup.sh     # installs the KDE config files
-│       ├── appearance/   # KDE appearance settings
-│       ├── plasma/      # Plasma settings
-│       ├── shortcuts/   # KDE global shortcuts
-│       └── taskbar/     # Plasma panel and taskbar settings
+├── install.sh           # entrypoint: flow, steps, summary
+├── lib/                 # installs the system and packages
+│   ├── ui/
+│   │   ├── messages.sh  # colors, banner, messages, cleanup
+│   │   ├── steps.sh     # steps, spinner, time
+│   │   ├── menu.sh      # the menu for choosing what to install
+│   │   └── failures.sh  # what install.sh --logs shows
+│   ├── system/
+│   │   ├── checks.sh    # checks the system can run the install
+│   │   ├── sudo.sh      # password and temporary sudo rule
+│   │   └── services.sh  # system services, runs setup/setup.sh
+│   └── installers/
+│       ├── pacman.sh    # pacman config and package list installs
+│       ├── aur.sh       # paru and AUR packages
+│       └── vm.sh        # VM detection, packages and services
+├── setup/               # puts the dots in place
+│   ├── setup.sh         # runs the parts below in order
+│   ├── variables.sh     # paths and names shared by the parts
+│   ├── desktop/
+│   │   ├── plasma.sh    # KDE configs, panel, activity, Panel Colorizer
+│   │   ├── themes.sh    # global themes, styles, theme switching, removed themes
+│   │   ├── wallpapers.sh
+│   │   └── icons.sh     # icons and cursors
+│   ├── login/
+│   │   └── sddm.sh
+│   └── apps/
+│       ├── vicinae.sh
+│       └── firefox.sh
+├── config/              # the files that get installed
 ├── packages/
 │   ├── base.txt
 │   ├── kde.txt
 │   ├── apps.txt
-│   ├── aur.txt       # AUR packages for every system
-│   └── vm.txt        # virt-type -> package (repo or AUR) -> service
-└── .gitattributes    # forces LF line endings
+│   ├── aur.txt          # AUR packages for every system
+│   └── vm.txt           # virt-type -> package (repo or AUR) -> service
+├── wallpapers/
+└── .gitattributes       # forces LF line endings
 ```
 
 ## Roadmap
 
-- Themes, wallpapers and dotfile deployment.
-- GTK/Qt theming and custom Plasma widgets (QML).
 - An uninstaller.
 
 ## Notes

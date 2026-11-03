@@ -1,9 +1,15 @@
 #!/usr/bin/env bash
-# Applies what Plasma's global themes do not: the theme's wallpaper on the desktop,
-# lock screen and login screen, its colors on the login screen, and its profile
-# picture. Started by viresta-theme-sync.path when kdeglobals changes. These come from
-# the theme's package; themes without a wallpaper path or picture keep the current one.
+
+# viresta-theme-sync
+# Changes the wallpaper, login screen and profile picture when the theme changes.
+# Started by viresta-theme-sync.path when kdeglobals changes. Themes without a
+# wallpaper path or picture keep the current one.
+
 set -euo pipefail
+
+# ------------------------------------------------------------
+# Settings
+# ------------------------------------------------------------
 
 LOGIN_WALLPAPER="/var/lib/viresta/login-wallpaper.jpg"
 LOGIN_COLORS="/var/lib/viresta/login-colors"
@@ -21,13 +27,16 @@ SETTINGS_PICTURE="/var/lib/AccountsService/icons/$(id -un)"
 # The last picture this script applied.
 APPLIED_PICTURE="$STATE_HOME/applied-profile"
 
-# replace_file <source> <target>: other programs must never see a half-written file.
+# ------------------------------------------------------------
+# Profile picture
+# ------------------------------------------------------------
+
+# Other programs must never see a half-written file.
 replace_file() {
     cp "$1" "$2.new"
     mv -f "$2.new" "$2"
 }
 
-# True if the file is a picture Viresta put there, not one the user chose.
 is_viresta_picture() {
     local picture
 
@@ -42,7 +51,7 @@ is_viresta_picture() {
     return 1
 }
 
-# apply_profile_picture <picture>: leaves a picture the user chose alone.
+# Leaves a picture the user chose alone.
 apply_profile_picture() {
     [ -f "$1" ] || return 0
 
@@ -69,6 +78,10 @@ if [ "${1:-}" = "--profile" ]; then
     apply_profile_picture "$2"
     exit 0
 fi
+
+# ------------------------------------------------------------
+# Theme change
+# ------------------------------------------------------------
 
 theme="$(kreadconfig6 --file kdeglobals --group KDE --key LookAndFeelPackage)"
 

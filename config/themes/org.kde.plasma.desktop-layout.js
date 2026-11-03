@@ -1,12 +1,21 @@
-// The layout a Viresta global theme applies when "Desktop and window layout" is
-// ticked. Without it, Plasma falls back to Breeze's default panel. setup.sh fills in
-// the @...@ values, and the panel here should match the tracked appletsrc.
+// org.kde.plasma.desktop-layout.js
+// The panel and wallpaper a Viresta theme applies when "Desktop and window layout"
+// is ticked. Without this, Plasma uses Breeze's default panel. setup.sh fills in the
+// @...@ values. Keep the panel the same as the tracked appletsrc.
+
+// ------------------------------------------------------------
+// Panel
+// ------------------------------------------------------------
 
 var panel = new Panel;
 panel.location = "bottom";
 panel.height = 44;
 panel.floating = false;
 panel.floatingApplets = false;
+
+// ------------------------------------------------------------
+// App launcher
+// ------------------------------------------------------------
 
 // Without Vicinae, the normal KDE app launcher takes its place.
 var useVicinae = "@USE_VICINAE@" === "1";
@@ -16,6 +25,10 @@ if (useVicinae) {
 } else {
     panel.addWidget("org.kde.plasma.kickoff");
 }
+
+// ------------------------------------------------------------
+// Widgets
+// ------------------------------------------------------------
 
 panel.addWidget("org.kde.plasma.pager");
 
@@ -42,6 +55,10 @@ colorizer.currentConfigGroup = ["General"];
 colorizer.writeConfig("hideWidget", true);
 colorizer.writeConfig("lastPreset", "@PANEL_COLORIZER_PRESET_DIR@/");
 colorizer.writeConfig("globalSettings", JSON.stringify(@PANEL_COLORIZER_SETTINGS@));
+
+// ------------------------------------------------------------
+// Wallpaper
+// ------------------------------------------------------------
 
 var desktopList = desktopsForActivity(currentActivity());
 for (var i = 0; i < desktopList.length; i++) {

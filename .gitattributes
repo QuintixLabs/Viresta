@@ -1,13 +1,13 @@
-# Normalize all text files to LF on checkout and commit.
-# Critical: scripts are authored on Windows but executed by bash.
+# Always use LF line endings, wherever a file is edited, since the scripts run on Linux.
 * text=auto eol=lf
 
+# Images
 *.png binary
 *.jpg binary
 *.jpeg binary
-*.gif binary
-*.ico binary
-*.ttf binary
-*.otf binary
-*.woff binary
-*.woff2 binary
+
+# Archives
+*.gz binary
+
+# Cursor files have no extension, so Git would have to guess
+config/cursors/**/cursors/* binary

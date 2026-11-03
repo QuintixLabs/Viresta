@@ -1,0 +1,152 @@
+#!/usr/bin/env bash
+
+# messages.sh
+# Handles colors, the banner, messages and cleanup.
+
+# ------------------------------------------------------------
+# Settings
+# ------------------------------------------------------------
+
+# Kept outside /tmp so both are still there after the reboot.
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/viresta"
+LOG_FILE="${LOG_FILE:-$STATE_DIR/install.log}"
+
+# 1 shows everything on screen, 0 shows only the steps and what went wrong.
+VERBOSE=0
+
+C_RESET=''
+C_BOLD=''
+C_DIM=''
+C_ACCENT=''
+C_OK=''
+C_WARN=''
+C_ERR=''
+S_OK='[ok]'
+S_ERR='[!!]'
+S_BULLET='*'
+
+CLEANUPS=()
+
+# ------------------------------------------------------------
+# Startup
+# ------------------------------------------------------------
+
+ui_init() {
+    mkdir -p "$(dirname "$LOG_FILE")" 2>/dev/null || true
+    : >"$LOG_FILE" 2>/dev/null || true
+    register_cleanup spinner_stop
+    register_cleanup show_cursor
+
+    local utf8=0
+    case "${LC_ALL:-${LC_CTYPE:-${LANG:-}}}" in
+        *UTF-8*|*utf8*|*UTF8*|*utf-8*) utf8=1 ;;
+    esac
+
+    if [ -t 1 ] && [ -z "${NO_COLOR:-}" ] && [ "${TERM:-dumb}" != "dumb" ]; then
+        C_RESET=$'\e[0m'
+        C_BOLD=$'\e[1m'
+        C_DIM=$'\e[38;5;245m'
+        C_ACCENT=$'\e[38;5;39m'
+        C_OK=$'\e[38;5;42m'
+        C_WARN=$'\e[38;5;214m'
+        C_ERR=$'\e[38;5;203m'
+    fi
+
+    if [ "$utf8" -eq 1 ]; then
+        S_OK='✓'
+        S_ERR='✗'
+        S_BULLET='•'
+    fi
+
+    # The Linux console font has no ✓ or ✗, but it does have these.
+    if [ "$utf8" -eq 1 ] && [ "${TERM:-}" = "linux" ]; then
+        S_OK='√'
+        S_ERR='×'
+    fi
+}
+
+banner() {
+    printf '\n%b' "$C_ACCENT$C_BOLD"
+    cat <<'EOF'
+█   █ ▀ ▄ ▄▄  ▄▄   ▄▄▄ ▄█▄   ▄▄▄
+▀▄ ▄▀ █ █▀   █▀▀▀ ▀▀▄▄  █   █  █
+  ▀   ▀ ▀     ▀▀▀ ▀▀▀    ▀▀  ▀▀▀▀
+EOF
+    printf '%b\n' "$C_RESET"
+    printf '%bThe clean, stable and user-friendly dots for everyone to use!%b\n' "$C_DIM" "$C_RESET"
+    printf '%b------------------------------------------------------------%b\n' "$C_DIM" "$C_RESET"
+    printf '\n'
+}
+
+# ------------------------------------------------------------
+# Messages
+# ------------------------------------------------------------
+
+_log() {
+    printf '%s\n' "$*" >>"$LOG_FILE" 2>/dev/null || true
+}
+
+_emit() {
+    local color="$1"
+    shift
+    printf '%b%s%b\n' "$color" "$*" "$C_RESET"
+    _log "$*"
+}
+
+# Progress messages stay in the log while a step's spinner is showing.
+_progress() {
+    if [ -n "$STEP_TITLE" ]; then
+        _log "$2"
+    else
+        _emit "$1" "$2"
+    fi
+}
+
+info() { _progress "$C_DIM" "  $S_BULLET $*"; }
+ok()   { _progress "$C_OK" "  $S_OK $*"; }
+
+warn() {
+    if [ -n "$STEP_TITLE" ]; then
+        STEP_MARK="$C_WARN!$C_RESET"
+        STEP_WARNINGS+=("  ! $*")
+        _log "  ! $*"
+    else
+        _emit "$C_WARN" "  ! $*"
+    fi
+}
+
+error() { _emit "$C_ERR" "  $S_ERR $*"; }
+
+die() {
+    STEP_MARK="$C_ERR$S_ERR$C_RESET"
+    step_finish
+    error "$*"
+    record_failure "$*"
+    printf '%b  Full log: %s%b\n' "$C_DIM" "$LOG_FILE" "$C_RESET"
+    exit 1
+}
+
+hr() {
+    printf '%b------------------------------------------------------------%b\n' "$C_DIM" "$C_RESET"
+}
+
+# ------------------------------------------------------------
+# Cleanup
+# ------------------------------------------------------------
+
+show_cursor() {
+    [ ! -t 1 ] || printf '\e[?25h'
+}
+
+register_cleanup() {
+    CLEANUPS+=("$1")
+}
+
+run_cleanups() {
+    local fn
+    if [ "${#CLEANUPS[@]}" -gt 0 ]; then
+        for fn in "${CLEANUPS[@]}"; do
+            [ -n "$fn" ] && "$fn" || true
+        done
+    fi
+}

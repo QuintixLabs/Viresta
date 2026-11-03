@@ -1,8 +1,17 @@
 #!/usr/bin/env bash
-# Viresta - pacman setup and package list installation.
-# Sourced by install.sh. Not meant to be executed directly.
+
+# pacman.sh
+# Installs packages with pacman.
+
+# ------------------------------------------------------------
+# Settings
+# ------------------------------------------------------------
 
 PACMAN_CONF=""
+
+# ------------------------------------------------------------
+# Pacman
+# ------------------------------------------------------------
 
 cleanup_pacman_conf() {
     [ -n "${PACMAN_CONF:-}" ] || return 0
@@ -10,8 +19,7 @@ cleanup_pacman_conf() {
     PACMAN_CONF=""
 }
 
-# Creates a temporary pacman config with ParallelDownloads = 1 so packages
-# download one at a time. The real /etc/pacman.conf is never modified.
+# Uses a temporary config, so the real /etc/pacman.conf is never modified.
 prepare_pacman_conf() {
     if [ "${DRY_RUN:-0}" -eq 1 ]; then
         info "Would limit downloads to one at a time"
@@ -31,7 +39,6 @@ prepare_pacman_conf() {
     ok "Downloads limited to one at a time"
 }
 
-# run_pacman <pacman args...>
 # Normally writes only to the log. With --verbose it runs inside a pseudo-terminal
 # so progress streams live.
 run_pacman() {
@@ -53,6 +60,10 @@ run_pacman() {
     fi
 }
 
+# ------------------------------------------------------------
+# System update
+# ------------------------------------------------------------
+
 update_system() {
     prepare_pacman_conf
 
@@ -71,7 +82,10 @@ update_system() {
     ok "System up to date"
 }
 
-# _install_array <label> <pkg...>
+# ------------------------------------------------------------
+# Package lists
+# ------------------------------------------------------------
+
 _install_array() {
     local label="$1"
     shift
@@ -92,7 +106,6 @@ _install_array() {
     ok "$label installed"
 }
 
-# _install_array_optional <label> <pkg...>
 # One bad package makes pacman refuse the whole list, so after a failure the
 # packages are tried one at a time to install everything that can be.
 _install_array_optional() {
@@ -115,13 +128,11 @@ _install_array_optional() {
     done
 }
 
-# _read_package_list <file>
 _read_package_list() {
     [ -f "$1" ] || return 0
     sed -e 's/#.*//' -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' "$1" | grep -v '^$' || true
 }
 
-# install_group_optional <label> <package-list-file>
 # For packages the desktop can work without: failures are listed, not fatal.
 install_group_optional() {
     local -a pkgs=()
@@ -129,7 +140,6 @@ install_group_optional() {
     _install_array_optional "$1" "${pkgs[@]}"
 }
 
-# install_group <label> <package-list-file>
 # For packages the desktop needs: a failure stops the install.
 install_group() {
     local label="$1" file="$2"
@@ -139,13 +149,14 @@ install_group() {
     _install_array "$label" "${pkgs[@]}"
 }
 
+# ------------------------------------------------------------
+# Package lookups
+# ------------------------------------------------------------
+
 is_installed() {
     pacman -Qq "$1" >/dev/null 2>&1
 }
 
-# pkg_source <package>
-# Prints "repo" if pacman knows the package, otherwise "aur".
-# The lookup is silent on purpose - nothing is shown or logged.
 pkg_source() {
     if pacman -Si "$1" >/dev/null 2>&1; then
         printf 'repo\n'

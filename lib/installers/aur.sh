@@ -1,10 +1,18 @@
 #!/usr/bin/env bash
-# Viresta - AUR packages and paru bootstrap.
-# Sourced by install.sh. Not meant to be executed directly.
+
+# aur.sh
+# Installs paru and AUR packages.
+
+# ------------------------------------------------------------
+# Settings
+# ------------------------------------------------------------
 
 AUR_LOG_DIR="${AUR_LOG_DIR:-$HOME/.local/state/viresta}"
 
-# _aur_install_one <package>
+# ------------------------------------------------------------
+# AUR packages
+# ------------------------------------------------------------
+
 _aur_install_one() {
     local pkg="$1"
 
@@ -36,8 +44,6 @@ _aur_install_one() {
     return 1
 }
 
-# install_aur
-# Reads packages/aur.txt and installs every package from the AUR.
 install_aur() {
     local file="$SCRIPT_DIR/packages/aur.txt"
 
@@ -62,36 +68,9 @@ install_aur() {
     return 0
 }
 
-# install_vm_extras
-# Installs packages listed for the detected VM in packages/vm.txt.
-# Source is detected silently: official repo -> pacman, otherwise -> paru.
-install_vm_extras() {
-    local -a pkgs=()
-    mapfile -t pkgs < <(vm_pkgs_for "$VIRT")
-
-    if [ "${#pkgs[@]}" -eq 0 ]; then
-        info "No VM packages for $VIRT"
-        return 0
-    fi
-
-    local pkg source
-    for pkg in "${pkgs[@]}"; do
-        source="$(pkg_source "$pkg")"
-
-        if [ "$source" = "repo" ]; then
-            if [ "${DRY_RUN:-0}" -eq 1 ]; then
-                info "Would install $pkg (repository)"
-                continue
-            fi
-            info "$pkg: installing"
-            run_pacman -S --needed --noconfirm "$pkg" || failure "$pkg: install failed - see $LOG_FILE"
-        else
-            _aur_install_one "$pkg" || true
-        fi
-    done
-
-    return 0
-}
+# ------------------------------------------------------------
+# Paru
+# ------------------------------------------------------------
 
 bootstrap_paru() {
     if command -v paru >/dev/null 2>&1; then

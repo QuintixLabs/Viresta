@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
+
+# install.sh
+# Runs the Viresta install from start to finish.
+
 set -euo pipefail
+
+# ------------------------------------------------------------
+# Settings
+# ------------------------------------------------------------
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 DRY_RUN=0
@@ -10,19 +18,37 @@ INSTALL_RENAME_WALLPAPERS=1
 # Set when a flag already answered the question, so the menu does not ask it.
 VICINAE_FLAG=0
 RENAME_WALLPAPERS_FLAG=0
-# Read by config/setup.sh too.
+# Read by setup/setup.sh too.
 SAVED_OPTIONS_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/viresta/options"
 
-# shellcheck source=lib/ui.sh
-source "$SCRIPT_DIR/lib/ui.sh"
-# shellcheck source=lib/system.sh
-source "$SCRIPT_DIR/lib/system.sh"
-# shellcheck source=lib/packages.sh
-source "$SCRIPT_DIR/lib/packages.sh"
-# shellcheck source=lib/aur.sh
-source "$SCRIPT_DIR/lib/aur.sh"
-# shellcheck source=lib/config.sh
-source "$SCRIPT_DIR/lib/config.sh"
+# ------------------------------------------------------------
+# Libraries
+# ------------------------------------------------------------
+
+# shellcheck source=lib/ui/messages.sh
+source "$SCRIPT_DIR/lib/ui/messages.sh"
+# shellcheck source=lib/ui/steps.sh
+source "$SCRIPT_DIR/lib/ui/steps.sh"
+# shellcheck source=lib/ui/menu.sh
+source "$SCRIPT_DIR/lib/ui/menu.sh"
+# shellcheck source=lib/ui/failures.sh
+source "$SCRIPT_DIR/lib/ui/failures.sh"
+# shellcheck source=lib/system/checks.sh
+source "$SCRIPT_DIR/lib/system/checks.sh"
+# shellcheck source=lib/system/sudo.sh
+source "$SCRIPT_DIR/lib/system/sudo.sh"
+# shellcheck source=lib/system/services.sh
+source "$SCRIPT_DIR/lib/system/services.sh"
+# shellcheck source=lib/installers/pacman.sh
+source "$SCRIPT_DIR/lib/installers/pacman.sh"
+# shellcheck source=lib/installers/aur.sh
+source "$SCRIPT_DIR/lib/installers/aur.sh"
+# shellcheck source=lib/installers/vm.sh
+source "$SCRIPT_DIR/lib/installers/vm.sh"
+
+# ------------------------------------------------------------
+# Flags and saved choices
+# ------------------------------------------------------------
 
 usage() {
     cat <<'EOF'
@@ -83,12 +109,20 @@ done
 export DRY_RUN
 TOTAL_STEPS=$((TOTAL_STEPS - SKIP_AUR - SKIP_VM))
 
+# ------------------------------------------------------------
+# Startup
+# ------------------------------------------------------------
+
 ui_init
 
 trap run_cleanups EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 trap 'exit 129' HUP
+
+# ------------------------------------------------------------
+# Menu
+# ------------------------------------------------------------
 
 # Starts from the saved choices, and only asks what the flags have not answered.
 # --fast and --no-aur are for one run, so they neither ask about Vicinae nor change
@@ -125,30 +159,38 @@ ask_options() {
     fi
 }
 
+# ------------------------------------------------------------
+# Summary
+# ------------------------------------------------------------
+
 summary() {
     local elapsed="$SECONDS"
 
     printf '\n'
     hr
     if [ "$DRY_RUN" -eq 1 ]; then
-        printf '%b  Dry run complete - nothing was changed%b\n' "$C_WARN$C_BOLD" "$C_RESET"
+        printf '%bDry run complete - nothing was changed%b\n' "$C_WARN$C_BOLD" "$C_RESET"
     else
-        printf '%b  Installation complete%b\n' "$C_OK$C_BOLD" "$C_RESET"
-        ok "Time taken: $(format_duration "$elapsed")"
+        printf '%bInstallation complete%b\n' "$C_OK$C_BOLD" "$C_RESET"
+        _emit "$C_OK" "$S_OK Time taken: $(format_duration "$elapsed")"
         if [ "$(failure_count)" -gt 0 ]; then
-            warn "$(failure_count) failed - run ./install.sh --logs to see them"
+            _emit "$C_WARN" "! $(failure_count) failed - run ./install.sh --logs to see them"
         fi
-        ok "Temporary sudo rule removed on exit"
-        ok "Install log: $LOG_FILE"
+        _emit "$C_OK" "$S_OK Temporary sudo rule removed on exit"
+        _emit "$C_OK" "$S_OK Install log: $LOG_FILE"
         if [ "$SKIP_AUR" -eq 0 ]; then
-            ok "AUR build logs: $AUR_LOG_DIR"
+            _emit "$C_OK" "$S_OK AUR build logs: $AUR_LOG_DIR"
         fi
         printf '\n'
-        info "Reboot to start KDE Plasma (Wayland) from SDDM:"
-        printf '      %bsudo reboot%b\n' "$C_ACCENT" "$C_RESET"
+        _emit "$C_DIM" "$S_BULLET Reboot to start KDE Plasma (Wayland) from SDDM:"
+        printf '%bsudo reboot%b\n' "$C_ACCENT" "$C_RESET"
     fi
     printf '\n'
 }
+
+# ------------------------------------------------------------
+# Main
+# ------------------------------------------------------------
 
 main() {
     reset_failures
@@ -211,7 +253,6 @@ main() {
         configure_vm_services
     fi
     configure_sddm
-    configure_default_session
     configure_kde_configs
     configure_vscodium
 
