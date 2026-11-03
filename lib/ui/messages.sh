@@ -31,6 +31,18 @@ CLEANUPS=()
 # Startup
 # ------------------------------------------------------------
 
+ui_colors() {
+    if [ -t 1 ] && [ -z "${NO_COLOR:-}" ] && [ "${TERM:-dumb}" != "dumb" ]; then
+        C_RESET=$'\e[0m'
+        C_BOLD=$'\e[1m'
+        C_DIM=$'\e[38;5;245m'
+        C_ACCENT=$'\e[38;5;39m'
+        C_OK=$'\e[38;5;42m'
+        C_WARN=$'\e[38;5;214m'
+        C_ERR=$'\e[38;5;203m'
+    fi
+}
+
 ui_init() {
     mkdir -p "$(dirname "$LOG_FILE")" 2>/dev/null || true
     : >"$LOG_FILE" 2>/dev/null || true
@@ -42,15 +54,7 @@ ui_init() {
         *UTF-8*|*utf8*|*UTF8*|*utf-8*) utf8=1 ;;
     esac
 
-    if [ -t 1 ] && [ -z "${NO_COLOR:-}" ] && [ "${TERM:-dumb}" != "dumb" ]; then
-        C_RESET=$'\e[0m'
-        C_BOLD=$'\e[1m'
-        C_DIM=$'\e[38;5;245m'
-        C_ACCENT=$'\e[38;5;39m'
-        C_OK=$'\e[38;5;42m'
-        C_WARN=$'\e[38;5;214m'
-        C_ERR=$'\e[38;5;203m'
-    fi
+    ui_colors
 
     if [ "$utf8" -eq 1 ]; then
         S_OK='✓'
@@ -76,6 +80,25 @@ EOF
     printf '%bThe clean, stable and user-friendly dots for everyone to use!%b\n' "$C_DIM" "$C_RESET"
     printf '%b------------------------------------------------------------%b\n' "$C_DIM" "$C_RESET"
     printf '\n'
+}
+
+# ------------------------------------------------------------
+# Help
+# ------------------------------------------------------------
+
+# Help runs before ui_init, which would empty the log.
+help_header() {
+    ui_colors
+    printf '\n%bUsage:%b %s\n\n' "$C_ACCENT$C_BOLD" "$C_RESET" "$1"
+    printf '%bOptions:%b\n' "$C_ACCENT$C_BOLD" "$C_RESET"
+}
+
+help_option() {
+    printf '  %b%-12s%b %s\n' "$C_OK" "$1" "$C_RESET" "$2"
+}
+
+help_note() {
+    printf '%b%s%b\n' "$C_DIM" "$1" "$C_RESET"
 }
 
 # ------------------------------------------------------------

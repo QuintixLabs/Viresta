@@ -34,20 +34,14 @@ TOTAL_STEPS=6
 # ------------------------------------------------------------
 
 usage() {
-    cat <<'EOF'
-Viresta - uninstall
-
-Usage: ./uninstall.sh [options]
-
-Options:
-  --dry-run   Show what would be removed without changing anything
-  --verbose   Show everything on screen instead of only the steps
-  -h, --help  Show this help
-
-Removes Viresta and resets KDE to its defaults. Config files Viresta installed are
-deleted, including any changes you made to them. Run it after logging out, from a
-text console (Ctrl+Alt+F3), because Plasma rewrites its configs while it is running.
-EOF
+    help_header "./uninstall.sh [options]"
+    help_option "--dry-run" "Show what would be removed without changing anything"
+    help_option "--verbose" "Show everything on screen instead of only the steps"
+    help_option "-h, --help" "Show this help"
+    printf '\n'
+    help_note "Removes Viresta and resets KDE to its defaults."
+    help_note "Config files Viresta installed are deleted, including any changes you made to them."
+    printf '\n'
 }
 
 for arg in "$@"; do
@@ -59,6 +53,12 @@ for arg in "$@"; do
     esac
 done
 export DRY_RUN
+
+# Comes before the startup, which would create a log for nothing.
+if ! viresta_is_installed; then
+    printf 'Viresta is not installed, so there is nothing to remove.\n'
+    exit 0
+fi
 
 start_script
 

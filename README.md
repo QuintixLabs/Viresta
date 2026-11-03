@@ -37,21 +37,15 @@ Preview what it would do without changing anything:
 ./install.sh --dry-run
 ```
 
-Skip the slow parts when testing:
+Skip the VM packages and services:
 
 ```sh
-./install.sh --fast      # same as --no-aur --no-vm
-./install.sh --no-aur    # skip paru and packages/aur.txt
-./install.sh --no-vm     # skip VM packages and services
+./install.sh --no-vm
 ```
 
-Anything in `packages/aur.txt` will be missing after `--no-aur` or `--fast`,
-unless it is already installed. That includes Panel Colorizer and Vicinae.
-
 Before installing, a menu lets you turn off Vicinae and `rename_wallpapers.py`.
-You can skip the question for either one with `--no-vicinae` and
-`--no-rename-wallpapers`. Without Vicinae, whether by choice, with `--no-aur` or
-`--fast`, or because its build failed, you get the normal KDE app launcher.
+Without Vicinae, whether by choice or because its build failed, you get the normal
+KDE app launcher.
 
 Your choices are saved in `~/.config/viresta/options`. The menu starts from them
 next time, and `setup/setup.sh` follows them too.
@@ -68,7 +62,7 @@ up first. `uninstall.sh` puts them back.
 ```
 
 It downloads the latest Viresta and stops without changing anything if this folder
-has local edits. Use `--no-pull` to use the files already in the folder.
+has local edits.
 
 | Part | On update |
 |---|---|

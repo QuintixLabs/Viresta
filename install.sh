@@ -11,13 +11,9 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 DRY_RUN=0
-SKIP_AUR=0
 SKIP_VM=0
 INSTALL_VICINAE=1
 INSTALL_RENAME_WALLPAPERS=1
-# Set when a flag already answered the question, so the menu does not ask it.
-VICINAE_FLAG=0
-RENAME_WALLPAPERS_FLAG=0
 # Read by setup/setup.sh too.
 SAVED_OPTIONS_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/viresta/options"
 
@@ -33,27 +29,13 @@ source "$SCRIPT_DIR/lib/load.sh"
 # ------------------------------------------------------------
 
 usage() {
-    cat <<'EOF'
-Viresta - Arch Linux + KDE Plasma 6 installer
-
-Usage: ./install.sh [options]
-
-Options:
-  --dry-run   Show what would be done without changing anything
-  --no-aur    Skip paru and the AUR packages in packages/aur.txt
-  --no-vm     Skip VM packages and services
-  --fast      Same as --no-aur --no-vm, for quick test installs
-  --no-vicinae
-              Use the normal KDE app launcher instead of Vicinae
-  --no-rename-wallpapers
-              Skip the rename_wallpapers.py script
-  --logs      Show what failed in the last install, without installing anything
-  --verbose   Show everything on screen instead of only the steps
-  -h, --help  Show this help
-
-Vicinae comes from the AUR, so --no-aur and --fast use the KDE app launcher too.
-What you choose is remembered for the next run.
-EOF
+    help_header "./install.sh [options]"
+    help_option "--dry-run" "Show what would be done without changing anything"
+    help_option "--no-vm" "Skip VM packages and services"
+    help_option "--logs" "Show what failed in the last install, without installing anything"
+    help_option "--verbose" "Show everything on screen instead of only the steps"
+    help_option "-h, --help" "Show this help"
+    printf '\n'
 }
 
 load_saved_options() {
@@ -78,18 +60,14 @@ for arg in "$@"; do
         # A dry run's only output is what it would do, so it is always verbose.
         --dry-run) DRY_RUN=1; VERBOSE=1 ;;
         --verbose) VERBOSE=1 ;;
-        --no-aur) SKIP_AUR=1 ;;
         --no-vm) SKIP_VM=1 ;;
-        --fast) SKIP_AUR=1; SKIP_VM=1 ;;
-        --no-vicinae) INSTALL_VICINAE=0; VICINAE_FLAG=1 ;;
-        --no-rename-wallpapers) INSTALL_RENAME_WALLPAPERS=0; RENAME_WALLPAPERS_FLAG=1 ;;
         --logs) show_failures; exit 0 ;;
         -h|--help) usage; exit 0 ;;
         *) printf 'Unknown option: %s\n\n' "$arg" >&2; usage; exit 2 ;;
     esac
 done
 export DRY_RUN
-TOTAL_STEPS=$((TOTAL_STEPS - SKIP_AUR - SKIP_VM))
+TOTAL_STEPS=$((TOTAL_STEPS - SKIP_VM))
 
 start_script
 
@@ -97,39 +75,21 @@ start_script
 # Menu
 # ------------------------------------------------------------
 
-# Starts from the saved choices, and only asks what the flags have not answered.
-# --fast and --no-aur are for one run, so they neither ask about Vicinae nor change
-# what is saved for it.
+# Starts from the saved choices.
 ask_options() {
-    local ask_vicinae=0 ask_rename_wallpapers=0
+    [ "$DRY_RUN" -eq 0 ] || return 0
 
-    if [ "$DRY_RUN" -eq 0 ]; then
-        if [ "$VICINAE_FLAG" -eq 0 ] && [ "$SKIP_AUR" -eq 0 ]; then
-            ask_vicinae=1
-            add_option vicinae "Vicinae" "Faster, better looking app launcher than KDE's own" "$INSTALL_VICINAE"
-        fi
-        if [ "$RENAME_WALLPAPERS_FLAG" -eq 0 ]; then
-            ask_rename_wallpapers=1
-            add_option rename_wallpapers "rename_wallpapers" "Script that organizes your wallpapers in Pictures" "$INSTALL_RENAME_WALLPAPERS"
-        fi
+    add_option vicinae "Vicinae" "Faster, better looking app launcher than KDE's own" "$INSTALL_VICINAE"
+    add_option rename_wallpapers "rename_wallpapers" "Script that organizes your wallpapers in Pictures" "$INSTALL_RENAME_WALLPAPERS"
 
-        choose_options
+    choose_options
 
-        if [ "$ask_vicinae" -eq 1 ]; then
-            INSTALL_VICINAE=0
-            if option_enabled vicinae; then INSTALL_VICINAE=1; fi
-        fi
-        if [ "$ask_rename_wallpapers" -eq 1 ]; then
-            INSTALL_RENAME_WALLPAPERS=0
-            if option_enabled rename_wallpapers; then INSTALL_RENAME_WALLPAPERS=1; fi
-        fi
+    INSTALL_VICINAE=0
+    if option_enabled vicinae; then INSTALL_VICINAE=1; fi
+    INSTALL_RENAME_WALLPAPERS=0
+    if option_enabled rename_wallpapers; then INSTALL_RENAME_WALLPAPERS=1; fi
 
-        save_options
-    fi
-
-    if [ "$SKIP_AUR" -eq 1 ]; then
-        INSTALL_VICINAE=0
-    fi
+    save_options
 }
 
 # ------------------------------------------------------------
@@ -173,9 +133,7 @@ summary() {
         fi
         _emit "$C_OK" "$S_OK Temporary sudo rule removed on exit"
         _emit "$C_OK" "$S_OK Install log: $LOG_FILE"
-        if [ "$SKIP_AUR" -eq 0 ]; then
-            _emit "$C_OK" "$S_OK AUR build logs: $AUR_LOG_DIR"
-        fi
+        _emit "$C_OK" "$S_OK AUR build logs: $AUR_LOG_DIR"
         printf '\n'
         _emit "$C_DIM" "$S_BULLET Reboot to start KDE Plasma (Wayland) from SDDM:"
         printf '%bsudo reboot%b\n' "$C_ACCENT" "$C_RESET"
@@ -227,16 +185,11 @@ main() {
 
     set_build_jobs
 
-    if [ "$SKIP_AUR" -eq 1 ]; then
-        step_finish
-        warn "Skipping paru and AUR packages: anything in packages/aur.txt will be missing"
+    step "Installing AUR apps"
+    if bootstrap_paru; then
+        install_aur
     else
-        step "Installing AUR apps"
-        if bootstrap_paru; then
-            install_aur
-        else
-            warn "paru unavailable; skipping AUR packages"
-        fi
+        warn "paru unavailable; skipping AUR packages"
     fi
 
     if [ "$SKIP_VM" -eq 1 ]; then

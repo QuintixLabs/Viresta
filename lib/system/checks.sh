@@ -23,6 +23,11 @@ require_x86_64() {
     [ "$(uname -m)" = "x86_64" ] || die "Only x86_64 is supported (detected: $(uname -m))."
 }
 
+# Every install puts this file there, and nothing else does.
+viresta_is_installed() {
+    [ -e "$HOME/.local/bin/viresta-theme-sync" ] || [ -e "$VIRESTA_STATE_DIR/installed-files" ]
+}
+
 # ------------------------------------------------------------
 # Internet
 # ------------------------------------------------------------

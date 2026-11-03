@@ -16,16 +16,19 @@ source "$SETUP_DIR/shared/variables.sh"
 
 usage() {
     cat <<'EOF'
-Usage: setup.sh [--no-vicinae] [--no-rename-wallpapers]
+
+Usage: setup.sh [options]
 
 Install the Viresta configuration files into ~/.config, replacing what is there.
-The normal KDE app launcher is used when Vicinae is turned off or is not installed.
+It follows what you chose in the install.sh menu. The normal KDE app launcher is used
+when Vicinae is turned off or is not installed.
 
   --power-profile=laptop|desktop
                    Use this power profile instead of detecting the machine
   --update         What update.sh uses: keeps the user's own settings
   --list-replaced  List the existing configs an install would replace
   --back-up        Copy those configs, for uninstall.sh to put back
+
 EOF
 }
 
@@ -249,8 +252,6 @@ fi
 
 for arg in "$@"; do
     case "$arg" in
-        --no-vicinae) USE_VICINAE=0 ;;
-        --no-rename-wallpapers) USE_RENAME_WALLPAPERS=0 ;;
         --power-profile=laptop|--power-profile=desktop) POWER_PROFILE="${arg#*=}" ;;
         --update) SETUP_MODE="update" ;;
         --list-replaced) list_replaced_configs; exit 0 ;;

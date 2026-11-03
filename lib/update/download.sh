@@ -8,14 +8,17 @@
 # ------------------------------------------------------------
 
 # Bash reads a script as it runs, so a new version of update.sh needs a fresh start.
+# VIRESTA_PULLED tells that fresh start the download is already done.
 pull_latest() {
+    [ -z "${VIRESTA_PULLED:-}" ] || return 0
+
     local before
-    local -a flags=(--no-pull)
+    local -a flags=()
 
     git -C "$SCRIPT_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1 \
-        || die "This folder is not a git clone. Use --no-pull to use its files as they are."
+        || die "This folder is not a git clone, so it cannot download updates. Clone Viresta with git."
     [ -z "$(git -C "$SCRIPT_DIR" status --porcelain)" ] \
-        || die "This folder has local edits, so nothing was changed. Commit them, or use --no-pull."
+        || die "This folder has local edits, so nothing was changed. Commit them, then try again."
 
     before="$(git -C "$SCRIPT_DIR" rev-parse HEAD)"
     git -C "$SCRIPT_DIR" pull --ff-only >>"$LOG_FILE" 2>&1 \
@@ -24,6 +27,6 @@ pull_latest() {
     if [ "$(git -C "$SCRIPT_DIR" rev-parse HEAD)" != "$before" ]; then
         step_finish
         [ "$VERBOSE" -eq 0 ] || flags+=(--verbose)
-        exec bash "$SCRIPT_DIR/update.sh" "${flags[@]}"
+        VIRESTA_PULLED=1 exec bash "$SCRIPT_DIR/update.sh" "${flags[@]}"
     fi
 }

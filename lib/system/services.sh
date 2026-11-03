@@ -43,16 +43,12 @@ configure_kde_configs() {
 
     # setup.sh reports what it could not do on stderr without stopping.
     local errors line setup_status=0
-    local -a setup_args=()
-    [ "${INSTALL_VICINAE:-1}" -eq 1 ] || setup_args+=(--no-vicinae)
-    [ "${INSTALL_RENAME_WALLPAPERS:-1}" -eq 1 ] || setup_args+=(--no-rename-wallpapers)
-    [ "$#" -eq 0 ] || setup_args+=("$@")
 
     errors="$(mktemp)"
     if [ "$VERBOSE" -eq 1 ]; then
-        bash "$src" "${setup_args[@]}" 2>"$errors" || setup_status=$?
+        bash "$src" "$@" 2>"$errors" || setup_status=$?
     else
-        bash "$src" "${setup_args[@]}" >>"$LOG_FILE" 2>"$errors" || setup_status=$?
+        bash "$src" "$@" >>"$LOG_FILE" 2>"$errors" || setup_status=$?
     fi
 
     while IFS= read -r line; do

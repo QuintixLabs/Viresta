@@ -10,7 +10,6 @@ set -euo pipefail
 # ------------------------------------------------------------
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-PULL=1
 LOG_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/viresta/update.log"
 FAILURE_LOG="${XDG_STATE_HOME:-$HOME/.local/state}/viresta/update-failures.log"
 UPDATE_NOTES_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/viresta/update-notes"
@@ -29,30 +28,25 @@ TOTAL_STEPS=4
 # ------------------------------------------------------------
 
 usage() {
-    cat <<'EOF'
-Viresta - update
-
-Usage: ./update.sh [options]
-
-Options:
-  --no-pull   Use the files in this folder instead of downloading the latest
-  --verbose   Show everything on screen instead of only the steps
-  -h, --help  Show this help
-
-Your wallpaper, theme, panel, shortcuts, profile picture and notification volume
-stay as they are. Settings you changed in the Kitty, VSCodium, Vicinae and Fastfetch
-configs stay too, and everything else in those files can update.
-EOF
+    help_header "./update.sh [options]"
+    help_option "--verbose" "Show everything on screen instead of only the steps"
+    help_option "-h, --help" "Show this help"
+    printf '\n'
 }
 
 for arg in "$@"; do
     case "$arg" in
-        --no-pull) PULL=0 ;;
         --verbose) VERBOSE=1 ;;
         -h|--help) usage; exit 0 ;;
         *) printf 'Unknown option: %s\n\n' "$arg" >&2; usage; exit 2 ;;
     esac
 done
+
+# Comes before the startup, which would create a log for nothing.
+if ! viresta_is_installed; then
+    printf 'Viresta is not installed. Run ./install.sh first.\n' >&2
+    exit 1
+fi
 
 start_script
 
@@ -92,9 +86,7 @@ main() {
     require_sudo
 
     step "Downloading the latest Viresta"
-    if [ "$PULL" -eq 1 ]; then
-        pull_latest
-    fi
+    pull_latest
 
     step "Getting permission to update"
     read_password
