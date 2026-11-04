@@ -39,8 +39,8 @@ set_build_jobs() {
 # AUR packages
 # ------------------------------------------------------------
 
-_aur_install_one() {
-    local pkg="$1"
+aur_install_one() {
+    local pkg="$1" flags="${2:-}"
 
     if is_installed "$pkg"; then
         ok "$pkg already installed"
@@ -52,7 +52,7 @@ _aur_install_one() {
         return 0
     fi
 
-    if ! command -v paru >/dev/null 2>&1; then
+    if [ -z "$flags" ] && ! command -v paru >/dev/null 2>&1; then
         failure "$pkg: paru is not available"
         return 1
     fi
@@ -61,13 +61,43 @@ _aur_install_one() {
     local log="$AUR_LOG_DIR/aur-$pkg.log"
     info "$pkg: building from the AUR (this may take a while)"
 
-    if paru -S --needed --noconfirm "$pkg" </dev/null >"$log" 2>&1; then
+    if {
+        if [ -n "$flags" ]; then
+            aur_build_with_flags "$pkg" "$flags"
+        else
+            paru -S --needed --noconfirm "$pkg"
+        fi
+    } </dev/null >"$log" 2>&1; then
         ok "$pkg installed"
         return 0
     fi
 
     failure "$pkg: install failed - see $log"
     return 1
+}
+
+# paru cannot add flags to a build, so this downloads the package and builds it the way
+# bootstrap_paru does. It stops if there is no ./configure to add them to, so a change
+# to the package shows up as a failure and not as a build without the flags.
+aur_build_with_flags() {
+    local pkg="$1" flags="$2"
+    local tmp status=0
+
+    tmp="$(mktemp -d)"
+    (
+        cd "$tmp" || exit 1
+        git clone "https://aur.archlinux.org/$pkg.git" || exit 1
+        cd "$pkg" || exit 1
+        if ! grep -q '\./configure' PKGBUILD; then
+            printf 'No ./configure in the PKGBUILD to add %s to\n' "$flags"
+            exit 1
+        fi
+        sed -i "s|\./configure|& $flags|" PKGBUILD
+        makepkg -si --noconfirm
+    ) || status=$?
+
+    rm -rf "$tmp"
+    return "$status"
 }
 
 install_aur() {
@@ -88,7 +118,7 @@ install_aur() {
         if [ "$pkg" = "vicinae-bin" ] && [ "${INSTALL_VICINAE:-1}" -eq 0 ]; then
             continue
         fi
-        _aur_install_one "$pkg" || true
+        aur_install_one "$pkg" || true
     done <"$file"
 
     return 0

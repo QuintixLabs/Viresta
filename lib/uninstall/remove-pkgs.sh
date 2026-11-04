@@ -23,8 +23,8 @@ packages_to_remove() {
     {
         printf '%s\n' "${VIRESTA_PACKAGES[@]}"
         if [ "$REMOVE_APPS" -eq 1 ]; then
-            _read_package_list "$SCRIPT_DIR/packages/apps.txt"
-            _read_package_list "$SCRIPT_DIR/packages/aur.txt"
+            read_package_list "$SCRIPT_DIR/packages/apps.txt"
+            read_package_list "$SCRIPT_DIR/packages/aur.txt"
         fi
     } | sort -u | while IFS= read -r pkg; do
         real="$(pacman -Qq "$pkg" 2>/dev/null)" || continue

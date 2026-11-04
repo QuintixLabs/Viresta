@@ -91,7 +91,7 @@ update_system() {
 # Package lists
 # ------------------------------------------------------------
 
-_install_array() {
+install_array() {
     local label="$1"
     shift
     local -a pkgs=("$@")
@@ -113,12 +113,12 @@ _install_array() {
 
 # One bad package makes pacman refuse the whole list, so after a failure the
 # packages are tried one at a time to install everything that can be.
-_install_array_optional() {
+install_array_optional() {
     local label="$1" pkg
     shift
 
     if [ "$#" -eq 0 ] || [ "${DRY_RUN:-0}" -eq 1 ]; then
-        _install_array "$label" "$@"
+        install_array "$label" "$@"
         return 0
     fi
 
@@ -133,7 +133,7 @@ _install_array_optional() {
     done
 }
 
-_read_package_list() {
+read_package_list() {
     [ -f "$1" ] || return 0
     sed -e 's/#.*//' -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' "$1" | grep -v '^$' || true
 }
@@ -141,8 +141,8 @@ _read_package_list() {
 # For packages the desktop can work without: failures are listed, not fatal.
 install_group_optional() {
     local -a pkgs=()
-    mapfile -t pkgs < <(_read_package_list "$2")
-    _install_array_optional "$1" "${pkgs[@]}"
+    mapfile -t pkgs < <(read_package_list "$2")
+    install_array_optional "$1" "${pkgs[@]}"
 }
 
 # For packages the desktop needs: a failure stops the install.
@@ -150,8 +150,8 @@ install_group() {
     local label="$1" file="$2"
     local -a pkgs=()
 
-    mapfile -t pkgs < <(_read_package_list "$file")
-    _install_array "$label" "${pkgs[@]}"
+    mapfile -t pkgs < <(read_package_list "$file")
+    install_array "$label" "${pkgs[@]}"
 }
 
 # ------------------------------------------------------------
@@ -169,7 +169,7 @@ listed_packages() {
     local list
 
     for list in base kde apps aur; do
-        _read_package_list "$SCRIPT_DIR/packages/$list.txt"
+        read_package_list "$SCRIPT_DIR/packages/$list.txt"
     done
 }
 

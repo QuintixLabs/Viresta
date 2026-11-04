@@ -6,6 +6,9 @@
 
 <!-- A VM is fine. Say what you ran and what you checked. -->
 
-## Checklist
+## What AI tool did you use?
 
-- [ ] Tested on Arch with KDE Plasma
+<!-- If you didn't use anything leave empty -->
+<!-- Used Codex, model: GPT-6  -->
+
+## Anything else?

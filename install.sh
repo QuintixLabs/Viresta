@@ -127,15 +127,15 @@ summary() {
         printf '%bDry run complete - nothing was changed%b\n' "$C_WARN$C_BOLD" "$C_RESET"
     else
         printf '%bInstallation complete%b\n' "$C_OK$C_BOLD" "$C_RESET"
-        _emit "$C_OK" "$S_OK Time taken: $(format_duration "$elapsed")"
+        emit "$C_OK" "$S_OK Time taken: $(format_duration "$elapsed")"
         if [ "$(failure_count)" -gt 0 ]; then
-            _emit "$C_WARN" "! $(failure_count) failed - run ./install.sh --logs to see them"
+            emit "$C_WARN" "! $(failure_count) failed - run ./install.sh --logs to see them"
         fi
-        _emit "$C_OK" "$S_OK Temporary sudo rule removed on exit"
-        _emit "$C_OK" "$S_OK Install log: $LOG_FILE"
-        _emit "$C_OK" "$S_OK AUR build logs: $AUR_LOG_DIR"
+        emit "$C_OK" "$S_OK Temporary sudo rule removed on exit"
+        emit "$C_OK" "$S_OK Install log: $LOG_FILE"
+        emit "$C_OK" "$S_OK AUR build logs: $AUR_LOG_DIR"
         printf '\n'
-        _emit "$C_DIM" "$S_BULLET Reboot to start KDE Plasma (Wayland) from SDDM:"
+        emit "$C_DIM" "$S_BULLET Reboot to start KDE Plasma (Wayland) from SDDM:"
         printf '%bsudo reboot%b\n' "$C_ACCENT" "$C_RESET"
     fi
     printf '\n'

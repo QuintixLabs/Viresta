@@ -32,10 +32,34 @@ vm_pkgs_for() {
 vm_service_for() {
     local virt="$1" file="$SCRIPT_DIR/packages/vm.txt"
     [ -f "$file" ] || return 0
-    while read -r v _pkg svc; do
+    while read -r v _pkg svc _replaces; do
         case "$v" in ''|\#*) continue ;; esac
         if [ "$v" = "$virt" ] && [ -n "$svc" ]; then
             printf '%s\n' "$svc"
+            return 0
+        fi
+    done <"$file"
+}
+
+vm_replaces_for() {
+    local virt="$1" wanted="$2" file="$SCRIPT_DIR/packages/vm.txt"
+    [ -f "$file" ] || return 0
+    while read -r v pkg _svc replaces _rest; do
+        case "$v" in ''|\#*) continue ;; esac
+        if [ "$v" = "$virt" ] && [ "$pkg" = "$wanted" ] && [ -n "$replaces" ] && [ "$replaces" != "-" ]; then
+            printf '%s\n' "$replaces"
+            return 0
+        fi
+    done <"$file"
+}
+
+vm_flags_for() {
+    local virt="$1" wanted="$2" file="$SCRIPT_DIR/packages/vm.txt"
+    [ -f "$file" ] || return 0
+    while read -r v pkg _svc _replaces flags; do
+        case "$v" in ''|\#*) continue ;; esac
+        if [ "$v" = "$virt" ] && [ "$pkg" = "$wanted" ] && [ -n "$flags" ]; then
+            printf '%s\n' "$flags"
             return 0
         fi
     done <"$file"
@@ -54,23 +78,63 @@ install_vm_extras() {
         return 0
     fi
 
-    local pkg source
+    local pkg old
     for pkg in "${pkgs[@]}"; do
-        source="$(pkg_source "$pkg")"
+        old="$(vm_replaces_for "$VIRT" "$pkg")"
 
-        if [ "$source" = "repo" ]; then
-            if [ "${DRY_RUN:-0}" -eq 1 ]; then
-                info "Would install $pkg (repository)"
-                continue
-            fi
-            info "$pkg: installing"
-            run_pacman -S --needed --noconfirm "$pkg" || failure "$pkg: install failed - see $LOG_FILE"
+        if [ -n "$old" ]; then
+            replace_vm_package "$pkg" "$old" || true
         else
-            _aur_install_one "$pkg" || true
+            install_vm_package "$pkg" || true
         fi
     done
 
     return 0
+}
+
+install_vm_package() {
+    local pkg="$1"
+
+    if [ "$(pkg_source "$pkg")" != "repo" ]; then
+        aur_install_one "$pkg" "$(vm_flags_for "$VIRT" "$pkg")"
+        return
+    fi
+
+    if [ "${DRY_RUN:-0}" -eq 1 ]; then
+        info "Would install $pkg (repository)"
+        return 0
+    fi
+
+    info "$pkg: installing"
+    if ! run_pacman -S --needed --noconfirm "$pkg"; then
+        failure "$pkg: install failed - see $LOG_FILE"
+        return 1
+    fi
+}
+
+# Some distros come with a package that clashes with the one in vm.txt, and neither
+# pacman nor paru replaces a package with --noconfirm. The name is compared because
+# pacman also answers for a package that only provides it. If the install fails the
+# old package comes back, so the VM still has tools.
+replace_vm_package() {
+    local pkg="$1" old="$2"
+
+    if [ "${DRY_RUN:-0}" -eq 1 ] || [ "$(pacman -Qq "$old" 2>/dev/null)" != "$old" ]; then
+        install_vm_package "$pkg"
+        return
+    fi
+
+    info "$old: replacing with $pkg"
+    if ! run_pacman -Rdd --noconfirm "$old"; then
+        failure "$pkg: could not remove $old - see $LOG_FILE"
+        return 1
+    fi
+
+    install_vm_package "$pkg" && return 0
+
+    run_pacman -S --needed --noconfirm "$old" \
+        || failure "Could not bring back $old. To try again: sudo pacman -S $old"
+    return 1
 }
 
 # ------------------------------------------------------------

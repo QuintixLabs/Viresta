@@ -35,7 +35,7 @@ format_duration() {
 # Spinner
 # ------------------------------------------------------------
 
-_step_line() {
+step_line() {
     printf '%b[%s/%s]%b %b%-36s%b %s  %b%s%b' \
         "$C_ACCENT" "$STEP" "$TOTAL_STEPS" "$C_RESET" "$C_BOLD" "$STEP_TITLE" "$C_RESET" \
         "$1" "$C_DIM" "$2" "$C_RESET"
@@ -51,7 +51,7 @@ spinner_start() {
         i=0
         # Stops by itself if the installer is killed too hard to clean up.
         while kill -0 "$$" 2>/dev/null; do
-            line="$(_step_line "${frames:i%4:1}" "$(format_duration "$((EPOCHSECONDS - STEP_STARTED))")")"
+            line="$(step_line "${frames:i%4:1}" "$(format_duration "$((EPOCHSECONDS - STEP_STARTED))")")"
             # One write that overwrites the old text, since clearing first would flicker.
             printf '\r%s\e[K' "$line"
             # Counted out here, because a change made inside $(...) would be lost.
@@ -80,7 +80,7 @@ step_finish() {
 
     [ -n "$STEP_TITLE" ] || return 0
     spinner_stop
-    _step_line "$STEP_MARK" "$(format_duration "$((EPOCHSECONDS - STEP_STARTED))")"
+    step_line "$STEP_MARK" "$(format_duration "$((EPOCHSECONDS - STEP_STARTED))")"
     printf '\n'
     for line in "${STEP_WARNINGS[@]}"; do
         printf '%b%s%b\n' "$C_WARN" "$line" "$C_RESET"
@@ -92,7 +92,7 @@ step_finish() {
 step() {
     step_finish
     STEP=$((STEP + 1))
-    _log "[$STEP/$TOTAL_STEPS] $1"
+    log "[$STEP/$TOTAL_STEPS] $1"
 
     if [ "$VERBOSE" -eq 1 ]; then
         printf '\n%b[%s/%s]%b %b%s%b\n' \

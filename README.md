@@ -1,29 +1,25 @@
 <h1 id="start-of-content" align="center">
   <a id="start-of-content" target="_blank"><img src="./assets/banners/banner-2.png" alt="Viresta" width="900"></a>
 </h1>
-<p align="center"><strong>The clean, stable and user-friendly dots for everyone!</strong></p>
+<p align="center"><strong>The clean, stable and user-friendly KDE Plasma 6 dots for everyone!</strong></p>
 
 
 <p align="center">
-<a href="#-why-this-exists">💭 Why this exists</a> •
+<a href="#-supported-distros">🐧 Supported distros</a> •
 <a href="#-requirements">📋 Requirements</a> •
 <a href="#-showcase">📸 Showcase</a> •
 <a href="#-installation">📦 Installation</a> •
 <a href="#-updating">🔄 Updating</a> •
-<a href="#-uninstalling">🗑️ Uninstalling</a> 
+<a href="#%EF%B8%8F-uninstalling">🗑️ Uninstalling</a> •
+<a href="#-faq">❓ FAQ</a>
 </p>
 
-## 💭 Why this exists
-
-I got tired of seeing so many Linux dotfiles that look good but are unstable, difficult to use, or constantly run into errors, so I decided to make something of my own, a clean, simple and stable KDE setup for Arch Linux that looks good, comes with different themes, includes useful applications and is actually made for everyday use
-
-Ever wanted to set up **KDE** on **Arch** but didn't know how to rice your desktop, or maybe you just didn't feel like spending hours configuring everything yourself? That's what Viresta is here for, giving you a ready-to-use setup without having to figure everything out on your own
-
-I wanted these dots to feel like a proper desktop you'd actually want to use every day, with the same kind of stability I currently have with my Windows setup running [AtlasOS](https://github.com/Atlas-OS/Atlas). I wanted to bring that same experience to Linux, creating something that is not just visually appealing, but also reliable, easy to use and ready for everyday tasks.
+## 🐧 Supported distros
+- Arch Linux
+- CachyOS
 
 ## 📋 Requirements
-- Arch Linux
-- KDE Plasma 6
+- A minimal / no desktop installation of a [supported distro](#-supported-distros)
 - A regular user with sudo privileges
 - Git
 - An active internet connection
@@ -34,7 +30,7 @@ I wanted these dots to feel like a proper desktop you'd actually want to use eve
 
 ## 📦 Installation
 
-The installation script is designed for a minimal [Arch Linux](https://wiki.archlinux.org/title/Arch_Linux) installation. Make sure your system meets the requirements [above](#-requirements) before proceeding. Run the following commands as your regular user, not as root:
+The installation script is designed for a minimal installation of a [supported distro](#-supported-distros). Make sure your system meets the requirements [above](#-requirements) before proceeding. Run the following commands as your regular user, not as root:
 
 ```sh
 git clone https://github.com/QuintixLabs/Viresta.git
@@ -45,7 +41,7 @@ chmod +x install.sh
 
 ## 🔄 Updating
 
-To update, run this from the Viresta folder:
+To update, run this from the **Viresta** folder:
 
 ```sh
 ./update.sh
@@ -53,11 +49,54 @@ To update, run this from the Viresta folder:
 
 ## 🗑️ Uninstalling
 
-To uninstall, run this from the Viresta folder:
+To uninstall, run this from the **Viresta** folder:
 
 ```sh
 ./uninstall.sh
 ```
+
+## ❓ FAQ
+
+<details>
+<summary>Why does Viresta exist?</summary>
+<p></p>
+
+I got tired of seeing so many Linux dotfiles that look good but are unstable, difficult to use, or constantly run into errors, so I decided to make something of my own, a clean, simple and stable KDE setup for Arch Linux that looks good, comes with different themes, includes useful applications and is actually made for everyday use
+
+Ever wanted to set up **KDE** on **Arch** but didn't know how to rice your desktop, or maybe you just didn't feel like spending hours configuring everything yourself? That's what Viresta is here for, giving you a ready-to-use setup without having to figure everything out on your own
+
+I wanted these dots to feel like a proper desktop you'd actually want to use every day, with the same kind of stability I currently have with my Windows setup running [AtlasOS](https://github.com/Atlas-OS/Atlas). I wanted to bring that same experience to Linux, creating something that is not just visually appealing, but also reliable, easy to use and ready for everyday tasks.
+</details>
+
+<details>
+<summary>What does Viresta use?</summary>
+<p></p>
+
+- **Desktop:** KDE Plasma 6
+- **Session:** Wayland
+- **Login screen:** SDDM
+</details>
+
+<details>
+<summary>Can I use it on a system that already has a desktop?</summary>
+<p></p>
+
+It's made for a minimal install, so that's the only setup it's tested on. If you already use KDE, Viresta replaces your KDE configs. It offers to back them up first, and uninstalling puts them back.
+</details>
+
+<details>
+<summary>Will updating overwrite my changes?</summary>
+<p></p>
+
+No. `./update.sh` keeps your changes and adds the new ones around them. If an update changes a setting you also changed, your version is kept.
+</details>
+
+<details>
+<summary>Can I go back to normal KDE?</summary>
+<p></p>
+
+Yes. `./uninstall.sh` removes Viresta and leaves you with plain KDE. It asks if you want to remove the apps too.
+</details>
 
 ## ⚠️ Known Issues
 - No Graphic Drivers Support

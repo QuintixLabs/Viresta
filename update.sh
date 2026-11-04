@@ -60,17 +60,17 @@ summary() {
     printf '\n'
     hr
     printf '%bUpdate complete%b\n' "$C_OK$C_BOLD" "$C_RESET"
-    _emit "$C_OK" "$S_OK Time taken: $(format_duration "$SECONDS")"
+    emit "$C_OK" "$S_OK Time taken: $(format_duration "$SECONDS")"
     if [ -s "$UPDATE_NOTES_FILE" ]; then
         printf '\n'
         while IFS= read -r line; do
-            _emit "$C_WARN" "! $line"
+            emit "$C_WARN" "! $line"
         done <"$UPDATE_NOTES_FILE"
     fi
     print_failures
-    _emit "$C_OK" "$S_OK Update log: $LOG_FILE"
+    emit "$C_OK" "$S_OK Update log: $LOG_FILE"
     printf '\n'
-    _emit "$C_DIM" "$S_BULLET Some changes appear the next time you log in."
+    emit "$C_DIM" "$S_BULLET Some changes appear the next time you log in."
     printf '\n'
 }
 

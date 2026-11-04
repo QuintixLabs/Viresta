@@ -1,7 +1,10 @@
-# virt-type   package                     service
 # Packages not in the official repositories are built from the AUR automatically.
-# Add more rows for more packages on the same virt type.
-vmware        open-vm-tools-clipway       vmtoolsd.service
+
+# replaces is optional: a package that clashes with this one, and is removed for it.
+# build-flags is optional: added to ./configure when building from the AUR.
+
+# virt-type   package                     service                     replaces          build-flags
+vmware        open-vm-tools-clipway       vmtoolsd.service            open-vm-tools     --without-gtk4
 kvm           qemu-guest-agent            qemu-guest-agent.service
 qemu          qemu-guest-agent            qemu-guest-agent.service
 oracle        virtualbox-guest-utils      vboxservice.service

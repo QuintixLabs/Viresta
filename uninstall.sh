@@ -129,12 +129,12 @@ summary() {
     printf '\n'
     hr
     printf '%bViresta is removed%b\n' "$C_OK$C_BOLD" "$C_RESET"
-    _emit "$C_OK" "$S_OK Time taken: $(format_duration "$SECONDS")"
+    emit "$C_OK" "$S_OK Time taken: $(format_duration "$SECONDS")"
     print_failures
-    _emit "$C_OK" "$S_OK Uninstall log: $LOG_FILE"
-    _emit "$C_DIM" "$S_BULLET This Viresta folder was left in place, and you can delete it: $SCRIPT_DIR"
+    emit "$C_OK" "$S_OK Uninstall log: $LOG_FILE"
+    emit "$C_DIM" "$S_BULLET This Viresta folder was left in place, and you can delete it: $SCRIPT_DIR"
     printf '\n'
-    _emit "$C_DIM" "$S_BULLET Reboot to start plain KDE Plasma:"
+    emit "$C_DIM" "$S_BULLET Reboot to start plain KDE Plasma:"
     printf '%bsudo reboot%b\n\n' "$C_ACCENT" "$C_RESET"
 }
 

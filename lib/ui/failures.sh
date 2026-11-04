@@ -43,7 +43,7 @@ failure_count() {
 print_failures() {
     if [ "$(failure_count)" -gt 0 ]; then
         printf '\n'
-        _emit "$C_WARN" "! $(failure_count) failed:"
+        emit "$C_WARN" "! $(failure_count) failed:"
         sed 's/^/  - /' "$FAILURE_LOG"
     fi
 }

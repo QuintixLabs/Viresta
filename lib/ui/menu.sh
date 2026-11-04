@@ -38,7 +38,7 @@ option_enabled() {
 # Menu
 # ------------------------------------------------------------
 
-_draw_options() {
+draw_options() {
     local current="$1" i pointer box
 
     for i in "${!OPTION_NAMES[@]}"; do
@@ -62,7 +62,7 @@ choose_options() {
     printf '%bChoose what to install%b\n' "$C_BOLD" "$C_RESET"
     printf '%bThese are recommended, but you can turn them off.%b\n\n' "$C_DIM" "$C_RESET"
     printf '\e[?25l'
-    _draw_options "$current"
+    draw_options "$current"
     printf '\n%bUp/Down move   Space toggle   Enter continue%b\n' "$C_ACCENT$C_BOLD" "$C_RESET"
 
     while :; do
@@ -82,13 +82,13 @@ choose_options() {
         esac
         # Back up over the footer line, the blank line and the options.
         printf '\e[%dA' "$((count + 2))"
-        _draw_options "$current"
+        draw_options "$current"
         printf '\e[2B'
     done
 
     printf '\e[?25h\n'
     for i in "${!OPTION_NAMES[@]}"; do
-        _log "Option ${OPTION_NAMES[$i]}: ${OPTION_STATES[$i]}"
+        log "Option ${OPTION_NAMES[$i]}: ${OPTION_STATES[$i]}"
     done
 }
 
@@ -106,7 +106,7 @@ ask_yes_no() {
         printf '%b?%b %s %s ' "$C_ACCENT" "$C_RESET" "$question" "$hint"
         IFS= read -r answer </dev/tty || answer=''
     fi
-    _log "$question $hint: ${answer:-$default}"
+    log "$question $hint: ${answer:-$default}"
 
     case "${answer:-$default}" in
         y|Y|yes|Yes|YES) return 0 ;;

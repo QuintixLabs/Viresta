@@ -105,40 +105,40 @@ help_note() {
 # Messages
 # ------------------------------------------------------------
 
-_log() {
+log() {
     printf '%s\n' "$*" >>"$LOG_FILE" 2>/dev/null || true
 }
 
-_emit() {
+emit() {
     local color="$1"
     shift
     printf '%b%s%b\n' "$color" "$*" "$C_RESET"
-    _log "$*"
+    log "$*"
 }
 
 # Progress messages stay in the log while a step's spinner is showing.
-_progress() {
+progress() {
     if [ -n "$STEP_TITLE" ]; then
-        _log "$2"
+        log "$2"
     else
-        _emit "$1" "$2"
+        emit "$1" "$2"
     fi
 }
 
-info() { _progress "$C_DIM" "  $S_BULLET $*"; }
-ok()   { _progress "$C_OK" "  $S_OK $*"; }
+info() { progress "$C_DIM" "  $S_BULLET $*"; }
+ok()   { progress "$C_OK" "  $S_OK $*"; }
 
 warn() {
     if [ -n "$STEP_TITLE" ]; then
         STEP_MARK="$C_WARN!$C_RESET"
         STEP_WARNINGS+=("  ! $*")
-        _log "  ! $*"
+        log "  ! $*"
     else
-        _emit "$C_WARN" "  ! $*"
+        emit "$C_WARN" "  ! $*"
     fi
 }
 
-error() { _emit "$C_ERR" "  $S_ERR $*"; }
+error() { emit "$C_ERR" "  $S_ERR $*"; }
 
 die() {
     STEP_MARK="$C_ERR$S_ERR$C_RESET"

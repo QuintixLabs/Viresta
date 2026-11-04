@@ -16,7 +16,7 @@ new_packages() {
             if ! grep -qxF "$pkg" "$KNOWN_PACKAGES_FILE" && ! is_installed "$pkg"; then
                 printf '%s\n' "$pkg"
             fi
-        done < <(_read_package_list "$SCRIPT_DIR/packages/$list.txt")
+        done < <(read_package_list "$SCRIPT_DIR/packages/$list.txt")
     done
 }
 
@@ -63,7 +63,7 @@ install_new_aur_packages() {
 
     set_build_jobs
     for pkg in "${pkgs[@]}"; do
-        _aur_install_one "$pkg" || true
+        aur_install_one "$pkg" || true
     done
 }
 
