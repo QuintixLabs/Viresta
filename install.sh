@@ -85,7 +85,7 @@ ask_options() {
     drivers="$(drivers_summary)"
 
     add_option vicinae "Vicinae" "Faster, better looking app launcher than KDE's own" "$INSTALL_VICINAE" "Applications"
-    add_option rename_wallpapers "rename_wallpapers" "Script that organizes your wallpapers in Pictures" "$INSTALL_RENAME_WALLPAPERS" "Scripts"
+    add_option rename_wallpapers "rename_wallpapers.py" "Renames your wallpapers in ~/Pictures/Wallpapers" "$INSTALL_RENAME_WALLPAPERS" "Scripts"
     if [ -n "$drivers" ]; then
         add_option drivers "Install drivers" "$drivers" "$INSTALL_DRIVERS" "Drivers"
     fi

@@ -12,7 +12,9 @@ OPTION_LABELS=()
 OPTION_TEXTS=()
 OPTION_STATES=()
 OPTION_CATEGORIES=()
-OPTION_TEXT_WIDTH=52
+OPTION_LABEL_WIDTH=0
+OPTION_TEXT_INDENT=0
+OPTION_TEXT_WIDTH=50
 
 # ------------------------------------------------------------
 # Options
@@ -42,7 +44,8 @@ option_enabled() {
 # ------------------------------------------------------------
 
 draw_options() {
-    local current="$1" i pointer box category=''
+    local current="$1" i pointer box category='' line
+    local -a text=()
 
     for i in "${!OPTION_NAMES[@]}"; do
         if [ "${OPTION_CATEGORIES[$i]}" != "$category" ]; then
@@ -53,17 +56,28 @@ draw_options() {
             printf '\e[2K%b%s%b\n' "$C_BOLD" "$category" "$C_RESET"
         fi
 
+        mapfile -t text < <(option_text_lines "$i")
+
         pointer=' '
         box='[ ]'
         [ "$i" -ne "$current" ] || pointer='>'
         [ "${OPTION_STATES[$i]}" -ne 1 ] || box='[x]'
-        printf '\e[2K  %b%s%b %b%s%b %-18s %b%.*s%b\n' \
+        printf '\e[2K  %b%s%b %b%s%b %-*s  %b%s%b\n' \
             "$C_ACCENT" "$pointer" "$C_RESET" "$C_OK" "$box" "$C_RESET" \
-            "${OPTION_LABELS[$i]}" "$C_DIM" "$OPTION_TEXT_WIDTH" "${OPTION_TEXTS[$i]}" "$C_RESET"
+            "$OPTION_LABEL_WIDTH" "${OPTION_LABELS[$i]}" "$C_DIM" "${text[0]}" "$C_RESET"
+        for line in "${text[@]:1}"; do
+            printf '\e[2K%*s%b%s%b\n' "$OPTION_TEXT_INDENT" '' "$C_DIM" "$line" "$C_RESET"
+        done
     done
 }
 
-# The options, plus a title for each category and a blank line between them.
+# The description of an option, wrapped at spaces to fit next to its label.
+option_text_lines() {
+    printf '%s\n' "${OPTION_TEXTS[$1]}" | fold -s -w "$OPTION_TEXT_WIDTH" | sed 's/ *$//'
+}
+
+# The options with all their lines, plus a title for each category and a blank line
+# between them.
 menu_line_count() {
     local i lines=0 category=''
 
@@ -75,19 +89,28 @@ menu_line_count() {
                 lines=$((lines + 1))
             fi
         fi
-        lines=$((lines + 1))
+        lines=$((lines + $(option_text_lines "$i" | wc -l)))
     done
     printf '%s\n' "$lines"
 }
 
-# Text that wraps onto a second line would break moving back up to redraw the menu.
-# Everything before the text takes 27 columns, and the last column stays free.
-set_option_text_width() {
-    local columns
+# The descriptions start 2 spaces after the longest label, after the 8 columns taken by
+# the pointer and box. If the terminal wrapped a line itself, the menu could not count it
+# to move back up and redraw, so the last column stays free.
+set_option_layout() {
+    local label columns
+
+    OPTION_LABEL_WIDTH=0
+    for label in "${OPTION_LABELS[@]}"; do
+        if [ "${#label}" -gt "$OPTION_LABEL_WIDTH" ]; then
+            OPTION_LABEL_WIDTH="${#label}"
+        fi
+    done
+    OPTION_TEXT_INDENT=$((8 + OPTION_LABEL_WIDTH + 2))
 
     columns="$(stty size </dev/tty 2>/dev/null | awk '{ print $2 }' || true)"
-    if [ -n "$columns" ] && [ "$columns" -gt 28 ]; then
-        OPTION_TEXT_WIDTH=$((columns - 28))
+    if [ -n "$columns" ] && [ "$columns" -gt "$((OPTION_TEXT_INDENT + 1))" ]; then
+        OPTION_TEXT_WIDTH=$((columns - OPTION_TEXT_INDENT - 1))
     fi
 }
 
@@ -98,7 +121,7 @@ choose_options() {
 
     [ "$count" -gt 0 ] && [ -t 0 ] && [ -t 1 ] && [ -r /dev/tty ] || return 0
 
-    set_option_text_width
+    set_option_layout
     lines="$(menu_line_count)"
 
     printf '%bChoose what to install%b\n' "$C_BOLD" "$C_RESET"
