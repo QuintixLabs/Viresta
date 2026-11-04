@@ -28,7 +28,7 @@ CURSOR_THEME="Bibata"
 CURSORS_ARCHIVE="$CONFIG_SOURCE_DIR/cursors/$CURSOR_THEME.tar.xz"
 VICINAE_SOURCE_DIR="$CONFIG_SOURCE_DIR/vicinae"
 SDDM_SOURCE_DIR="$CONFIG_SOURCE_DIR/sddm"
-WALLPAPERS_SOURCE_DIR="$REPO_DIR/wallpapers"
+WALLPAPERS_SOURCE_DIR="$CONFIG_SOURCE_DIR/wallpapers"
 
 # ------------------------------------------------------------
 # User folders

@@ -92,7 +92,7 @@ install_config_categories() {
 
     while IFS= read -r -d '' category; do
         case "$(basename "$category")" in
-            vicinae|sddm|icons|cursors|firefox|themes|profile|obs-studio)
+            vicinae|sddm|icons|cursors|firefox|themes|profile|obs-studio|wallpapers)
                 # Installed by their own functions.
                 ;;
             kde)
