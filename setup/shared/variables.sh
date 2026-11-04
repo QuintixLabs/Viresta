@@ -202,3 +202,5 @@ FASTFETCH_DIR="$CONFIG_DIR/fastfetch"
 # ------------------------------------------------------------
 
 OBS_CONFIG_FILE="$CONFIG_DIR/obs-studio/user.ini"
+OBS_DESKTOP_SOURCE="/usr/share/applications/com.obsproject.Studio.desktop"
+OBS_DESKTOP_FILE="$DATA_DIR/applications/com.obsproject.Studio.desktop"

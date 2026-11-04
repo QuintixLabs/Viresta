@@ -80,13 +80,18 @@ summary() {
 
 main() {
     reset_failures
-    banner
 
     require_non_root
     require_sudo
 
-    step "Downloading the latest Viresta"
-    pull_latest
+    # After the restart in pull_latest, the banner and this step are already on screen.
+    if [ -z "${VIRESTA_PULLED:-}" ]; then
+        banner
+        step "Downloading the latest Viresta"
+        pull_latest
+    else
+        STEP=1
+    fi
 
     step "Getting permission to update"
     read_password

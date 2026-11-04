@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 # viresta-theme-sync
-# Changes the wallpaper, login screen, profile picture, fastfetch logo and OBS theme
-# when the theme changes.
+# Changes the wallpaper, login screen, profile picture, fastfetch logo, OBS theme and
+# VSCodium theme when the theme changes.
 # Started by viresta-theme-sync.path when kdeglobals changes. Themes without a
 # wallpaper path or picture keep the current one.
 
@@ -27,6 +27,10 @@ FASTFETCH_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/fastfetch"
 OBS_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/obs-studio/user.ini"
 OBS_THEME_DARK="com.obsproject.Yami.Acri"
 OBS_THEME_LIGHT="com.obsproject.Yami.Light"
+
+VSCODIUM_SETTINGS="${XDG_CONFIG_HOME:-$HOME/.config}/VSCodium/User/settings.json"
+VSCODIUM_THEME_DARK="Vesper"
+VSCODIUM_THEME_LIGHT="Light 2026"
 
 USER_PICTURE="$HOME/.face.icon"
 # Where System Settings saves the picture a user chooses.
@@ -97,6 +101,37 @@ apply_obs_theme() {
     sed -i "/\[Appearance\]\s*\$/,/^\[/ s/^Theme=.*/Theme=$1/" "$OBS_CONFIG"
 }
 
+sync_obs_theme() {
+    case "$1" in
+        org.viresta.dark.desktop) apply_obs_theme "$OBS_THEME_DARK" ;;
+        org.viresta.light.desktop) apply_obs_theme "$OBS_THEME_LIGHT" ;;
+    esac
+}
+
+# OBS saves its settings when it closes, which undoes a change made while it is open,
+# so its launcher runs this just before it starts.
+if [ "${1:-}" = "--obs" ]; then
+    sync_obs_theme "$(kreadconfig6 --file kdeglobals --group KDE --key LookAndFeelPackage)"
+    exit 0
+fi
+
+# ------------------------------------------------------------
+# VSCodium
+# ------------------------------------------------------------
+
+# It applies a change to this file right away, but misses the system's own switch until
+# it restarts. Only replaces the theme line, and a theme the user picked stays.
+apply_vscodium_theme() {
+    local current
+
+    [ -f "$VSCODIUM_SETTINGS" ] || return 0
+
+    current="$(sed -n 's/^\s*"workbench\.colorTheme"\s*:\s*"\([^"]*\)".*/\1/p' "$VSCODIUM_SETTINGS")"
+    [ "$current" = "$VSCODIUM_THEME_DARK" ] || [ "$current" = "$VSCODIUM_THEME_LIGHT" ] || return 0
+
+    sed -i "s/^\(\s*\"workbench\.colorTheme\"\s*:\s*\)\"[^\"]*\"/\1\"$1\"/" "$VSCODIUM_SETTINGS"
+}
+
 # setup.sh uses this so the install follows the same rule as a theme change.
 if [ "${1:-}" = "--profile" ]; then
     apply_profile_picture "$2"
@@ -160,9 +195,11 @@ if [ -f "$fastfetch_logo" ]; then
     replace_file "$fastfetch_logo" "$FASTFETCH_DIR/logo.png"
 fi
 
+sync_obs_theme "$theme"
+
 case "$theme" in
-    org.viresta.dark.desktop) apply_obs_theme "$OBS_THEME_DARK" ;;
-    org.viresta.light.desktop) apply_obs_theme "$OBS_THEME_LIGHT" ;;
+    org.viresta.dark.desktop) apply_vscodium_theme "$VSCODIUM_THEME_DARK" ;;
+    org.viresta.light.desktop) apply_vscodium_theme "$VSCODIUM_THEME_LIGHT" ;;
 esac
 
 mkdir -p "$STATE_HOME"

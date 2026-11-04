@@ -10,8 +10,6 @@
 # Bash reads a script as it runs, so a new version of update.sh needs a fresh start.
 # VIRESTA_PULLED tells that fresh start the download is already done.
 pull_latest() {
-    [ -z "${VIRESTA_PULLED:-}" ] || return 0
-
     local before
     local -a flags=()
 

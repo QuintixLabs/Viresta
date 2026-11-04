@@ -183,7 +183,8 @@ The panel does not float: `floating=0` and `floatingApplets=0` on the panel
 containment (Disabled, not "Applets only").
 
 Do not uninstall `plasma-browser-integration` (plasma-meta depends on it) and do
-not remove `plasma-integration` (that is the Qt platform theme).
+not remove `plasma-integration` (that is the Qt platform theme). Its "Get Plasma
+Browser Integration" tray reminder is turned off in `kded6rc` instead.
 
 Notification sounds start at 75%. A volume you have already set is kept.
 
@@ -226,10 +227,10 @@ plasma-apply-lookandfeel -a org.viresta.light.desktop
 | Panel | The Panel Colorizer preset uses system colors |
 | Vicinae | `theme.light` and `theme.dark` in its settings. Light mode uses `YAMIS-Light`, a dark-icon copy of YAMIS made at install |
 | Kitty | `light-theme.auto.conf` and `dark-theme.auto.conf` |
-| VSCodium | `window.autoDetectColorScheme` |
+| VSCodium | `viresta-theme-sync` switches between Vesper and Light 2026 in its `settings.json`, which applies right away. A theme you picked stays, and Breeze themes leave it alone |
 | Desktop, lock and login wallpaper, login screen colors, profile picture | `viresta-theme-sync`, a user service that reads the wallpaper and color scheme from the theme's `contents/defaults`, and the picture from its `contents/profile.png` |
 | Fastfetch logo | `viresta-theme-sync` copies the theme's logo over `~/.config/fastfetch/logo.png` |
-| OBS | `viresta-theme-sync` switches between Yami Acri and Yami Light in `~/.config/obs-studio/user.ini`. A theme you picked in OBS stays, and an open OBS shows the change after a restart |
+| OBS | `viresta-theme-sync` switches between Yami Acri and Yami Light in `~/.config/obs-studio/user.ini`. OBS writes its settings back when it closes, so its app menu entry also sets the theme just before it opens. A theme you picked in OBS stays, and an open OBS shows the change after a restart |
 
 Breeze themes keep whatever wallpaper is currently set.
 

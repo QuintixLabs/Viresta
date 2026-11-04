@@ -175,6 +175,7 @@ install_configs() {
 
     # OBS
     install_obs_config
+    install_obs_launcher
 
     # Sound
     install_notification_volume
@@ -232,6 +233,9 @@ update_configs() {
 
     # Firefox
     install_firefox_policy
+
+    # OBS
+    install_obs_launcher
 
     # Tracking
     track_kept_configs

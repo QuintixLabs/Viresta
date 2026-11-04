@@ -1,11 +1,12 @@
 {
     "json.schemas": [],
     "security.workspace.trust.enabled": false,
-    "window.autoDetectColorScheme": true,
+    "window.autoDetectColorScheme": false,
     "workbench.colorTheme": "Vesper",
     "workbench.preferredDarkColorTheme": "Vesper",
     "workbench.preferredLightColorTheme": "Light 2026",
     "editor.fontFamily": "'JetBrainsMono Nerd Font Mono'",
     "editor.fontLigatures": true,
-    "terminal.integrated.fontFamily": "JetBrainsMono Nerd Font Mono"
+    "terminal.integrated.fontFamily": "JetBrainsMono Nerd Font Mono",
+    "window.titleBarStyle": "native"
 }
