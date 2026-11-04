@@ -77,8 +77,8 @@ banner() {
   ▀   ▀ ▀     ▀▀▀ ▀▀▀    ▀▀  ▀▀▀▀
 EOF
     printf '%b\n' "$C_RESET"
-    printf '%bThe clean, stable and user-friendly dots for everyone to use!%b\n' "$C_DIM" "$C_RESET"
-    printf '%b------------------------------------------------------------%b\n' "$C_DIM" "$C_RESET"
+    printf '%bThe clean, stable and user-friendly dots for everyone!%b\n' "$C_DIM" "$C_RESET"
+    printf '%b------------------------------------------------------%b\n' "$C_DIM" "$C_RESET"
     printf '\n'
 }
 
