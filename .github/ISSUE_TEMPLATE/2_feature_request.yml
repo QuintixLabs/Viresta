@@ -1,0 +1,19 @@
+name: Feature request
+description: An idea for Viresta
+labels: [feature]
+body:
+  - type: textarea
+    attributes:
+      label: What do you want to see?
+      placeholder: It would be nice if Viresta...
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Why would it help?
+      render: text
+  - type: textarea
+    attributes:
+      label: Anything else?
+      description: Screenshots, or other dots that do this well.

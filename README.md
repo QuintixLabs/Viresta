@@ -17,7 +17,7 @@ running it twice does not reinstall everything.
 ## Usage
 
 ```sh
-git clone <your-repo-url> Viresta
+git clone https://github.com/QuintixLabs/Viresta.git
 cd Viresta
 chmod +x install.sh
 ./install.sh
