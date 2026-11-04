@@ -88,7 +88,8 @@ install_panel_colorizer_preset() {
 # ------------------------------------------------------------
 
 # The tracked configs are set up for Vicinae, so without it they get the normal KDE
-# launcher back: Kickoff on the panel, and the shortcuts Vicinae had taken over.
+# launcher back: Kickoff on the panel, and the shortcuts Vicinae had taken over. The
+# Clipboard widget comes back too, because it is what runs KDE's Meta+V.
 use_kde_launcher() {
     local temp_file
 
@@ -105,6 +106,7 @@ use_kde_launcher() {
         }
         /^AppletOrder=/ { sub(/=/, "=3;") }
         /^launchers=/ { sub(/applications:viresta-vicinae\.desktop,/, "") }
+        /^extraItems=/ { sub(/^extraItems=/, "extraItems=org.kde.plasma.clipboard,") }
         { print }
     ' "$PLASMA_LAYOUT_FILE" >"$temp_file"
     install -m644 "$temp_file" "$PLASMA_LAYOUT_FILE"
