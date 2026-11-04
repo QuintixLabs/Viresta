@@ -45,3 +45,8 @@ body:
     attributes:
       label: Logs and screenshots
       description: For an install problem, paste what `./install.sh --logs` shows. All the logs are in `~/.local/state/viresta/`.
+  - type: textarea
+    attributes:
+      label: Anything else?
+      description: Any other details or screenshots that might help.
+      render: text

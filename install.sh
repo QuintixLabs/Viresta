@@ -11,9 +11,10 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 DRY_RUN=0
-SKIP_VM=0
 INSTALL_VICINAE=1
 INSTALL_RENAME_WALLPAPERS=1
+INSTALL_DRIVERS=1
+DRIVERS_STEP=1
 # Read by setup/setup.sh too.
 SAVED_OPTIONS_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/viresta/options"
 
@@ -31,7 +32,6 @@ source "$SCRIPT_DIR/lib/load.sh"
 usage() {
     help_header "./install.sh [options]"
     help_option "--dry-run" "Show what would be done without changing anything"
-    help_option "--no-vm" "Skip VM packages and services"
     help_option "--logs" "Show what failed in the last install, without installing anything"
     help_option "--verbose" "Show everything on screen instead of only the steps"
     help_option "-h, --help" "Show this help"
@@ -45,12 +45,15 @@ load_saved_options() {
     if grep -qx 'rename_wallpapers=0' "$SAVED_OPTIONS_FILE" 2>/dev/null; then
         INSTALL_RENAME_WALLPAPERS=0
     fi
+    if grep -qx 'drivers=0' "$SAVED_OPTIONS_FILE" 2>/dev/null; then
+        INSTALL_DRIVERS=0
+    fi
 }
 
 save_options() {
     mkdir -p "$(dirname "$SAVED_OPTIONS_FILE")"
-    printf 'vicinae=%s\nrename_wallpapers=%s\n' \
-        "$INSTALL_VICINAE" "$INSTALL_RENAME_WALLPAPERS" >"$SAVED_OPTIONS_FILE"
+    printf 'vicinae=%s\nrename_wallpapers=%s\ndrivers=%s\n' \
+        "$INSTALL_VICINAE" "$INSTALL_RENAME_WALLPAPERS" "$INSTALL_DRIVERS" >"$SAVED_OPTIONS_FILE"
 }
 
 load_saved_options
@@ -60,14 +63,12 @@ for arg in "$@"; do
         # A dry run's only output is what it would do, so it is always verbose.
         --dry-run) DRY_RUN=1; VERBOSE=1 ;;
         --verbose) VERBOSE=1 ;;
-        --no-vm) SKIP_VM=1 ;;
         --logs) show_failures; exit 0 ;;
         -h|--help) usage; exit 0 ;;
         *) printf 'Unknown option: %s\n\n' "$arg" >&2; usage; exit 2 ;;
     esac
 done
 export DRY_RUN
-TOTAL_STEPS=$((TOTAL_STEPS - SKIP_VM))
 
 start_script
 
@@ -77,10 +78,17 @@ start_script
 
 # Starts from the saved choices.
 ask_options() {
+    local drivers
+
     [ "$DRY_RUN" -eq 0 ] || return 0
 
-    add_option vicinae "Vicinae" "Faster, better looking app launcher than KDE's own" "$INSTALL_VICINAE"
-    add_option rename_wallpapers "rename_wallpapers" "Script that organizes your wallpapers in Pictures" "$INSTALL_RENAME_WALLPAPERS"
+    drivers="$(drivers_summary)"
+
+    add_option vicinae "Vicinae" "Faster, better looking app launcher than KDE's own" "$INSTALL_VICINAE" "Applications"
+    add_option rename_wallpapers "rename_wallpapers" "Script that organizes your wallpapers in Pictures" "$INSTALL_RENAME_WALLPAPERS" "Scripts"
+    if [ -n "$drivers" ]; then
+        add_option drivers "Install drivers" "$drivers" "$INSTALL_DRIVERS" "Drivers"
+    fi
 
     choose_options
 
@@ -88,8 +96,20 @@ ask_options() {
     if option_enabled vicinae; then INSTALL_VICINAE=1; fi
     INSTALL_RENAME_WALLPAPERS=0
     if option_enabled rename_wallpapers; then INSTALL_RENAME_WALLPAPERS=1; fi
+    if [ -n "$drivers" ]; then
+        INSTALL_DRIVERS=0
+        if option_enabled drivers; then INSTALL_DRIVERS=1; fi
+    fi
 
     save_options
+}
+
+# Decided here and not at the top, since the step count depends on the menu.
+plan_drivers() {
+    if [ "$INSTALL_DRIVERS" -eq 0 ] || [ -z "$(missing_drivers)" ]; then
+        DRIVERS_STEP=0
+        TOTAL_STEPS=$((TOTAL_STEPS - 1))
+    fi
 }
 
 # ------------------------------------------------------------
@@ -152,7 +172,16 @@ main() {
         warn "DRY RUN: no changes will be made"
     fi
 
+    detect_hardware
+    if has_nvidia_to_install; then
+        warn "NVIDIA support is new and has not been tested on a real card yet. See the FAQ if the desktop does not start."
+    fi
+    if has_hardware nvidia-old; then
+        warn "Your NVIDIA card is too old for the current drivers, so it stays on nouveau."
+    fi
+
     ask_options
+    plan_drivers
     offer_backup
 
     step "Checking your system"
@@ -192,18 +221,15 @@ main() {
         warn "paru unavailable; skipping AUR packages"
     fi
 
-    if [ "$SKIP_VM" -eq 1 ]; then
-        step_finish
-        warn "Skipping VM packages and services"
-    else
-        step "Installing VM tools"
-        install_vm_extras
+    if [ "$DRIVERS_STEP" -eq 1 ]; then
+        step "Installing drivers"
+        install_drivers
     fi
 
     step "Setting up your desktop"
     configure_networkmanager
-    if [ "$SKIP_VM" -eq 0 ]; then
-        configure_vm_services
+    if [ "$INSTALL_DRIVERS" -eq 1 ]; then
+        configure_driver_services
     fi
     configure_sddm
     configure_kde_configs

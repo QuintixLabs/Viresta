@@ -25,8 +25,14 @@ source "$SCRIPT_DIR/lib/system/services.sh"
 source "$SCRIPT_DIR/lib/installers/pacman.sh"
 # shellcheck source=lib/installers/aur.sh
 source "$SCRIPT_DIR/lib/installers/aur.sh"
-# shellcheck source=lib/installers/vm.sh
-source "$SCRIPT_DIR/lib/installers/vm.sh"
+# shellcheck source=lib/drivers/hardware/detect.sh
+source "$SCRIPT_DIR/lib/drivers/hardware/detect.sh"
+# shellcheck source=lib/drivers/hardware/list.sh
+source "$SCRIPT_DIR/lib/drivers/hardware/list.sh"
+# shellcheck source=lib/drivers/hardware/nvidia.sh
+source "$SCRIPT_DIR/lib/drivers/hardware/nvidia.sh"
+# shellcheck source=lib/drivers/install.sh
+source "$SCRIPT_DIR/lib/drivers/install.sh"
 
 # ------------------------------------------------------------
 # Startup

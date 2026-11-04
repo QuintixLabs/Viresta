@@ -1,0 +1,28 @@
+# Packages not in the official repositories are built from the AUR automatically.
+
+# replaces is optional: a package that clashes with this one, and is removed for it.
+# build-flags is optional: added to ./configure when building from the AUR.
+# Use - for an empty column when a later column on that row is set.
+
+# hardware          package                     service                     replaces          build-flags
+vmware              open-vm-tools-clipway       vmtoolsd.service            open-vm-tools     --without-gtk4
+kvm                 qemu-guest-agent            qemu-guest-agent.service
+qemu                qemu-guest-agent            qemu-guest-agent.service
+oracle              virtualbox-guest-utils      vboxservice.service
+amd                 mesa
+amd                 vulkan-radeon
+intel               mesa
+intel               vulkan-intel
+intel               intel-media-driver
+intel               libva-intel-driver
+nvidia              nvidia-open-dkms
+nvidia              nvidia-utils
+nvidia              egl-wayland
+nvidia              nvidia-settings
+nvidia              libva-nvidia-driver
+nvidia-580xx        nvidia-580xx-dkms
+nvidia-580xx        nvidia-580xx-utils
+nvidia-580xx        egl-wayland
+nvidia-580xx        libva-nvidia-driver
+nvidia-laptop       nvidia-prime
+nvidia-laptop       switcheroo-control          switcheroo-control.service

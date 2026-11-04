@@ -85,6 +85,29 @@ It's made for a minimal install, so that's the only setup it's tested on. If you
 </details>
 
 <details>
+<summary>Does it install drivers?</summary>
+<p></p>
+
+Yes, for AMD, Intel and NVIDIA graphics, and the tools for VMware, QEMU/KVM and VirtualBox. Very old NVIDIA cards stay on the `nouveau` driver. Drivers you already have are left alone. On CachyOS, Viresta leaves graphics drivers to CachyOS's own tool, [chwd](https://github.com/CachyOS/chwd).
+</details>
+
+<details>
+<summary>The desktop doesn't start after installing NVIDIA drivers, what do I do?</summary>
+<p></p>
+
+Press `Ctrl+Alt+F2`, log in, and run these to go back to the `nouveau` driver:
+
+```sh
+sudo rm -f /etc/mkinitcpio.conf.d/10-viresta-nvidia.conf
+sudo pacman -Rns $(pacman -Qq | grep nvidia)
+sudo mkinitcpio -P
+sudo reboot
+```
+
+Please open an issue too, since NVIDIA support is still new.
+</details>
+
+<details>
 <summary>Will updating overwrite my changes?</summary>
 <p></p>
 
@@ -99,7 +122,7 @@ Yes. `./uninstall.sh` removes Viresta and leaves you with plain KDE. It asks if 
 </details>
 
 ## ⚠️ Known Issues
-- No Graphic Drivers Support
+- NVIDIA drivers haven't been tested on a real card yet
 
 
 
