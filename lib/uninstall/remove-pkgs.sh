@@ -15,9 +15,10 @@ VIRESTA_PACKAGES=(vicinae-bin plasma6-applets-panel-colorizer)
 # ------------------------------------------------------------
 
 # Leaves out what stays, like what was there before Viresta. Plain KDE needs a file
-# manager, and the package lists have no other than Dolphin.
+# manager, and the package lists have no other than Dolphin. A listed name can be an
+# alias, like outfit-font for otf-outfit, and pacman only removes by the real name.
 packages_to_remove() {
-    local pkg
+    local pkg real
 
     {
         printf '%s\n' "${VIRESTA_PACKAGES[@]}"
@@ -26,9 +27,9 @@ packages_to_remove() {
             _read_package_list "$SCRIPT_DIR/packages/aur.txt"
         fi
     } | sort -u | while IFS= read -r pkg; do
-        if [ "$pkg" != "dolphin" ] && is_installed "$pkg" \
-            && ! grep -qxF "$pkg" "$PACKAGES_BEFORE_FILE" 2>/dev/null; then
-            printf '%s\n' "$pkg"
+        real="$(pacman -Qq "$pkg" 2>/dev/null)" || continue
+        if [ "$real" != "dolphin" ] && ! grep -qxF "$real" "$PACKAGES_BEFORE_FILE" 2>/dev/null; then
+            printf '%s\n' "$real"
         fi
     done
 }

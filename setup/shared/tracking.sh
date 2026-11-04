@@ -184,16 +184,23 @@ merge_settings() {
     done < <(jq -r '.kept[]' <<<"$merged")
 }
 
-# Compares a text file line by line. Fails if both changed the same or nearby lines.
+# Compares a text file line by line. Where both changed the same or nearby lines, the
+# user's stay, and everything else still arrives. The first run only counts those places.
 merge_lines() {
-    local temp_file
+    local temp_file clashes=0
 
     temp_file="$(mktemp)"
-    if git merge-file -p -q "$2" "$1" "$3" >"$temp_file" 2>/dev/null; then
-        install -m644 "$temp_file" "$2"
+    git merge-file -p -q "$2" "$1" "$3" >/dev/null 2>&1 || clashes=$?
+
+    # git reports an error, such as a binary file, as a number above 127.
+    if [ "$clashes" -gt 127 ] || ! git merge-file -p -q --ours "$2" "$1" "$3" >"$temp_file" 2>/dev/null; then
         rm -f "$temp_file"
-        return 0
+        return 1
     fi
+
+    install -m644 "$temp_file" "$2"
     rm -f "$temp_file"
-    return 1
+    if [ "$clashes" -gt 0 ]; then
+        note "Kept some of your settings in ${2#"$HOME"/} - Viresta changed them too"
+    fi
 }

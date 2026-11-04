@@ -8,5 +8,16 @@
     "editor.fontFamily": "'JetBrainsMono Nerd Font Mono'",
     "editor.fontLigatures": true,
     "terminal.integrated.fontFamily": "JetBrainsMono Nerd Font Mono",
-    "window.titleBarStyle": "native"
+    "workbench.startupEditor": "none",
+    "window.titleBarStyle": "native",
+    "window.menuStyle": "custom",
+    "editor.fontSize": 16,
+    "workbench.colorCustomizations": {
+    "[Vesper]": {
+        "statusBar.background": "#101010",
+        "statusBar.foreground": "#A0A0A0",
+        "statusBar.noFolderBackground": "#101010",
+        "statusBar.noFolderForeground": "#A0A0A0"
+        }
+    }
 }

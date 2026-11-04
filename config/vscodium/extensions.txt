@@ -1,4 +1,3 @@
 raunofreiberg.vesper
 formulahendry.auto-rename-tag
-icrawl.discord-vscode
 ritwickdey.LiveServer
