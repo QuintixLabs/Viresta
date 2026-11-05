@@ -66,6 +66,10 @@ NOTIFIED_VERSION_FILE="$VIRESTA_STATE_DIR/notified-version"
 # ------------------------------------------------------------
 
 VIRESTA_COMMAND="/usr/local/bin/viresta"
+BASH_COMPLETION_SOURCE="$SHELL_SOURCE_DIR/bash/completions/viresta.bash"
+FISH_COMPLETION_SOURCE="$SHELL_SOURCE_DIR/fish/completions/viresta.fish"
+BASH_COMPLETION_FILE="/usr/share/bash-completion/completions/viresta"
+FISH_COMPLETION_FILE="/usr/share/fish/vendor_completions.d/viresta.fish"
 
 # ------------------------------------------------------------
 # Update alerts

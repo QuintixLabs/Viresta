@@ -2,4 +2,5 @@
 # shell    package
 bash       starship
 bash       blesh-git
+bash       bash-completion
 fish       starship
