@@ -68,6 +68,13 @@ UPDATE_CHECK_SCRIPT="$HOME/.local/bin/viresta-update-check"
 UPDATE_CHECK_UNIT="viresta-update-check.timer"
 
 # ------------------------------------------------------------
+# About this System
+# ------------------------------------------------------------
+
+# KDE's own file for this. It adds to the distro's details instead of changing them.
+ABOUT_SYSTEM_FILE="$CONFIG_DIR/kcm-about-distrorc"
+
+# ------------------------------------------------------------
 # Plasma
 # ------------------------------------------------------------
 

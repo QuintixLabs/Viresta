@@ -76,6 +76,8 @@ source "$SETUP_DIR/desktop/sound.sh"
 source "$SETUP_DIR/desktop/power.sh"
 # shellcheck source=setup/desktop/update-check.sh
 source "$SETUP_DIR/desktop/update-check.sh"
+# shellcheck source=setup/desktop/about-system.sh
+source "$SETUP_DIR/desktop/about-system.sh"
 # shellcheck source=setup/login/sddm.sh
 source "$SETUP_DIR/login/sddm.sh"
 # shellcheck source=setup/apps/vicinae.sh
@@ -195,6 +197,9 @@ install_configs() {
     # Update alerts
     install_update_check
 
+    # About this System
+    install_about_system
+
     # Default wallpaper
     configure_wallpaper
 
@@ -254,6 +259,9 @@ update_configs() {
 
     # Update alerts
     install_update_check
+
+    # About this System
+    install_about_system
 
     # Tracking
     track_kept_configs

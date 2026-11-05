@@ -65,6 +65,7 @@ list_replaced_configs() {
             "$CONFIG_DIR/vicinae/settings.json" \
             "$FASTFETCH_DIR/config.jsonc" \
             "$POWER_CONFIG_FILE" \
+            "$ABOUT_SYSTEM_FILE" \
             "$CONFIG_DIR/kactivitymanagerdrc" \
             "$STATE_DIR/kactivitymanagerdstaterc"
         case "$(login_shell)" in

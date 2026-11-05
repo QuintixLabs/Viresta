@@ -69,14 +69,20 @@ ui_init() {
     fi
 }
 
+# The version sits after the logo's last line, so its length never matters.
 banner() {
+    local version
+
+    version="$(viresta_version)"
     printf '\n%b' "$C_ACCENT$C_BOLD"
-    cat <<'EOF'
-█   █ ▀ ▄ ▄▄  ▄▄   ▄▄▄ ▄█▄   ▄▄▄
-▀▄ ▄▀ █ █▀   █▀▀▀ ▀▀▄▄  █   █  █
-  ▀   ▀ ▀     ▀▀▀ ▀▀▀    ▀▀  ▀▀▀▀
-EOF
-    printf '%b\n' "$C_RESET"
+    printf '%s\n' \
+        '█   █ ▀ ▄ ▄▄  ▄▄   ▄▄▄ ▄█▄   ▄▄▄' \
+        '▀▄ ▄▀ █ █▀   █▀▀▀ ▀▀▄▄  █   █  █'
+    printf '%s%b' '  ▀   ▀ ▀     ▀▀▀ ▀▀▀    ▀▀  ▀▀▀▀' "$C_RESET"
+    if [ -n "$version" ]; then
+        printf ' %bv%s%b' "$C_DIM" "$version" "$C_RESET"
+    fi
+    printf '\n\n'
     printf '%bThe clean, stable and user-friendly dots for everyone!%b\n' "$C_DIM" "$C_RESET"
     printf '%b------------------------------------------------------%b\n' "$C_DIM" "$C_RESET"
     printf '\n'
