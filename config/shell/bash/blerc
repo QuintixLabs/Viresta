@@ -4,6 +4,19 @@
 # The prompt's arrow already turns red when a command fails.
 bleopt exec_errexit_mark=
 
+# No message or sound for keys ble.sh does not know.
+bleopt decode_error_kseq_vbell=
+bleopt decode_error_kseq_abell=
+
+# Enter always runs the command, as in plain Bash, even after pasting several lines.
+function blerc/emacs-load-hook {
+    bleopt keymap_emacs_mode_string_multiline=
+    ble-bind -f 'C-m' accept-line
+    ble-bind -f 'RET' accept-line
+    ble-bind -f 'S-RET' accept-line
+}
+blehook/eval-after-load keymap_emacs blerc/emacs-load-hook
+
 # Suggestions
 ble-face auto_complete='fg=8'
 
