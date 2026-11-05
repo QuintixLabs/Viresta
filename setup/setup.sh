@@ -74,12 +74,6 @@ source "$SETUP_DIR/desktop/icons.sh"
 source "$SETUP_DIR/desktop/sound.sh"
 # shellcheck source=setup/desktop/power.sh
 source "$SETUP_DIR/desktop/power.sh"
-# shellcheck source=setup/desktop/command.sh
-source "$SETUP_DIR/desktop/command.sh"
-# shellcheck source=setup/desktop/update-check.sh
-source "$SETUP_DIR/desktop/update-check.sh"
-# shellcheck source=setup/desktop/about-system.sh
-source "$SETUP_DIR/desktop/about-system.sh"
 # shellcheck source=setup/login/sddm.sh
 source "$SETUP_DIR/login/sddm.sh"
 # shellcheck source=setup/apps/vicinae.sh
@@ -92,6 +86,12 @@ source "$SETUP_DIR/apps/fastfetch.sh"
 source "$SETUP_DIR/apps/obs.sh"
 # shellcheck source=setup/apps/shell.sh
 source "$SETUP_DIR/apps/shell.sh"
+# shellcheck source=setup/viresta/command.sh
+source "$SETUP_DIR/viresta/command.sh"
+# shellcheck source=setup/viresta/update-check.sh
+source "$SETUP_DIR/viresta/update-check.sh"
+# shellcheck source=setup/viresta/about-system.sh
+source "$SETUP_DIR/viresta/about-system.sh"
 
 # ------------------------------------------------------------
 # Install
