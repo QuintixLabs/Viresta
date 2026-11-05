@@ -167,6 +167,7 @@ main() {
 
     step "Stopping Viresta's services"
     systemctl --user disable --now "$THEME_SYNC_UNIT" "$VICINAE_UNIT" >/dev/null 2>&1 || true
+    systemctl --user disable --now "$UPDATE_CHECK_UNIT" >/dev/null 2>&1 || true
 
     step "Removing Viresta's files"
     remove_viresta_files

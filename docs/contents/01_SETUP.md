@@ -41,6 +41,8 @@ If you make your changes somewhere else, like your main PC, commit and push them
 
 `./update.sh` stops if the Viresta folder has edits that aren't committed. If you edit on the VM, commit them first.
 
+Update alerts stay quiet on your branch, since they're only for people following releases.
+
 ## If something goes wrong
 
 To see everything on screen, add `--verbose`:

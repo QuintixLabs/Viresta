@@ -1,0 +1,7 @@
+[Unit]
+Description=Check for a new Viresta release
+PartOf=graphical-session.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/viresta-update-check

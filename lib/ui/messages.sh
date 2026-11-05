@@ -94,7 +94,7 @@ help_header() {
 }
 
 help_option() {
-    printf '  %b%-12s%b %s\n' "$C_OK" "$1" "$C_RESET" "$2"
+    printf '  %b%-*s%b %s\n' "$C_OK" "${HELP_OPTION_WIDTH:-12}" "$1" "$C_RESET" "$2"
 }
 
 help_note() {

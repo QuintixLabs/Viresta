@@ -10,3 +10,4 @@ kde-gtk-config
 kwallet-pam
 breeze
 breeze-gtk
+libnotify

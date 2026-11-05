@@ -46,6 +46,15 @@ To update, run this from the **Viresta** folder:
 ./update.sh
 ```
 
+Viresta also shows a notification once when a new release is out, and nothing updates until you click **Update** or run `./update.sh` yourself.
+
+To stop these notifications, click **Don't show again** on one or just turn them off or back on from the **Viresta** folder:
+
+```sh
+./update.sh --notifications-off
+./update.sh --notifications-on
+```
+
 ## 🗑️ Uninstalling
 
 To uninstall, run this from the **Viresta** folder:

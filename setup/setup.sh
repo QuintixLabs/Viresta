@@ -74,6 +74,8 @@ source "$SETUP_DIR/desktop/icons.sh"
 source "$SETUP_DIR/desktop/sound.sh"
 # shellcheck source=setup/desktop/power.sh
 source "$SETUP_DIR/desktop/power.sh"
+# shellcheck source=setup/desktop/update-check.sh
+source "$SETUP_DIR/desktop/update-check.sh"
 # shellcheck source=setup/login/sddm.sh
 source "$SETUP_DIR/login/sddm.sh"
 # shellcheck source=setup/apps/vicinae.sh
@@ -96,7 +98,7 @@ install_config_categories() {
 
     while IFS= read -r -d '' category; do
         case "$(basename "$category")" in
-            vicinae|sddm|icons|cursors|firefox|themes|profile|obs-studio|wallpapers|shell)
+            vicinae|sddm|icons|cursors|firefox|themes|profile|obs-studio|wallpapers|shell|updates)
                 # Installed by their own functions.
                 ;;
             kde)
@@ -190,6 +192,9 @@ install_configs() {
     # Power
     install_power_profile
 
+    # Update alerts
+    install_update_check
+
     # Default wallpaper
     configure_wallpaper
 
@@ -246,6 +251,9 @@ update_configs() {
 
     # Shell
     install_shell_setup
+
+    # Update alerts
+    install_update_check
 
     # Tracking
     track_kept_configs

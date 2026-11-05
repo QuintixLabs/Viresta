@@ -10,11 +10,15 @@ set -euo pipefail
 # ------------------------------------------------------------
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+SETUP_DIR="$SCRIPT_DIR/setup"
 LOG_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/viresta/update.log"
 FAILURE_LOG="${XDG_STATE_HOME:-$HOME/.local/state}/viresta/update-failures.log"
 UPDATE_NOTES_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/viresta/update-notes"
 DEV=0
+NOTIFICATIONS=""
 
+# shellcheck source=setup/shared/variables.sh
+source "$SETUP_DIR/shared/variables.sh"
 # shellcheck source=lib/load.sh
 source "$SCRIPT_DIR/lib/load.sh"
 # shellcheck source=lib/update/download.sh
@@ -29,8 +33,12 @@ TOTAL_STEPS=4
 # ------------------------------------------------------------
 
 usage() {
+    local HELP_OPTION_WIDTH=19
+
     help_header "./update.sh [options]"
     help_option "--dev" "Update to the latest commit instead of the newest release"
+    help_option "--notifications-off" "Stop alerting you about new releases, without updating"
+    help_option "--notifications-on" "Alert you about new releases again, without updating"
     help_option "--verbose" "Show everything on screen instead of only the steps"
     help_option "-h, --help" "Show this help"
     printf '\n'
@@ -39,6 +47,8 @@ usage() {
 for arg in "$@"; do
     case "$arg" in
         --dev) DEV=1 ;;
+        --notifications-off) NOTIFICATIONS=0 ;;
+        --notifications-on) NOTIFICATIONS=1 ;;
         --verbose) VERBOSE=1 ;;
         -h|--help) usage; exit 0 ;;
         *) printf 'Unknown option: %s\n\n' "$arg" >&2; usage; exit 2 ;;
@@ -49,6 +59,19 @@ done
 if ! viresta_is_installed; then
     printf 'Viresta is not installed. Run ./install.sh first.\n' >&2
     exit 1
+fi
+
+# Only changes the setting. Turning alerts on also forgets the last one, so someone who
+# turned them off and came back still hears about a release they have not installed.
+if [ -n "$NOTIFICATIONS" ]; then
+    save_option update_notifications "$NOTIFICATIONS"
+    if [ "$NOTIFICATIONS" -eq 1 ]; then
+        rm -f -- "$NOTIFIED_VERSION_FILE"
+        printf 'Update notifications are on.\n'
+    else
+        printf 'Update notifications are off.\n'
+    fi
+    exit 0
 fi
 
 start_script

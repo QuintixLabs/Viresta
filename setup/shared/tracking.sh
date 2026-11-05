@@ -23,6 +23,8 @@ track_other_files() {
     track "$PLASMA_STYLES_DIR/viresta-dark"
     track "$PLASMA_STYLES_DIR/viresta-light"
     track "$CONFIG_DIR/systemd/user/graphical-session.target.wants/$THEME_SYNC_UNIT"
+    track "$UPDATE_CHECK_SCRIPT"
+    track "$CONFIG_DIR/systemd/user/graphical-session.target.wants/$UPDATE_CHECK_UNIT"
     track "$VICINAE_UNIT_LINK"
     track "$ICONS_DIR/$ICON_THEME"
     track "$ICONS_DIR/$ICON_THEME_LIGHT"

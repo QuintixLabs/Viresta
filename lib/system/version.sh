@@ -24,6 +24,24 @@ newest_release() {
     git -C "$SCRIPT_DIR" tag --list 'v[0-9]*' --sort=-v:refname 2>/dev/null | sed -n 1p
 }
 
+# Asks GitHub without changing the folder. Only plain numbers count, since the result is
+# shown to the user. It never waits for a password, as nobody is there to type one.
+newest_online_release() {
+    GIT_TERMINAL_PROMPT=0 timeout 30 git -C "$SCRIPT_DIR" ls-remote --tags --refs origin 2>/dev/null \
+        | sed -n 's|.*refs/tags/\(v[0-9][0-9.]*\)$|\1|p' \
+        | sort -V \
+        | tail -n 1
+}
+
+# Someone on another branch is there to test it, so releases are not for them. A release
+# leaves the folder on its tag, which has no branch at all.
+follows_releases() {
+    local branch
+
+    branch="$(git -C "$SCRIPT_DIR" symbolic-ref -q --short HEAD || true)"
+    [ -z "$branch" ] || [ "$branch" = "$DEV_BRANCH" ]
+}
+
 # An older folder has no VERSION file, so any release counts as newer.
 is_newer_version() {
     local new="$1" current="$2"
@@ -45,14 +63,10 @@ is_newer_version() {
 # releases, or local edits to keep, this folder is installed as it is. So is any other
 # branch, since someone on one is there to test it.
 use_newest_release() {
-    local release branch
+    local release
 
     git -C "$SCRIPT_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1 || return 0
-
-    branch="$(git -C "$SCRIPT_DIR" symbolic-ref -q --short HEAD || true)"
-    if [ -n "$branch" ] && [ "$branch" != "$DEV_BRANCH" ]; then
-        return 0
-    fi
+    follows_releases || return 0
 
     git -C "$SCRIPT_DIR" fetch -q --tags origin >/dev/null 2>&1 || true
     release="$(newest_release)"

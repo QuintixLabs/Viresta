@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+
+# viresta-update-check
+# Tells the user once about each new Viresta release. It never updates by itself.
+# Started by viresta-update-check.timer. If anything is missing, like the internet, it
+# stays quiet and the next check tries again.
+
+set -euo pipefail
+
+# ------------------------------------------------------------
+# Settings
+# ------------------------------------------------------------
+
+FOLDER_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/viresta/folder"
+
+# The folder can be moved or deleted. Running ./update.sh from a new place saves it again.
+SCRIPT_DIR="$(cat "$FOLDER_FILE" 2>/dev/null)" || exit 0
+SETUP_DIR="$SCRIPT_DIR/setup"
+
+if [ ! -f "$SETUP_DIR/shared/variables.sh" ] || [ ! -f "$SCRIPT_DIR/lib/system/version.sh" ]; then
+    exit 0
+fi
+
+# shellcheck source=setup/shared/variables.sh
+source "$SETUP_DIR/shared/variables.sh"
+# shellcheck source=lib/system/version.sh
+source "$SCRIPT_DIR/lib/system/version.sh"
+
+load_saved_options
+
+# ------------------------------------------------------------
+# Check
+# ------------------------------------------------------------
+
+[ "$USE_UPDATE_NOTIFICATIONS" -eq 1 ] || exit 0
+command -v notify-send >/dev/null 2>&1 || exit 0
+follows_releases || exit 0
+
+release="$(newest_online_release)" || exit 0
+[ -n "$release" ] || exit 0
+version="${release#v}"
+
+is_newer_version "$version" "$(viresta_version)" || exit 0
+[ "$(cat "$NOTIFIED_VERSION_FILE" 2>/dev/null)" != "$version" ] || exit 0
+
+# ------------------------------------------------------------
+# Alert
+# ------------------------------------------------------------
+
+# Waits for the user, and stays on screen so the buttons can still be used. If the session
+# ends first, nothing is saved, so the next login alerts again.
+action="$(notify-send \
+    --app-name=Viresta \
+    --icon=system-software-update \
+    --expire-time=0 \
+    --action=update=Update \
+    --action=off="Don't show again" \
+    "Viresta $version is available")" || exit 0
+
+printf '%s\n' "$version" >"$NOTIFIED_VERSION_FILE"
+
+case "$action" in
+    update) exec kitty --hold --directory "$SCRIPT_DIR" "$SCRIPT_DIR/update.sh" ;;
+    off) save_option update_notifications 0 ;;
+esac

@@ -13,6 +13,8 @@
 USE_VICINAE=1
 USE_RENAME_WALLPAPERS=1
 USE_DRIVERS=1
+# Not in the menu. ./update.sh --notifications-off and --notifications-on change it.
+USE_UPDATE_NOTIFICATIONS=1
 # "update" leaves out what belongs to the user and merges the shared configs.
 SETUP_MODE="install"
 
@@ -32,6 +34,7 @@ VICINAE_SOURCE_DIR="$CONFIG_SOURCE_DIR/vicinae"
 SDDM_SOURCE_DIR="$CONFIG_SOURCE_DIR/sddm"
 WALLPAPERS_SOURCE_DIR="$CONFIG_SOURCE_DIR/wallpapers"
 SHELL_SOURCE_DIR="$CONFIG_SOURCE_DIR/shell"
+UPDATE_CHECK_SOURCE="$CONFIG_SOURCE_DIR/updates/viresta-update-check"
 
 # ------------------------------------------------------------
 # User folders
@@ -54,6 +57,15 @@ BASE_DIR="$VIRESTA_STATE_DIR/base"
 BACKUP_DIR="$VIRESTA_STATE_DIR/backup"
 UPDATE_NOTES_FILE="$VIRESTA_STATE_DIR/update-notes"
 BASHRC_ADDED_FILE="$VIRESTA_STATE_DIR/bashrc-added"
+VIRESTA_FOLDER_FILE="$VIRESTA_STATE_DIR/folder"
+NOTIFIED_VERSION_FILE="$VIRESTA_STATE_DIR/notified-version"
+
+# ------------------------------------------------------------
+# Update alerts
+# ------------------------------------------------------------
+
+UPDATE_CHECK_SCRIPT="$HOME/.local/bin/viresta-update-check"
+UPDATE_CHECK_UNIT="viresta-update-check.timer"
 
 # ------------------------------------------------------------
 # Plasma
@@ -224,4 +236,18 @@ load_saved_options() {
             printf -v "USE_${option^^}" '%s' "$value"
         fi
     done <"$SAVED_OPTIONS_FILE"
+}
+
+# Changes one option and leaves the others as they are.
+save_option() {
+    local kept
+
+    mkdir -p "$(dirname "$SAVED_OPTIONS_FILE")"
+    kept="$(grep -v "^$1=" "$SAVED_OPTIONS_FILE" 2>/dev/null || true)"
+    {
+        if [ -n "$kept" ]; then
+            printf '%s\n' "$kept"
+        fi
+        printf '%s=%s\n' "$1" "$2"
+    } >"$SAVED_OPTIONS_FILE"
 }
