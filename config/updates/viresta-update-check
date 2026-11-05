@@ -26,6 +26,9 @@ source "$SETUP_DIR/shared/variables.sh"
 # shellcheck source=lib/system/version.sh
 source "$SCRIPT_DIR/lib/system/version.sh"
 
+# A folder from before the alerts existed, like one moved back to an older release.
+declare -F load_saved_options follows_releases newest_online_release >/dev/null || exit 0
+
 load_saved_options
 
 # ------------------------------------------------------------
