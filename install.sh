@@ -36,10 +36,15 @@ usage() {
     printf '\n'
 }
 
+# Every variable starting with USE_, so a new option is saved without being listed here.
 save_options() {
+    local name option
+
     mkdir -p "$(dirname "$SAVED_OPTIONS_FILE")"
-    printf 'vicinae=%s\nrename_wallpapers=%s\ndrivers=%s\n' \
-        "$USE_VICINAE" "$USE_RENAME_WALLPAPERS" "$USE_DRIVERS" >"$SAVED_OPTIONS_FILE"
+    for name in $(compgen -v USE_); do
+        option="${name#USE_}"
+        printf '%s=%s\n' "${option,,}" "${!name}"
+    done >"$SAVED_OPTIONS_FILE"
 }
 
 load_saved_options

@@ -9,23 +9,12 @@
 # ------------------------------------------------------------
 
 # What is ticked in the install menu. What the user chose last time is read over these.
+# Anything starting with USE_ is saved as an option, so only options should start with it.
 USE_VICINAE=1
 USE_RENAME_WALLPAPERS=1
 USE_DRIVERS=1
 # "update" leaves out what belongs to the user and merges the shared configs.
 SETUP_MODE="install"
-
-load_saved_options() {
-    if grep -qx 'vicinae=0' "$SAVED_OPTIONS_FILE" 2>/dev/null; then
-        USE_VICINAE=0
-    fi
-    if grep -qx 'rename_wallpapers=0' "$SAVED_OPTIONS_FILE" 2>/dev/null; then
-        USE_RENAME_WALLPAPERS=0
-    fi
-    if grep -qx 'drivers=0' "$SAVED_OPTIONS_FILE" 2>/dev/null; then
-        USE_DRIVERS=0
-    fi
-}
 
 # ------------------------------------------------------------
 # Repository
@@ -219,3 +208,20 @@ FASTFETCH_DIR="$CONFIG_DIR/fastfetch"
 OBS_CONFIG_FILE="$CONFIG_DIR/obs-studio/user.ini"
 OBS_DESKTOP_SOURCE="/usr/share/applications/com.obsproject.Studio.desktop"
 OBS_DESKTOP_FILE="$DATA_DIR/applications/com.obsproject.Studio.desktop"
+
+# ------------------------------------------------------------
+# Saved options
+# ------------------------------------------------------------
+
+# A line like vicinae=0 sets USE_VICINAE=0. A damaged line is skipped.
+load_saved_options() {
+    local option value
+
+    [ -f "$SAVED_OPTIONS_FILE" ] || return 0
+
+    while IFS='=' read -r option value || [ -n "$option" ]; do
+        if [[ "$option" =~ ^[a-z_]+$ && "$value" =~ ^[01]$ ]]; then
+            printf -v "USE_${option^^}" '%s' "$value"
+        fi
+    done <"$SAVED_OPTIONS_FILE"
+}
