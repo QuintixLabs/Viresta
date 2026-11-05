@@ -2,12 +2,14 @@ name: Draft release
 
 # Runs when the number in VERSION changes. A draft has no tag yet, so update.sh does not
 # see it. Publishing it on GitHub creates the tag, and that is what sends it to users.
+# It can also be run from the Actions tab, to make a deleted draft again.
 on:
   push:
     branches:
       - master
     paths:
       - VERSION
+  workflow_dispatch:
 
 jobs:
   draft:
@@ -43,9 +45,19 @@ jobs:
             if [ -z "$previous" ]; then
               echo "First release of Viresta."
             else
-              echo "## What's Changed"
-              git log --no-merges --pretty='- %s' "$previous..HEAD"
-              echo
+              # The commit that changes VERSION means nothing to users.
+              commits="$(git log --no-merges --invert-grep --grep='^chore: release ' --pretty='%s' "$previous..HEAD")"
+              type='(\([^)]*\))?!?:'
+
+              # The heading already says the type, so it is left out of each line.
+              features="$(grep -E "^feat$type" <<<"$commits" | sed -E "s/^feat$type *//; s/^./\U&/; s/^/- /" || true)"
+              fixes="$(grep -E "^fix$type" <<<"$commits" | sed -E "s/^fix$type *//; s/^./\U&/; s/^/- /" || true)"
+              other="$(grep -Ev "^(feat|fix)$type" <<<"$commits" | sed 's/^/- /' || true)"
+
+              if [ -n "$features" ]; then printf '## ✨ New features\n%s\n\n' "$features"; fi
+              if [ -n "$fixes" ]; then printf '## 🐛 Fixes\n%s\n\n' "$fixes"; fi
+              if [ -n "$other" ]; then printf '## 📝 Other\n%s\n\n' "$other"; fi
+
               echo "## Contributors"
               gh api --paginate "repos/$GITHUB_REPOSITORY/compare/$previous...$GITHUB_SHA" \
                 --jq '.commits[].author.login // empty' \
