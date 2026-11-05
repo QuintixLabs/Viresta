@@ -10,18 +10,16 @@ set -euo pipefail
 # ------------------------------------------------------------
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+SETUP_DIR="$SCRIPT_DIR/setup"
 DRY_RUN=0
-INSTALL_VICINAE=1
-INSTALL_RENAME_WALLPAPERS=1
-INSTALL_DRIVERS=1
 DRIVERS_STEP=1
-# Read by setup/setup.sh too.
-SAVED_OPTIONS_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/viresta/options"
 
 # ------------------------------------------------------------
 # Libraries
 # ------------------------------------------------------------
 
+# shellcheck source=setup/shared/variables.sh
+source "$SETUP_DIR/shared/variables.sh"
 # shellcheck source=lib/load.sh
 source "$SCRIPT_DIR/lib/load.sh"
 
@@ -38,22 +36,10 @@ usage() {
     printf '\n'
 }
 
-load_saved_options() {
-    if grep -qx 'vicinae=0' "$SAVED_OPTIONS_FILE" 2>/dev/null; then
-        INSTALL_VICINAE=0
-    fi
-    if grep -qx 'rename_wallpapers=0' "$SAVED_OPTIONS_FILE" 2>/dev/null; then
-        INSTALL_RENAME_WALLPAPERS=0
-    fi
-    if grep -qx 'drivers=0' "$SAVED_OPTIONS_FILE" 2>/dev/null; then
-        INSTALL_DRIVERS=0
-    fi
-}
-
 save_options() {
     mkdir -p "$(dirname "$SAVED_OPTIONS_FILE")"
     printf 'vicinae=%s\nrename_wallpapers=%s\ndrivers=%s\n' \
-        "$INSTALL_VICINAE" "$INSTALL_RENAME_WALLPAPERS" "$INSTALL_DRIVERS" >"$SAVED_OPTIONS_FILE"
+        "$USE_VICINAE" "$USE_RENAME_WALLPAPERS" "$USE_DRIVERS" >"$SAVED_OPTIONS_FILE"
 }
 
 load_saved_options
@@ -88,21 +74,21 @@ ask_options() {
 
     drivers="$(drivers_summary)"
 
-    add_option vicinae "Vicinae" "Faster, better looking app launcher than KDE's own" "$INSTALL_VICINAE" "Applications"
-    add_option rename_wallpapers "rename_wallpapers.py" "Renames your wallpapers in ~/Pictures/Wallpapers" "$INSTALL_RENAME_WALLPAPERS" "Scripts"
+    add_option vicinae "Vicinae" "Faster, better looking app launcher than KDE's own" "$USE_VICINAE" "Applications"
+    add_option rename_wallpapers "rename_wallpapers.py" "Renames your wallpapers in ~/Pictures/Wallpapers" "$USE_RENAME_WALLPAPERS" "Scripts"
     if [ -n "$drivers" ]; then
-        add_option drivers "Install drivers" "$drivers" "$INSTALL_DRIVERS" "Drivers"
+        add_option drivers "Install drivers" "$drivers" "$USE_DRIVERS" "Drivers"
     fi
 
     choose_options
 
-    INSTALL_VICINAE=0
-    if option_enabled vicinae; then INSTALL_VICINAE=1; fi
-    INSTALL_RENAME_WALLPAPERS=0
-    if option_enabled rename_wallpapers; then INSTALL_RENAME_WALLPAPERS=1; fi
+    USE_VICINAE=0
+    if option_enabled vicinae; then USE_VICINAE=1; fi
+    USE_RENAME_WALLPAPERS=0
+    if option_enabled rename_wallpapers; then USE_RENAME_WALLPAPERS=1; fi
     if [ -n "$drivers" ]; then
-        INSTALL_DRIVERS=0
-        if option_enabled drivers; then INSTALL_DRIVERS=1; fi
+        USE_DRIVERS=0
+        if option_enabled drivers; then USE_DRIVERS=1; fi
     fi
 
     save_options
@@ -110,7 +96,7 @@ ask_options() {
 
 # Decided here and not at the top, since the step count depends on the menu.
 plan_drivers() {
-    if [ "$INSTALL_DRIVERS" -eq 0 ] || [ -z "$(missing_drivers)" ]; then
+    if [ "$USE_DRIVERS" -eq 0 ] || [ -z "$(missing_drivers)" ]; then
         DRIVERS_STEP=0
         TOTAL_STEPS=$((TOTAL_STEPS - 1))
     fi
@@ -233,7 +219,7 @@ main() {
 
     step "Setting up your desktop"
     configure_networkmanager
-    if [ "$INSTALL_DRIVERS" -eq 1 ]; then
+    if [ "$USE_DRIVERS" -eq 1 ]; then
         configure_driver_services
     fi
     configure_sddm

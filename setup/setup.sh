@@ -257,12 +257,7 @@ update_configs() {
 # ------------------------------------------------------------
 
 # What the user chose in install.sh also applies when this is run by hand.
-if grep -qx 'vicinae=0' "$SAVED_OPTIONS_FILE" 2>/dev/null; then
-    USE_VICINAE=0
-fi
-if grep -qx 'rename_wallpapers=0' "$SAVED_OPTIONS_FILE" 2>/dev/null; then
-    USE_RENAME_WALLPAPERS=0
-fi
+load_saved_options
 
 for arg in "$@"; do
     case "$arg" in

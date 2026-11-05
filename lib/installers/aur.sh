@@ -115,7 +115,7 @@ install_aur() {
         [ -n "$line" ] || continue
 
         pkg="$line"
-        if [ "$pkg" = "vicinae-bin" ] && [ "${INSTALL_VICINAE:-1}" -eq 0 ]; then
+        if [ "$pkg" = "vicinae-bin" ] && [ "${USE_VICINAE:-1}" -eq 0 ]; then
             continue
         fi
         aur_install_one "$pkg" || true

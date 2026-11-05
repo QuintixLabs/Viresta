@@ -8,11 +8,24 @@
 # Options
 # ------------------------------------------------------------
 
-# Set from what install.sh saved and the flags in setup.sh.
+# What is ticked in the install menu. What the user chose last time is read over these.
 USE_VICINAE=1
 USE_RENAME_WALLPAPERS=1
+USE_DRIVERS=1
 # "update" leaves out what belongs to the user and merges the shared configs.
 SETUP_MODE="install"
+
+load_saved_options() {
+    if grep -qx 'vicinae=0' "$SAVED_OPTIONS_FILE" 2>/dev/null; then
+        USE_VICINAE=0
+    fi
+    if grep -qx 'rename_wallpapers=0' "$SAVED_OPTIONS_FILE" 2>/dev/null; then
+        USE_RENAME_WALLPAPERS=0
+    fi
+    if grep -qx 'drivers=0' "$SAVED_OPTIONS_FILE" 2>/dev/null; then
+        USE_DRIVERS=0
+    fi
+}
 
 # ------------------------------------------------------------
 # Repository
