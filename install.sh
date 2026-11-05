@@ -177,8 +177,8 @@ main() {
     fi
 
     detect_hardware
-    if has_nvidia_to_install; then
-        warn "NVIDIA support is new and has not been tested on a real card yet. See the FAQ if the desktop does not start."
+    if has_hardware nvidia-580xx || has_hardware nvidia-laptop; then
+        warn "Your NVIDIA setup has not been tested on real hardware yet. See the FAQ if the desktop does not start."
     fi
     if has_hardware nvidia-old; then
         warn "Your NVIDIA card is too old for the current drivers, so it stays on nouveau."

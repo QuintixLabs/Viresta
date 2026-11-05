@@ -4,6 +4,12 @@
 # Knows which version this folder is on, and which release is the newest.
 
 # ------------------------------------------------------------
+# Settings
+# ------------------------------------------------------------
+
+DEV_BRANCH="master"
+
+# ------------------------------------------------------------
 # Versions
 # ------------------------------------------------------------
 
@@ -36,11 +42,17 @@ is_newer_version() {
 
 # A plain git clone is on the latest commit, which may not be ready for anyone yet. Bash
 # reads a script as it runs, so the release's own install.sh needs a fresh start. With no
-# releases, or local edits to keep, this folder is installed as it is.
+# releases, or local edits to keep, this folder is installed as it is. So is any other
+# branch, since someone on one is there to test it.
 use_newest_release() {
-    local release
+    local release branch
 
     git -C "$SCRIPT_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1 || return 0
+
+    branch="$(git -C "$SCRIPT_DIR" symbolic-ref -q --short HEAD || true)"
+    if [ -n "$branch" ] && [ "$branch" != "$DEV_BRANCH" ]; then
+        return 0
+    fi
 
     git -C "$SCRIPT_DIR" fetch -q --tags origin >/dev/null 2>&1 || true
     release="$(newest_release)"

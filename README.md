@@ -35,7 +35,6 @@ The installation script is designed for a minimal installation of a [supported d
 ```sh
 git clone https://github.com/QuintixLabs/Viresta.git
 cd Viresta
-chmod +x install.sh
 ./install.sh
 ```
 
@@ -104,7 +103,7 @@ sudo mkinitcpio -P
 sudo reboot
 ```
 
-Please open an issue too, since NVIDIA support is still new.
+Please open an issue too.
 </details>
 
 <details>
@@ -120,11 +119,6 @@ No. `./update.sh` keeps your changes and adds the new ones around them. If an up
 
 Yes. `./uninstall.sh` removes Viresta and leaves you with plain KDE. It asks if you want to remove the apps too.
 </details>
-
-## ⚠️ Known Issues
-- NVIDIA drivers haven't been tested on a real card yet
-
-
 
 ## 📄 License
 [![GNU GPLv3 Image](https://www.gnu.org/graphics/gplv3-127x51.png)](http://www.gnu.org/licenses/gpl-3.0.en.html)
