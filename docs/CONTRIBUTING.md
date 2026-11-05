@@ -22,7 +22,7 @@ Keep your changes focused and make sure they fit the project's existing code sty
 
 AI tools are allowed, but contributions must be reviewed and understood before submission.
 
-If you use AI, follow the [AI Usage Policy](../AI_POLICY.md).
+If you use AI, follow the [AI Usage Policy](/AI_POLICY.md).
 
 ## A Final Note
 
@@ -36,6 +36,6 @@ Thanks for taking the time to contribute.
 
 Once you've read all of this, continue with these:
 
-1. [Setup](contents/01_SETUP.md)
-2. [Committing](contents/02_COMMITING.md)
-3. [Releasing](contents/03_RELEASING.md)
+1. [Setup](/docs/contents/01_SETUP.md)
+2. [Committing](/docs/contents/02_COMMITING.md)
+3. [Releasing](/docs/contents/03_RELEASING.md)

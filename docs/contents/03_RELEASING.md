@@ -51,7 +51,7 @@ git commit -m "feat: add the thing"
 git push origin master
 ```
 
-See [Committing](02_COMMITING.md) for how to write the message, because it appears as written in the release notes.
+See [Committing](/docs/contents/02_COMMITING.md) for how to write the message, because it appears as written in the release notes.
 
 Then reset `dev` so it's ready for next time:
 

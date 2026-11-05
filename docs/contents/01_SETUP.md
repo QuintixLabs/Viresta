@@ -6,7 +6,7 @@ It's recommended to take a snapshot of your VM before you test. An update leaves
 
 ## What you need
 
-- A virtual machine with a minimal install of a [supported distro](../../README.md#-supported-distros) and no desktop
+- A virtual machine with a minimal install of a [supported distro](/README.md#-supported-distros) and no desktop
 - A regular user with sudo
 - Git and an internet connection
 
