@@ -4,45 +4,32 @@ This page is for maintainers. If you're contributing, you don't need any of this
 
 ## How it works
 
-There are two places the code lives:
-
-| | Forgejo | GitHub |
+| Branch | For | Commits |
 |---|---|---|
-| **For** | Testing | Users |
-| **Commits** | Anything, messy is fine | Only finished work |
-| **Main branch** | `dev` | `master` |
-| **Tags** | Never | Created by publishing a release |
+| `dev` | Testing | Anything, messy is fine |
+| `master` | Users | Only finished work |
 
-Forgejo must never have version tags. Without them, VMs cloned from it follow your latest commit instead of the newest release.
+Users only get what you publish as a release. Pushing to `dev` or `master` doesn't reach them.
 
-To set this up once, with `origin` pointing to Forgejo:
+Never make a version tag by hand. Publishing a release creates it, and `update.sh` follows tags.
 
-```sh
-git remote add github https://github.com/QuintixLabs/Viresta.git
-git switch -c dev
-git push -u origin dev
-```
+`dev` is public, so don't commit anything private to it.
 
-## Rules
+## Testing on dev
 
-- Never run `git push --tags` or `git push --mirror` to Forgejo.
-- Never push `dev` to GitHub. Only `master` goes there.
-- Never make a version tag by hand. Publishing a release creates it.
-
-## Testing your own changes
-
-Commit on `dev` and push to Forgejo:
+Commit your changes and push them:
 
 ```sh
 git switch dev
-git commit -am "test thing"
+git add -A
+git commit -m "test thing"
 git push origin dev
 ```
 
-On the VM, clone it once:
+On a VM, clone `dev` once and install it:
 
 ```sh
-git clone -b dev https://git.fr0st.xyz/fr0st/Viresta.git
+git clone -b dev https://github.com/QuintixLabs/Viresta.git
 cd Viresta
 ./install.sh
 ```
@@ -53,7 +40,7 @@ After that, get your new commits with:
 ./update.sh --dev
 ```
 
-## Moving finished work to GitHub
+## Moving finished work to master
 
 When it works, turn it into one clean commit:
 
@@ -61,7 +48,6 @@ When it works, turn it into one clean commit:
 git switch master
 git merge --squash dev
 git commit -m "feat: add the thing"
-git push github master
 git push origin master
 ```
 
@@ -75,52 +61,45 @@ git reset --hard master
 git push --force origin dev
 ```
 
+After this, VMs on `dev` can't update normally. Go back to a clean snapshot and clone again, or run this on the VM:
+
+```sh
+git fetch origin
+git reset --hard origin/dev
+```
+
 ## Testing a pull request
 
-Copy it to Forgejo, using the pull request's number:
+On a VM, using the pull request's number:
 
 ```sh
-git fetch github pull/123/head:pr-123
-git push origin pr-123
-```
-
-On the VM:
-
-```sh
-git clone -b pr-123 https://git.fr0st.xyz/fr0st/Viresta.git
+git clone https://github.com/QuintixLabs/Viresta.git
 cd Viresta
+git fetch origin pull/123/head:pr-123
+git switch pr-123
 ./install.sh
-```
-
-Nothing on GitHub changes. When you're done, delete the copy:
-
-```sh
-git branch -D pr-123
-git push origin --delete pr-123
 ```
 
 ## Merging a pull request
 
-Use **Squash and merge** on GitHub, so it lands as one clean commit. Then bring it to your PC and Forgejo:
+Use **Squash and merge** on GitHub, so it lands as one clean commit. Then bring it to your PC:
 
 ```sh
 git switch master
-git pull github master
-git push origin master
+git pull origin master
 ```
 
 ## Publishing a release
 
-Make sure everything for the release is already on GitHub's `master`, because the draft is tied to the commit that changes the version.
+Test everything on `dev` first, and make sure it's on `master`, because the draft is tied to the commit that changes the version.
 
 1. Change the number in `VERSION`, like `1.1.0`, with no `v`.
-2. Commit and push it to GitHub:
+2. Commit and push it:
 
    ```sh
    git switch master
    git add VERSION
    git commit -m "chore: release 1.1.0"
-   git push github master
    git push origin master
    ```
 
@@ -128,7 +107,7 @@ Make sure everything for the release is already on GitHub's `master`, because th
 4. Edit the notes. Remove anything that doesn't matter to users.
 5. Click **Publish release**. This creates the tag, and users can now update.
 
-Then check it on a clean VM cloned from GitHub:
+Then check it on a clean VM:
 
 ```sh
 git clone https://github.com/QuintixLabs/Viresta.git
