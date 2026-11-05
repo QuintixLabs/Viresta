@@ -1,0 +1,32 @@
+name: ShellCheck
+
+# Reads every script for common Bash mistakes, like a missing pair of quotes. It only
+# reads, so nothing in the repo changes, and a mistake shows as a red cross on the commit
+# or pull request.
+on:
+  push:
+    branches:
+      - dev
+      - master
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      # Scripts without .sh are found by their first line. SC2034 is left out, since the
+      # scripts share variables between files and ShellCheck reads each file alone.
+      - name: Check the scripts
+        run: |
+          mapfile -t files < <(git ls-files | while IFS= read -r file; do
+            case "$file" in
+              *.sh|*.bash) printf '%s\n' "$file" ;;
+              *) if head -n 1 "$file" 2>/dev/null | grep -q '^#!.*bash'; then printf '%s\n' "$file"; fi ;;
+            esac
+          done)
+          shellcheck --version
+          shellcheck -x -S warning -e SC2034 "${files[@]}"

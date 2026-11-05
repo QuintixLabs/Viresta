@@ -54,6 +54,8 @@ run_pacman() {
     args+=("$@")
 
     if [ "$VERBOSE" -eq 0 ]; then
+        # The log belongs to the user, so it is written as the user on purpose.
+        # shellcheck disable=SC2024
         sudo "${args[@]}" >>"$LOG_FILE" 2>&1 </dev/null
         return
     fi

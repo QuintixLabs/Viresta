@@ -118,6 +118,8 @@ setup_nvidia_boot() {
 
     info "Rebuilding the boot image for the NVIDIA driver"
     printf 'HOOKS=(${HOOKS[@]/kms/})\n' | sudo install -Dm644 /dev/stdin "$NVIDIA_MKINITCPIO_CONF"
+    # The log belongs to the user, so it is written as the user on purpose.
+    # shellcheck disable=SC2024
     if ! sudo mkinitcpio -P >>"$LOG_FILE" 2>&1; then
         failure "Could not rebuild the boot image. To try again: sudo mkinitcpio -P"
         return 1
