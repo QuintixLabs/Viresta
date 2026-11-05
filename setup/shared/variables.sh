@@ -29,6 +29,7 @@ CURSORS_ARCHIVE="$CONFIG_SOURCE_DIR/cursors/$CURSOR_THEME.tar.xz"
 VICINAE_SOURCE_DIR="$CONFIG_SOURCE_DIR/vicinae"
 SDDM_SOURCE_DIR="$CONFIG_SOURCE_DIR/sddm"
 WALLPAPERS_SOURCE_DIR="$CONFIG_SOURCE_DIR/wallpapers"
+SHELL_SOURCE_DIR="$CONFIG_SOURCE_DIR/shell"
 
 # ------------------------------------------------------------
 # User folders
@@ -50,6 +51,7 @@ INSTALLED_FILES="$VIRESTA_STATE_DIR/installed-files"
 BASE_DIR="$VIRESTA_STATE_DIR/base"
 BACKUP_DIR="$VIRESTA_STATE_DIR/backup"
 UPDATE_NOTES_FILE="$VIRESTA_STATE_DIR/update-notes"
+BASHRC_ADDED_FILE="$VIRESTA_STATE_DIR/bashrc-added"
 
 # ------------------------------------------------------------
 # Plasma

@@ -65,6 +65,10 @@ list_replaced_configs() {
             "$POWER_CONFIG_FILE" \
             "$CONFIG_DIR/kactivitymanagerdrc" \
             "$STATE_DIR/kactivitymanagerdstaterc"
+        case "$(login_shell)" in
+            bash) printf '%s\n' "$CONFIG_DIR/starship.toml" "$HOME/.blerc" ;;
+            fish) printf '%s\n' "$CONFIG_DIR/starship.toml" "$CONFIG_DIR/fish/conf.d/viresta.fish" ;;
+        esac
     } | while IFS= read -r source; do
         if [ -e "$source" ]; then
             printf '%s\n' "$source"

@@ -8,7 +8,7 @@
 # ------------------------------------------------------------
 
 # Exist only for Viresta, so they go whatever the answer about apps is.
-VIRESTA_PACKAGES=(vicinae-bin plasma6-applets-panel-colorizer)
+VIRESTA_PACKAGES=(vicinae-bin plasma6-applets-panel-colorizer starship blesh-git)
 
 # ------------------------------------------------------------
 # Removing

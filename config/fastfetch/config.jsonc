@@ -69,7 +69,7 @@
         {
             "type": "cpu",
             "format": "{1}",
-            "key": "   CPU",
+            "key": "   CPU",
             "keyColor": "blue"
         },
         {

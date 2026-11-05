@@ -60,6 +60,8 @@ install_tree() {
 
 # shellcheck source=setup/shared/tracking.sh
 source "$SETUP_DIR/shared/tracking.sh"
+# shellcheck source=setup/shared/shell.sh
+source "$SETUP_DIR/shared/shell.sh"
 # shellcheck source=setup/desktop/plasma.sh
 source "$SETUP_DIR/desktop/plasma.sh"
 # shellcheck source=setup/desktop/themes.sh
@@ -82,6 +84,8 @@ source "$SETUP_DIR/apps/firefox.sh"
 source "$SETUP_DIR/apps/fastfetch.sh"
 # shellcheck source=setup/apps/obs.sh
 source "$SETUP_DIR/apps/obs.sh"
+# shellcheck source=setup/apps/shell.sh
+source "$SETUP_DIR/apps/shell.sh"
 
 # ------------------------------------------------------------
 # Install
@@ -92,7 +96,7 @@ install_config_categories() {
 
     while IFS= read -r -d '' category; do
         case "$(basename "$category")" in
-            vicinae|sddm|icons|cursors|firefox|themes|profile|obs-studio|wallpapers)
+            vicinae|sddm|icons|cursors|firefox|themes|profile|obs-studio|wallpapers|shell)
                 # Installed by their own functions.
                 ;;
             kde)
@@ -177,6 +181,9 @@ install_configs() {
     install_obs_config
     install_obs_launcher
 
+    # Shell
+    install_shell_setup
+
     # Sound
     install_notification_volume
 
@@ -236,6 +243,9 @@ update_configs() {
 
     # OBS
     install_obs_launcher
+
+    # Shell
+    install_shell_setup
 
     # Tracking
     track_kept_configs

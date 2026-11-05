@@ -103,6 +103,7 @@ main() {
     step "Installing new packages"
     install_new_repo_packages
     install_new_aur_packages
+    install_shell_packages
 
     step "Updating Viresta"
     configure_kde_configs --update

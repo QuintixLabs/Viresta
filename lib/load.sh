@@ -25,6 +25,10 @@ source "$SCRIPT_DIR/lib/system/services.sh"
 source "$SCRIPT_DIR/lib/installers/pacman.sh"
 # shellcheck source=lib/installers/aur.sh
 source "$SCRIPT_DIR/lib/installers/aur.sh"
+# shellcheck source=setup/shared/shell.sh
+source "$SCRIPT_DIR/setup/shared/shell.sh"
+# shellcheck source=lib/installers/shell.sh
+source "$SCRIPT_DIR/lib/installers/shell.sh"
 # shellcheck source=lib/drivers/hardware/detect.sh
 source "$SCRIPT_DIR/lib/drivers/hardware/detect.sh"
 # shellcheck source=lib/drivers/hardware/list.sh

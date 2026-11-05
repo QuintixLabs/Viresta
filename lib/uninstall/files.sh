@@ -64,6 +64,14 @@ remove_notification_volume() {
     printf '%s\n' "$kept" >"$WIREPLUMBER_STREAMS_FILE"
 }
 
+# Only Viresta's lines. If that leaves nothing, the file was only there for them.
+remove_bash_setup() {
+    remove_bashrc_lines
+    if [ -f "$BASHRC_FILE" ] && [ ! -s "$BASHRC_FILE" ]; then
+        rm -f -- "$BASHRC_FILE"
+    fi
+}
+
 # Without a theme set, SDDM would fall back to its plain built-in login screen. This
 # is the file KDE's own login screen settings write to.
 set_kde_login_theme() {
@@ -80,6 +88,7 @@ remove_viresta_files() {
     remove_installed_files
     remove_kde_theme_files
     remove_notification_volume
+    remove_bash_setup
     set_kde_login_theme
 }
 

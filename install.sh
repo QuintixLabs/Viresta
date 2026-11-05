@@ -220,6 +220,7 @@ main() {
     else
         warn "paru unavailable; skipping AUR packages"
     fi
+    install_shell_packages
 
     if [ "$DRIVERS_STEP" -eq 1 ]; then
         step "Installing drivers"

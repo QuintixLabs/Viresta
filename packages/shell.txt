@@ -1,0 +1,5 @@
+# What each shell needs, going by the user's login shell. Other shells get nothing.
+# shell    package
+bash       starship
+bash       blesh-git
+fish       starship
