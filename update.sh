@@ -15,6 +15,7 @@ LOG_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/viresta/update.log"
 FAILURE_LOG="${XDG_STATE_HOME:-$HOME/.local/state}/viresta/update-failures.log"
 UPDATE_NOTES_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/viresta/update-notes"
 DEV=0
+CHECK=0
 NOTIFICATIONS=""
 
 # shellcheck source=setup/shared/variables.sh
@@ -37,6 +38,7 @@ usage() {
 
     help_header "${VIRESTA_RUN_AS:-./update.sh} [options]"
     help_option "--dev" "Update to the latest commit instead of the newest release"
+    help_option "--check" "Only say whether a new release is out, without updating"
     help_option "--notifications-off" "Stop alerting you about new releases, without updating"
     help_option "--notifications-on" "Alert you about new releases again, without updating"
     help_option "--verbose" "Show everything on screen instead of only the steps"
@@ -47,6 +49,7 @@ usage() {
 for arg in "$@"; do
     case "$arg" in
         --dev) DEV=1 ;;
+        --check) CHECK=1 ;;
         --notifications-off) NOTIFICATIONS=0 ;;
         --notifications-on) NOTIFICATIONS=1 ;;
         --verbose) VERBOSE=1 ;;
@@ -70,6 +73,22 @@ if [ -n "$NOTIFICATIONS" ]; then
         printf 'Update notifications are on.\n'
     else
         printf 'Update notifications are off.\n'
+    fi
+    exit 0
+fi
+
+# Asks GitHub the same way the alerts do, so nothing in the folder changes.
+if [ "$CHECK" -eq 1 ]; then
+    current="$(viresta_version)"
+    if ! release="$(newest_online_release)"; then
+        printf 'Could not check for a new release. Check your internet connection.\n' >&2
+        exit 1
+    fi
+    if [ -n "$release" ] && is_newer_version "${release#v}" "$current"; then
+        printf "Viresta %s is out. You're on %s. Run %s to get it.\n" \
+            "${release#v}" "${current:-an older version}" "${VIRESTA_RUN_AS:-./update.sh}"
+    else
+        printf 'Viresta is up to date%s.\n' "${current:+ (v$current)}"
     fi
     exit 0
 fi

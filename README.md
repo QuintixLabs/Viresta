@@ -46,6 +46,8 @@ To update, run this from anywhere:
 viresta update
 ```
 
+To only check whether a new release is out, without updating, add `--check`.
+
 Viresta also shows a notification once when a new release is out, and nothing updates until you click **Update** or run `viresta update` yourself.
 
 To stop these notifications, click **Don't show again** on one or just turn them off or back on with:
