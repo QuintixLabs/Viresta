@@ -84,7 +84,7 @@ banner() {
     fi
     printf '\n\n'
     printf '%bThe clean, stable and user-friendly dots for everyone!%b\n' "$C_DIM" "$C_RESET"
-    printf '%b------------------------------------------------------%b\n' "$C_DIM" "$C_RESET"
+    hr
     printf '\n'
 }
 
@@ -155,8 +155,9 @@ die() {
     exit 1
 }
 
+# As wide as the banner's tagline, so every line on screen matches.
 hr() {
-    printf '%b------------------------------------------------------------%b\n' "$C_DIM" "$C_RESET"
+    printf '%b------------------------------------------------------%b\n' "$C_DIM" "$C_RESET"
 }
 
 # ------------------------------------------------------------
