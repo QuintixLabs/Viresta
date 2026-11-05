@@ -28,7 +28,7 @@ source "$SCRIPT_DIR/lib/load.sh"
 # ------------------------------------------------------------
 
 usage() {
-    help_header "./install.sh [options]"
+    help_header "${VIRESTA_RUN_AS:-./install.sh} [options]"
     help_option "--dry-run" "Show what would be done without changing anything"
     help_option "--logs" "Show what failed in the last install, without installing anything"
     help_option "--verbose" "Show everything on screen instead of only the steps"

@@ -34,7 +34,7 @@ TOTAL_STEPS=6
 # ------------------------------------------------------------
 
 usage() {
-    help_header "./uninstall.sh [options]"
+    help_header "${VIRESTA_RUN_AS:-./uninstall.sh} [options]"
     help_option "--dry-run" "Show what would be removed without changing anything"
     help_option "--verbose" "Show everything on screen instead of only the steps"
     help_option "-h, --help" "Show this help"

@@ -71,6 +71,8 @@ case "${1:-}" in
     install|update|uninstall)
         find_folder
         script="$folder/$1.sh"
+        # So the script's help says viresta update instead of ./update.sh.
+        export VIRESTA_RUN_AS="viresta $1"
         shift
         exec bash "$script" "$@"
         ;;

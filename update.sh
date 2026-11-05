@@ -35,7 +35,7 @@ TOTAL_STEPS=4
 usage() {
     local HELP_OPTION_WIDTH=19
 
-    help_header "./update.sh [options]"
+    help_header "${VIRESTA_RUN_AS:-./update.sh} [options]"
     help_option "--dev" "Update to the latest commit instead of the newest release"
     help_option "--notifications-off" "Stop alerting you about new releases, without updating"
     help_option "--notifications-on" "Alert you about new releases again, without updating"
