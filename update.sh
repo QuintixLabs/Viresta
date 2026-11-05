@@ -13,6 +13,7 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 LOG_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/viresta/update.log"
 FAILURE_LOG="${XDG_STATE_HOME:-$HOME/.local/state}/viresta/update-failures.log"
 UPDATE_NOTES_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/viresta/update-notes"
+DEV=0
 
 # shellcheck source=lib/load.sh
 source "$SCRIPT_DIR/lib/load.sh"
@@ -29,6 +30,7 @@ TOTAL_STEPS=4
 
 usage() {
     help_header "./update.sh [options]"
+    help_option "--dev" "Update to the latest commit instead of the newest release"
     help_option "--verbose" "Show everything on screen instead of only the steps"
     help_option "-h, --help" "Show this help"
     printf '\n'
@@ -36,6 +38,7 @@ usage() {
 
 for arg in "$@"; do
     case "$arg" in
+        --dev) DEV=1 ;;
         --verbose) VERBOSE=1 ;;
         -h|--help) usage; exit 0 ;;
         *) printf 'Unknown option: %s\n\n' "$arg" >&2; usage; exit 2 ;;

@@ -1,12 +1,16 @@
-name: Publish release
+name: Draft release
 
+# Runs when the number in VERSION changes. A draft has no tag yet, so update.sh does not
+# see it. Publishing it on GitHub creates the tag, and that is what sends it to users.
 on:
   push:
-    tags:
-      - "v*"
+    branches:
+      - master
+    paths:
+      - VERSION
 
 jobs:
-  release:
+  draft:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -14,10 +18,41 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          fetch-tags: true
 
-      - name: Publish GitHub release
+      - name: Create the draft
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create "$GITHUB_REF_NAME" --generate-notes --title "$GITHUB_REF_NAME" || \
-            echo "Release $GITHUB_REF_NAME already exists"
+          version="$(tr -d '[:space:]' <VERSION)"
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "VERSION should look like 1.2.3, not: $version" >&2
+            exit 1
+          fi
+          tag="v$version"
+
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "$tag already has a release or a draft"
+            exit 0
+          fi
+
+          previous="$(git tag --list 'v[0-9]*' --sort=-v:refname | sed -n 1p)"
+          {
+            if [ -z "$previous" ]; then
+              echo "First release of Viresta."
+            else
+              echo "## What's Changed"
+              git log --no-merges --pretty='- %s' "$previous..HEAD"
+              echo
+              echo "## Contributors"
+              gh api --paginate "repos/$GITHUB_REPOSITORY/compare/$previous...$GITHUB_SHA" \
+                --jq '.commits[].author.login // empty' \
+                | grep -v '\[bot\]$' | sort -u | sed 's/^/- @/'
+              echo
+              echo "Full Changelog: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/compare/$previous...$tag"
+            fi
+          } >notes.md
+
+          gh release create "$tag" --draft --target "$GITHUB_SHA" --title "$tag" --notes-file notes.md

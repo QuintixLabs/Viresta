@@ -17,6 +17,8 @@ source "$SCRIPT_DIR/lib/ui/menu.sh"
 source "$SCRIPT_DIR/lib/ui/failures.sh"
 # shellcheck source=lib/system/checks.sh
 source "$SCRIPT_DIR/lib/system/checks.sh"
+# shellcheck source=lib/system/version.sh
+source "$SCRIPT_DIR/lib/system/version.sh"
 # shellcheck source=lib/system/sudo.sh
 source "$SCRIPT_DIR/lib/system/sudo.sh"
 # shellcheck source=lib/system/services.sh

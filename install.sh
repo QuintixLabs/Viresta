@@ -70,6 +70,10 @@ for arg in "$@"; do
 done
 export DRY_RUN
 
+if [ "$DRY_RUN" -eq 0 ]; then
+    use_newest_release "$@"
+fi
+
 start_script
 
 # ------------------------------------------------------------
