@@ -7,15 +7,23 @@
 # Download
 # ------------------------------------------------------------
 
-# A release leaves the folder on its tag, which has no branch to pull from.
+# A release leaves the folder on its tag, which has no branch to pull from. If the
+# download then fails, the folder goes back to that tag, so nothing was changed.
 follow_latest_commit() {
+    local release=""
+
     if ! git -C "$SCRIPT_DIR" symbolic-ref -q HEAD >/dev/null; then
+        release="$(git -C "$SCRIPT_DIR" rev-parse HEAD)"
         git -C "$SCRIPT_DIR" checkout -q "$DEV_BRANCH" >>"$LOG_FILE" 2>&1 \
             || die "Could not switch to the latest commit. Nothing was changed."
     fi
 
-    git -C "$SCRIPT_DIR" pull --ff-only >>"$LOG_FILE" 2>&1 \
-        || die "Could not download the latest Viresta. Nothing was changed."
+    if ! git -C "$SCRIPT_DIR" pull --ff-only >>"$LOG_FILE" 2>&1; then
+        if [ -n "$release" ]; then
+            git -C "$SCRIPT_DIR" checkout -q "$release" >>"$LOG_FILE" 2>&1 || true
+        fi
+        die "Could not download the latest Viresta. Nothing was changed."
+    fi
 }
 
 # Only ever forwards, so someone on a newer commit is not moved back to an older release.
