@@ -33,4 +33,8 @@ If it helps, include the issue number:
 - Keep commits focused (don't mix unrelated stuff)
 - Push with a clear message
 
+## Your commits are public
+
+Your commit messages end up on the Releases page, sorted under headings by their type, so write them for the people using Viresta. For example, `fix: show the version in the prompt instead of HEAD` tells a user what changed, while `fix: stuff` doesn't.
+
 #### [03. Releasing ➔](/docs/contents/03_RELEASING.md)
