@@ -54,11 +54,12 @@ usage() {
 # ------------------------------------------------------------
 
 # Every install and update saves where the folder is, so a moved folder is found again
-# after running ./update.sh from its new place.
+# after running one of them from its new place. The message names the script that was
+# wanted, since that one works from there too.
 find_folder() {
     folder="$(cat "$FOLDER_FILE" 2>/dev/null || true)"
     if [ -z "$folder" ] || [ ! -f "$folder/update.sh" ]; then
-        printf "Can't find the Viresta folder. Run ./update.sh from where it is now.\n" >&2
+        printf "Can't find the Viresta folder. If you moved it, run ./%s.sh from its new place.\n" "$1" >&2
         exit 1
     fi
 }
@@ -69,7 +70,7 @@ find_folder() {
 
 case "${1:-}" in
     install|update|uninstall)
-        find_folder
+        find_folder "$1"
         script="$folder/$1.sh"
         # So the script's help says viresta update instead of ./update.sh.
         export VIRESTA_RUN_AS="viresta $1"
@@ -77,7 +78,7 @@ case "${1:-}" in
         exec bash "$script" "$@"
         ;;
     -v|--version)
-        find_folder
+        find_folder update
         printf 'Viresta %s\n' "$(tr -d '[:space:]' <"$folder/VERSION" 2>/dev/null || echo unknown)"
         ;;
     -h|--help|"")
