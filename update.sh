@@ -87,6 +87,9 @@ summary() {
     hr
     printf '%bUpdate complete%b\n' "$C_OK$C_BOLD" "$C_RESET"
     emit "$C_OK" "$S_OK Time taken: $(format_duration "$SECONDS")"
+    if [ -n "${VIRESTA_NEW_RELEASE:-}" ]; then
+        emit "$C_OK" "$S_OK See what's new: $RELEASES_URL/tag/$VIRESTA_NEW_RELEASE"
+    fi
     if [ -s "$UPDATE_NOTES_FILE" ]; then
         printf '\n'
         while IFS= read -r line; do

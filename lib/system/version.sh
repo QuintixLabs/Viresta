@@ -8,6 +8,7 @@
 # ------------------------------------------------------------
 
 DEV_BRANCH="master"
+RELEASES_URL="https://github.com/QuintixLabs/Viresta/releases"
 
 # ------------------------------------------------------------
 # Versions

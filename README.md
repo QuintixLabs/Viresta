@@ -40,28 +40,30 @@ cd Viresta
 
 ## 🔄 Updating
 
-To update, run this from the **Viresta** folder:
+To update, run this from anywhere:
 
 ```sh
-./update.sh
+viresta update
 ```
 
-Viresta also shows a notification once when a new release is out, and nothing updates until you click **Update** or run `./update.sh` yourself.
+Viresta also shows a notification once when a new release is out, and nothing updates until you click **Update** or run `viresta update` yourself.
 
-To stop these notifications, click **Don't show again** on one or just turn them off or back on from the **Viresta** folder:
+To stop these notifications, click **Don't show again** on one or just turn them off or back on with:
 
 ```sh
-./update.sh --notifications-off
-./update.sh --notifications-on
+viresta update --notifications-off
+viresta update --notifications-on
 ```
 
 ## 🗑️ Uninstalling
 
-To uninstall, run this from the **Viresta** folder:
+To uninstall, run this from anywhere:
 
 ```sh
-./uninstall.sh
+viresta uninstall
 ```
+
+`viresta` runs the scripts in the **Viresta** folder, so `./update.sh` and `./uninstall.sh` from there work the same. If you move the folder, run `./update.sh` from its new place once.
 
 ## ❓ FAQ
 

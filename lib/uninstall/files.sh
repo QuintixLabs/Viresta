@@ -15,7 +15,7 @@ is_safe_to_remove() {
         "$HOME/Pictures"|"$USER_WALLPAPERS_DIR"|"$ICONS_DIR"|"$THEMES_DIR"|"$PLASMA_STYLES_DIR") return 1 ;;
         /usr/share|/usr/share/icons|/usr/share/wallpapers|/etc|/etc/pacman.d|/var/lib|/var/lib/sddm) return 1 ;;
         */../*|*/..|*/./*) return 1 ;;
-        "$HOME"/*|/usr/share/*|/etc/*|/var/lib/*) return 0 ;;
+        "$HOME"/*|/usr/share/*|/etc/*|/var/lib/*|"$VIRESTA_COMMAND") return 0 ;;
         *) return 1 ;;
     esac
 }

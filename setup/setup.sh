@@ -74,6 +74,8 @@ source "$SETUP_DIR/desktop/icons.sh"
 source "$SETUP_DIR/desktop/sound.sh"
 # shellcheck source=setup/desktop/power.sh
 source "$SETUP_DIR/desktop/power.sh"
+# shellcheck source=setup/desktop/command.sh
+source "$SETUP_DIR/desktop/command.sh"
 # shellcheck source=setup/desktop/update-check.sh
 source "$SETUP_DIR/desktop/update-check.sh"
 # shellcheck source=setup/desktop/about-system.sh
@@ -100,7 +102,7 @@ install_config_categories() {
 
     while IFS= read -r -d '' category; do
         case "$(basename "$category")" in
-            vicinae|sddm|icons|cursors|firefox|themes|profile|obs-studio|wallpapers|shell|updates)
+            vicinae|sddm|icons|cursors|firefox|themes|profile|obs-studio|wallpapers|shell|updates|commands)
                 # Installed by their own functions.
                 ;;
             kde)
@@ -194,6 +196,9 @@ install_configs() {
     # Power
     install_power_profile
 
+    # The viresta command
+    install_viresta_command
+
     # Update alerts
     install_update_check
 
@@ -256,6 +261,9 @@ update_configs() {
 
     # Shell
     install_shell_setup
+
+    # The viresta command
+    install_viresta_command
 
     # Update alerts
     install_update_check

@@ -49,9 +49,10 @@ ask_to_apply_again() {
 }
 
 # Bash reads a script as it runs, so a new version of update.sh needs a fresh start.
-# VIRESTA_PULLED tells that fresh start the download is already done.
+# VIRESTA_PULLED tells that fresh start the download is already done, and
+# VIRESTA_NEW_RELEASE which release it moved to, for the summary.
 pull_latest() {
-    local before before_version after_version release
+    local before before_version after_version release new_release=""
     local -a flags=()
 
     git -C "$SCRIPT_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1 \
@@ -81,8 +82,11 @@ pull_latest() {
     after_version="$(viresta_version)"
     if [ "$after_version" != "$before_version" ]; then
         emit "$C_OK" "$S_OK Updating Viresta${before_version:+ v$before_version} to v$after_version"
+        if [ "$DEV" -eq 0 ]; then
+            new_release="v$after_version"
+        fi
     fi
     [ "$VERBOSE" -eq 0 ] || flags+=(--verbose)
     [ "$DEV" -eq 0 ] || flags+=(--dev)
-    VIRESTA_PULLED=1 exec bash "$SCRIPT_DIR/update.sh" "${flags[@]}"
+    VIRESTA_PULLED=1 VIRESTA_NEW_RELEASE="$new_release" exec bash "$SCRIPT_DIR/update.sh" "${flags[@]}"
 }

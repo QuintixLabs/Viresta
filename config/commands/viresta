@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+
+# viresta
+# Runs install.sh, update.sh or uninstall.sh from anywhere, so nobody has to go to the
+# Viresta folder first. Anything after the command is passed along, like --dev.
+
+set -euo pipefail
+
+# ------------------------------------------------------------
+# Settings
+# ------------------------------------------------------------
+
+FOLDER_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/viresta/folder"
+
+# ------------------------------------------------------------
+# Help
+# ------------------------------------------------------------
+
+usage() {
+    cat <<'EOF'
+
+Usage: viresta <command> [options]
+
+Commands:
+  install      Run the install again, with the menu
+  update       Update Viresta
+  uninstall    Remove Viresta
+
+Options:
+  -v, --version  Show the installed version
+  -h, --help     Show this help
+
+Options after a command are passed to it, like viresta update --dev.
+To see them, run viresta <command> --help.
+
+EOF
+}
+
+# ------------------------------------------------------------
+# Folder
+# ------------------------------------------------------------
+
+# Every install and update saves where the folder is, so a moved folder is found again
+# after running ./update.sh from its new place.
+find_folder() {
+    folder="$(cat "$FOLDER_FILE" 2>/dev/null || true)"
+    if [ -z "$folder" ] || [ ! -f "$folder/update.sh" ]; then
+        printf "Can't find the Viresta folder. Run ./update.sh from where it is now.\n" >&2
+        exit 1
+    fi
+}
+
+# ------------------------------------------------------------
+# Main
+# ------------------------------------------------------------
+
+case "${1:-}" in
+    install|update|uninstall)
+        find_folder
+        script="$folder/$1.sh"
+        shift
+        exec bash "$script" "$@"
+        ;;
+    -v|--version)
+        find_folder
+        printf 'Viresta %s\n' "$(tr -d '[:space:]' <"$folder/VERSION" 2>/dev/null || echo unknown)"
+        ;;
+    -h|--help|"")
+        usage
+        ;;
+    *)
+        printf 'Unknown command: %s\n' "$1" >&2
+        usage >&2
+        exit 2
+        ;;
+esac

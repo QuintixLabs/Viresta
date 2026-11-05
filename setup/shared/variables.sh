@@ -35,6 +35,7 @@ SDDM_SOURCE_DIR="$CONFIG_SOURCE_DIR/sddm"
 WALLPAPERS_SOURCE_DIR="$CONFIG_SOURCE_DIR/wallpapers"
 SHELL_SOURCE_DIR="$CONFIG_SOURCE_DIR/shell"
 UPDATE_CHECK_SOURCE="$CONFIG_SOURCE_DIR/updates/viresta-update-check"
+VIRESTA_COMMAND_SOURCE="$CONFIG_SOURCE_DIR/commands/viresta"
 
 # ------------------------------------------------------------
 # User folders
@@ -59,6 +60,12 @@ UPDATE_NOTES_FILE="$VIRESTA_STATE_DIR/update-notes"
 BASHRC_ADDED_FILE="$VIRESTA_STATE_DIR/bashrc-added"
 VIRESTA_FOLDER_FILE="$VIRESTA_STATE_DIR/folder"
 NOTIFIED_VERSION_FILE="$VIRESTA_STATE_DIR/notified-version"
+
+# ------------------------------------------------------------
+# The viresta command
+# ------------------------------------------------------------
+
+VIRESTA_COMMAND="/usr/local/bin/viresta"
 
 # ------------------------------------------------------------
 # Update alerts
