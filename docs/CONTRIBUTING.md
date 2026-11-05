@@ -38,4 +38,4 @@ Once you've read all of this, continue with these:
 
 1. [Setup](contents/01_SETUP.md)
 2. [Committing](contents/02_COMMITING.md)
-3. [Releasing](contents/03_RELEASING.md) (for maintainers only, you can skip this one)
+3. [Releasing](contents/03_RELEASING.md)
