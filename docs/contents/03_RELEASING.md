@@ -53,21 +53,6 @@ git push origin master
 
 See [Committing](/docs/contents/02_COMMITING.md) for how to write the message, because it appears as written in the release notes.
 
-Then reset `dev` so it's ready for next time:
-
-```sh
-git switch dev
-git reset --hard master
-git push --force origin dev
-```
-
-After this, VMs on `dev` can't update normally. Go back to a clean snapshot and clone again, or run this on the VM:
-
-```sh
-git fetch origin
-git reset --hard origin/dev
-```
-
 ## Testing a pull request
 
 On a VM, using the pull request's number:
@@ -106,6 +91,18 @@ Test everything on `dev` first, and make sure it's on `master`, because the draf
 3. On GitHub, open **Releases**. The workflow has made a draft called `v1.1.0`, with the commits and contributors listed. Users get nothing yet.
 4. Edit the notes. Remove anything that doesn't matter to users.
 5. Click **Publish release**. This creates the tag, and users can now update.
+
+Publishing also resets `dev` to `master` by itself, so it's ready for next time. Anything that was only being tested on `dev`, like a pull request that wasn't merged, is dropped from it. Put it on `dev` again to keep testing.
+
+Bring your own copy of `dev` along:
+
+```sh
+git switch dev
+git fetch origin
+git reset --hard origin/dev
+```
+
+VMs on `dev` need the same two last lines if the reset dropped something, since `./update.sh --dev` can't update them normally then. You can also go back to a clean snapshot and clone again.
 
 Then check it on a clean VM:
 

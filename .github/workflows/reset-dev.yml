@@ -1,0 +1,24 @@
+name: Reset dev
+
+# Runs when a release is published, so dev starts again from master. Anything that was
+# only being tested on dev, like a pull request nobody merged, is dropped and has to be
+# put on dev again to keep testing it.
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  reset:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          ref: master
+
+      - name: Reset dev to master
+        run: git push --force origin HEAD:refs/heads/dev
