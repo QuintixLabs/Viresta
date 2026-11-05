@@ -18,13 +18,13 @@ Keep it short and clear. Don't overthink it.
 
 If it helps, include the issue number:
 
-- `fix(settings): keep password modal copy consistent (#6)`
+- `fix(menu): keep long descriptions lined up (#6)`
 
 #### Examples:
 
-- `feat(settings): add change password modal`
-- `fix(auth): stop wrong password message from flashing`
-- `docs: clarify docker setup without .env`
+- `feat(drivers): add a new VM package`
+- `fix(update): keep user settings when merging configs`
+- `docs: clarify the VM setup`
 
 
 ## Before pushing
