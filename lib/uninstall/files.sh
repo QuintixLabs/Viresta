@@ -20,6 +20,7 @@ is_safe_to_remove() {
     esac
 }
 
+# One file that cannot be removed is listed at the end, and the rest still go.
 remove_installed_files() {
     local path
 
@@ -28,9 +29,9 @@ remove_installed_files() {
         if ! is_safe_to_remove "$path"; then
             failure "Did not remove $path - it is not somewhere Viresta installs to"
         elif [ "${path#"$HOME"/}" != "$path" ]; then
-            rm -rf -- "$path"
+            rm -rf -- "$path" 2>/dev/null || failure "Could not remove $path"
         else
-            sudo rm -rf -- "$path"
+            sudo rm -rf -- "$path" 2>/dev/null || failure "Could not remove $path"
         fi
     done <"$INSTALLED_FILES"
 }
