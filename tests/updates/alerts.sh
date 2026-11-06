@@ -210,7 +210,7 @@ is "no saved folder: no alert" "$(alerts)" "0"
 
 timer="$VIRESTA/config/systemd/viresta-update-check.timer"
 is "timer: after login" "$(grep -c -x 'OnActiveSec=1min' "$timer")" "1"
-is "timer: once a day" "$(grep -c -x 'OnUnitActiveSec=1d' "$timer")" "1"
+is "timer: every 6 hours" "$(grep -c -x 'OnUnitActiveSec=6h' "$timer")" "1"
 is "timer: only in a desktop session" "$(grep -c -x 'WantedBy=graphical-session.target' "$timer")" "1"
 is "service: runs the script" "$(grep -c -x 'ExecStart=%h/.local/bin/viresta-update-check' "$VIRESTA/config/systemd/viresta-update-check.service")" "1"
 
