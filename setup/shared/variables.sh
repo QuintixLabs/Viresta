@@ -13,6 +13,7 @@
 USE_VICINAE=1
 USE_GAMING=1
 USE_RENAME_WALLPAPERS=1
+USE_UPDATE_SCRIPT=1
 USE_DRIVERS=1
 # Not in the menu. ./update.sh --notifications-off and --notifications-on change it.
 USE_UPDATE_NOTIFICATIONS=1
@@ -37,6 +38,7 @@ WALLPAPERS_SOURCE_DIR="$CONFIG_SOURCE_DIR/wallpapers"
 SHELL_SOURCE_DIR="$CONFIG_SOURCE_DIR/shell"
 UPDATE_CHECK_SOURCE="$CONFIG_SOURCE_DIR/updates/viresta-update-check"
 VIRESTA_COMMAND_SOURCE="$SHELL_SOURCE_DIR/commands/viresta"
+UPDATE_SCRIPT_SOURCE="$SHELL_SOURCE_DIR/scripts/update"
 
 # ------------------------------------------------------------
 # User folders
@@ -69,6 +71,7 @@ NOTIFIED_VERSION_FILE="$VIRESTA_STATE_DIR/notified-version"
 # ------------------------------------------------------------
 
 VIRESTA_COMMAND="/usr/local/bin/viresta"
+UPDATE_SCRIPT="/usr/local/bin/update"
 BASH_COMPLETION_SOURCE="$SHELL_SOURCE_DIR/bash/completions/viresta.bash"
 FISH_COMPLETION_SOURCE="$SHELL_SOURCE_DIR/fish/completions/viresta.fish"
 BASH_COMPLETION_FILE="/usr/share/bash-completion/completions/viresta"

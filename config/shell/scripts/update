@@ -1,0 +1,206 @@
+#!/usr/bin/env bash
+
+# update
+# Updates everything installed with one command: the official packages and the AUR with
+# paru, then Flatpak apps. It shows what is waiting first, and asks once.
+
+set -uo pipefail
+
+# ------------------------------------------------------------
+# Settings
+# ------------------------------------------------------------
+
+ASK=1
+CHECK_ONLY=0
+KERNEL_MODULES_DIR="${KERNEL_MODULES_DIR:-/usr/lib/modules}"
+
+# The same colors and marks as Viresta's own scripts, so it still works if the Viresta
+# folder is moved or deleted.
+C_RESET="" C_BOLD="" C_DIM="" C_ACCENT="" C_OK="" C_WARN="" C_ERR=""
+if [ -t 1 ] && [ -z "${NO_COLOR:-}" ] && [ "${TERM:-dumb}" != "dumb" ]; then
+    C_RESET=$'\e[0m'
+    C_BOLD=$'\e[1m'
+    C_DIM=$'\e[38;5;245m'
+    C_ACCENT=$'\e[38;5;39m'
+    C_OK=$'\e[38;5;42m'
+    C_WARN=$'\e[38;5;214m'
+    C_ERR=$'\e[38;5;203m'
+fi
+
+S_OK='[ok]'
+S_ERR='[!!]'
+case "${LC_ALL:-${LC_CTYPE:-${LANG:-}}}" in
+    *UTF-8*|*utf8*|*UTF8*|*utf-8*)
+        if [ "${TERM:-}" = "linux" ]; then S_OK='√' S_ERR='×'; else S_OK='✓' S_ERR='✗'; fi
+        ;;
+esac
+
+# ------------------------------------------------------------
+# Help
+# ------------------------------------------------------------
+
+row() {
+    printf '  %b%-12s%b %s\n' "$C_OK" "$1" "$C_RESET" "$2"
+}
+
+usage() {
+    printf '\n%bUsage:%b update [options]\n\n' "$C_ACCENT$C_BOLD" "$C_RESET"
+    printf '%bOptions:%b\n' "$C_ACCENT$C_BOLD" "$C_RESET"
+    row "-c, --check" "Only show what is waiting, without updating"
+    row "-y, --yes" "Update without asking first"
+    row "-h, --help" "Show this help"
+    printf '\n%bUpdates the official packages, the AUR and Flatpak apps. Viresta itself is%b\n' "$C_DIM" "$C_RESET"
+    printf '%bupdated with viresta update.%b\n\n' "$C_DIM" "$C_RESET"
+}
+
+for arg in "$@"; do
+    case "$arg" in
+        -c|--check) CHECK_ONLY=1 ;;
+        -y|--yes) ASK=0 ;;
+        -h|--help) usage; exit 0 ;;
+        *) printf 'Unknown option: %s\n' "$arg" >&2; usage >&2; exit 2 ;;
+    esac
+done
+
+if [ "$(id -u)" -eq 0 ]; then
+    printf 'Run update as your normal user. It asks for your password when it needs it.\n' >&2
+    exit 1
+fi
+if ! command -v pacman >/dev/null 2>&1; then
+    printf 'update is for Arch Linux and distros based on it, like CachyOS.\n' >&2
+    exit 1
+fi
+
+# Ctrl+C at the question stops in the middle of a line, so the prompt starts on its own.
+trap 'printf "\n"; exit 130' INT
+
+# ------------------------------------------------------------
+# What is waiting
+# ------------------------------------------------------------
+
+# checkupdates looks with a copy of the package lists, since refreshing the real ones
+# without updating would leave Arch half updated. It answers 2 for nothing waiting.
+count_official() {
+    local list status=0
+
+    command -v checkupdates >/dev/null 2>&1 || { printf '?\n'; return; }
+    list="$(checkupdates 2>/dev/null)" || status=$?
+    if [ "$status" -eq 0 ] || [ "$status" -eq 2 ]; then
+        grep -c . <<<"$list"
+    else
+        printf '?\n'
+    fi
+}
+
+count_aur() {
+    paru -Qua 2>/dev/null | grep -c . || true
+}
+
+count_flatpak() {
+    flatpak remote-ls --updates --columns=application 2>/dev/null | grep -c . || true
+}
+
+# The count in green, nothing waiting dimmed, and one it could not check in orange.
+show_count() {
+    case "$2" in
+        0) printf '  %-10s %bup to date%b\n' "$1" "$C_DIM" "$C_RESET" ;;
+        '?') printf '  %-10s %bcould not check%b\n' "$1" "$C_WARN" "$C_RESET" ;;
+        1) printf '  %-10s %b1 update%b\n' "$1" "$C_OK" "$C_RESET" ;;
+        *) printf '  %-10s %b%s updates%b\n' "$1" "$C_OK" "$2" "$C_RESET" ;;
+    esac
+}
+
+HAS_PARU=0
+HAS_FLATPAK=0
+command -v paru >/dev/null 2>&1 && HAS_PARU=1
+command -v flatpak >/dev/null 2>&1 && HAS_FLATPAK=1
+
+# A line that says it is working, then is cleared, only in a real terminal.
+printf '\n'
+[ ! -t 1 ] || printf '%bChecking for updates...%b' "$C_DIM" "$C_RESET"
+official="$(count_official)"
+aur=0
+flatpak=0
+[ "$HAS_PARU" -eq 0 ] || aur="$(count_aur)"
+[ "$HAS_FLATPAK" -eq 0 ] || flatpak="$(count_flatpak)"
+# Only told about, since updating Viresta is its own step with viresta update.
+viresta=""
+if command -v viresta >/dev/null 2>&1; then
+    viresta="$(viresta update --check 2>/dev/null | sed -n 's/^Viresta \([0-9.]*\) is out.*/\1/p')"
+fi
+[ ! -t 1 ] || printf '\r\e[2K'
+
+printf '%bUpdates%b\n' "$C_ACCENT$C_BOLD" "$C_RESET"
+show_count "Official" "$official"
+[ "$HAS_PARU" -eq 0 ] || show_count "AUR" "$aur"
+[ "$HAS_FLATPAK" -eq 0 ] || show_count "Flatpak" "$flatpak"
+if [ -n "$viresta" ]; then
+    printf '  %-10s %b%s is out, run viresta update%b\n' "Viresta" "$C_OK" "$viresta" "$C_RESET"
+fi
+printf '\n'
+
+if [ "$official" = 0 ] && [ "$aur" = 0 ] && [ "$flatpak" = 0 ]; then
+    printf '%b%s%b Your apps are up to date.\n\n' "$C_OK" "$S_OK" "$C_RESET"
+    exit 0
+fi
+
+[ "$CHECK_ONLY" -eq 0 ] || exit 0
+
+if [ "$ASK" -eq 1 ]; then
+    printf '%b?%b Update now? [Y/n] ' "$C_ACCENT" "$C_RESET"
+    answer=""
+    IFS= read -r answer </dev/tty || answer=""
+    case "$answer" in
+        ''|y|Y|yes|Yes|YES) ;;
+        *) printf 'Nothing was changed.\n\n'; exit 0 ;;
+    esac
+    printf '\n'
+fi
+
+# ------------------------------------------------------------
+# Updating
+# ------------------------------------------------------------
+
+STEP=0
+TOTAL=1
+[ "$HAS_FLATPAK" -eq 0 ] || [ "$flatpak" = 0 ] || TOTAL=2
+SECONDS=0
+
+step() {
+    STEP=$((STEP + 1))
+    printf '%b[%s/%s]%b %b%s%b\n' "$C_ACCENT" "$STEP" "$TOTAL" "$C_RESET" "$C_BOLD" "$1" "$C_RESET"
+}
+
+fail() {
+    printf '\n%b%s %s%b\n\n' "$C_ERR" "$S_ERR" "$1" "$C_RESET" >&2
+    exit 1
+}
+
+format_duration() {
+    if [ "$1" -ge 60 ]; then printf '%dm %02ds' "$(($1 / 60))" "$(($1 % 60))"; else printf '%ds' "$1"; fi
+}
+
+# paru updates the official packages first and then the AUR ones, in one go, so the two
+# are never out of step. pacman's own questions, like replacing a package, still come up.
+if [ "$HAS_PARU" -eq 1 ]; then
+    step "Updating official and AUR packages"
+    paru -Syu || fail "The package update stopped. Nothing else was updated."
+else
+    step "Updating official packages"
+    sudo pacman -Syu || fail "The package update stopped. Nothing else was updated."
+fi
+
+if [ "$TOTAL" -eq 2 ]; then
+    printf '\n'
+    step "Updating Flatpak apps"
+    flatpak update -y || fail "The Flatpak update stopped."
+fi
+
+printf '\n%bUpdate complete%b\n' "$C_OK$C_BOLD" "$C_RESET"
+printf '%b%s Time taken: %s%b\n' "$C_OK" "$S_OK" "$(format_duration "$SECONDS")" "$C_RESET"
+
+# The modules of the running kernel go away when a new kernel is installed.
+if [ ! -d "$KERNEL_MODULES_DIR/$(uname -r)" ]; then
+    printf '%b! A new kernel was installed. Reboot to start using it.%b\n' "$C_WARN" "$C_RESET"
+fi
+printf '\n'

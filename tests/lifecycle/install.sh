@@ -57,6 +57,8 @@ exists "Vicinae starts at login" "$C/systemd/user/graphical-session.target.wants
 is "update alerts start at login" "$(readlink "$C/systemd/user/graphical-session.target.wants/viresta-update-check.timer")" "../viresta-update-check.timer"
 exists "the update check is installed" "$HOME/.local/bin/viresta-update-check"
 is "the viresta command is installed" "$([ -x "$SYS/usr/local/bin/viresta" ] && echo yes)" "yes"
+is "the update command is installed" "$([ -x "$SYS/usr/local/bin/update" ] && echo yes)" "yes"
+has "the update command is on the uninstall list" "$SYS/usr/local/bin/update" "$(cat "$LIST")"
 exists "Bash completion is installed" "$SYS/usr/share/bash-completion/completions/viresta"
 exists "Fish completion is installed" "$SYS/usr/share/fish/vendor_completions.d/viresta.fish"
 is "the folder is saved" "$(cat "$V/folder")" "$VIRESTA"

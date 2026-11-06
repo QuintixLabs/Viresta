@@ -109,7 +109,9 @@ is "installed again: still one set" "$(grep -cxF "$BASHRC_START" "$BASHRC_FILE")
 is "the result is valid Bash" "$(bash -n "$BASHRC_FILE" 2>&1; echo $?)" "0"
 
 # With the packages gone, like after removing them by hand.
-out="$(PATH=/usr/bin:/bin bash --noprofile --rcfile "$BASHRC_FILE" -ic 'echo MINE=$MINE; alias ll' 2>&1)"
+# setsid gives each interactive Bash no terminal of its own. Otherwise it takes over the
+# terminal the tests run in, and other tests running at the same time get stuck.
+out="$(PATH=/usr/bin:/bin setsid bash --noprofile --rcfile "$BASHRC_FILE" -ic 'echo MINE=$MINE; alias ll' 2>&1)"
 is "no packages: no errors" "$(grep -c 'not found\|No such file\|error' <<<"$out")" "0"
 is "no packages: their settings load" "$(grep -c 'MINE=1' <<<"$out")" "1"
 is "not interactive: nothing runs" "$(PATH=/usr/bin:/bin bash --noprofile --rcfile "$BASHRC_FILE" -c 'echo fine' 2>&1)" "fine"
@@ -117,8 +119,8 @@ is "not interactive: nothing runs" "$(PATH=/usr/bin:/bin bash --noprofile --rcfi
 # A fake starship, to see it really runs, but not on the plain text login.
 printf '#!/bin/sh\necho '\''PS1="STARSHIP> "; echo STARSHIP_RAN'\''\n' >"$BIN/starship"
 chmod +x "$BIN/starship"
-is "in a terminal: starship runs" "$(TERM=xterm bash --noprofile --rcfile "$BASHRC_FILE" -i </dev/null 2>/dev/null | grep -c STARSHIP_RAN)" "1"
-is "text login: starship stays off" "$(TERM=linux bash --noprofile --rcfile "$BASHRC_FILE" -i </dev/null 2>/dev/null | grep -c STARSHIP_RAN)" "0"
+is "in a terminal: starship runs" "$(TERM=xterm setsid bash --noprofile --rcfile "$BASHRC_FILE" -i </dev/null 2>/dev/null | grep -c STARSHIP_RAN)" "1"
+is "text login: starship stays off" "$(TERM=linux setsid bash --noprofile --rcfile "$BASHRC_FILE" -i </dev/null 2>/dev/null | grep -c STARSHIP_RAN)" "0"
 rm "$BIN/starship"
 
 # ------------------------------------------------------------

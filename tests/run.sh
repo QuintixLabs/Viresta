@@ -50,7 +50,9 @@ total_failed=0
 broken=0
 
 # Every test has its own throwaway folder, so they all run at the same time. The results
-# are still shown in order, once each one is done.
+# are still shown in order, once each one is done. setsid keeps each test away from the
+# terminal you run this in, since two tests using it at once can get each other stuck.
+# Tests that need a terminal make their own with script.
 RESULTS="$(mktemp -d)"
 trap 'rm -rf "$RESULTS"' EXIT
 
@@ -63,7 +65,7 @@ started="$EPOCHREALTIME"
 for i in "${!tests[@]}"; do
     {
         test_started="$EPOCHREALTIME"
-        bash "${tests[$i]}" >"$RESULTS/$i.out" 2>&1
+        setsid bash "${tests[$i]}" </dev/null >"$RESULTS/$i.out" 2>&1
         echo $? >"$RESULTS/$i.status"
         seconds_since "$test_started" >"$RESULTS/$i.time"
     } &

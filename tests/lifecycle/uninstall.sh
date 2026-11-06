@@ -101,7 +101,7 @@ for path in "$C/plasma-org.kde.plasma.desktop-appletsrc" "$C/kglobalshortcutsrc"
     "$SYS/var/lib/viresta" "$SYS/etc/sddm.conf.d/viresta.conf" "$SYS/etc/firefox" \
     "$SYS/etc/pacman.d/hooks/viresta-remove-themes.hook" "$SYS/etc/pacman.d/hooks/viresta-default-cursor.hook" \
     "$SYS/usr/share/sddm/themes/breeze/theme.conf.user" "$SYS/usr/share/sddm/themes/breeze/faces/.face.icon" \
-    "$SYS/var/lib/sddm/.config/kdeglobals" "$SYS/usr/share/vicinae/themes/viresta-dark.toml" "$SYS/usr/local/bin/viresta" \
+    "$SYS/var/lib/sddm/.config/kdeglobals" "$SYS/usr/share/vicinae/themes/viresta-dark.toml" "$SYS/usr/local/bin/viresta" "$SYS/usr/local/bin/update" \
     "$SYS/usr/share/bash-completion/completions/viresta" "$SYS/usr/share/fish/vendor_completions.d/viresta.fish"; do
     # An empty folder left behind is fine, and a file or link is not.
     if [ -n "$(find "$path" \( -type f -o -type l \) 2>/dev/null | head -n 1)" ]; then

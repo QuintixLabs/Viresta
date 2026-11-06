@@ -6,3 +6,4 @@ networkmanager
 curl
 jq
 less
+pacman-contrib

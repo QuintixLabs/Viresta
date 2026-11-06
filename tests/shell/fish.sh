@@ -25,6 +25,7 @@ WITH="$TEST_DIR/tools:/usr/bin:/bin"
 WITHOUT="/usr/bin:/bin"
 
 # run <term> <path> <fish lines first> [their own prompt]: what the prompt and color end up as.
+# setsid gives Fish no terminal of its own, so it cannot take over the one the tests run in.
 run() {
     local home="$TEST_DIR/fish-home"
     rm -rf "$home" "$TEST_DIR/result"
@@ -37,7 +38,7 @@ run() {
     if [ -n "${4:-}" ]; then printf '%s\n' "$4" >"$home/.config/fish/functions/fish_prompt.fish"; fi
     env -i HOME="$home" XDG_CONFIG_HOME="$home/.config" XDG_DATA_DIRS="$VENDOR" PATH="$2" TERM="$1" \
         LANG=C.UTF-8 RESULT="$TEST_DIR/result" ${LD_LIBRARY_PATH:+LD_LIBRARY_PATH="$LD_LIBRARY_PATH"} \
-        "$FISH" -i -C 'source $XDG_CONFIG_HOME/fish/conf.d/000-before.fish; source $XDG_CONFIG_HOME/fish/conf.d/viresta.fish; begin; echo PROMPT=(fish_prompt); echo COLOR=$fish_color_autosuggestion; end >$RESULT; exit' \
+        setsid "$FISH" -i -C 'source $XDG_CONFIG_HOME/fish/conf.d/000-before.fish; source $XDG_CONFIG_HOME/fish/conf.d/viresta.fish; begin; echo PROMPT=(fish_prompt); echo COLOR=$fish_color_autosuggestion; end >$RESULT; exit' \
         </dev/null >/dev/null 2>"$TEST_DIR/errors"
     cat "$TEST_DIR/result" 2>/dev/null
 }

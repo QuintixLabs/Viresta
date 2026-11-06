@@ -86,6 +86,8 @@ source "$SETUP_DIR/apps/fastfetch.sh"
 source "$SETUP_DIR/apps/obs.sh"
 # shellcheck source=setup/apps/shell.sh
 source "$SETUP_DIR/apps/shell.sh"
+# shellcheck source=setup/apps/scripts.sh
+source "$SETUP_DIR/apps/scripts.sh"
 # shellcheck source=setup/viresta/command.sh
 source "$SETUP_DIR/viresta/command.sh"
 # shellcheck source=setup/viresta/update-check.sh
@@ -189,6 +191,7 @@ install_configs() {
 
     # Shell
     install_shell_setup
+    install_update_script
 
     # Sound
     install_notification_volume
@@ -261,6 +264,7 @@ update_configs() {
 
     # Shell
     install_shell_setup
+    install_update_script
 
     # The viresta command
     install_viresta_command
