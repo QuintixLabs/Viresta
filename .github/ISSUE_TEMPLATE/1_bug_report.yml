@@ -9,6 +9,13 @@ body:
       render: text
     validations:
       required: true
+  - type: input
+    attributes:
+      label: Viresta version
+      description: What `viresta --version` shows.
+      placeholder: Viresta 1.1.0
+    validations:
+      required: true
   - type: dropdown
     attributes:
       label: Where did it happen?
@@ -44,7 +51,7 @@ body:
   - type: textarea
     attributes:
       label: Logs and screenshots
-      description: For an install problem, paste what `./install.sh --logs` shows. All the logs are in `~/.local/state/viresta/`.
+      description: Paste what `viresta install --logs`, `viresta update --logs` or `viresta uninstall --logs` shows, for whichever went wrong. All the logs are in `~/.local/state/viresta/`.
   - type: textarea
     attributes:
       label: Anything else?
