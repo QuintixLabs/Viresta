@@ -134,6 +134,26 @@ done
 is "setup.sh has a help" "$(cd "$VIRESTA" && bash setup/setup.sh --help | sed -n 2p)" "Usage: setup.sh [options]"
 
 # ------------------------------------------------------------
+# Ctrl+C
+# ------------------------------------------------------------
+
+# A question, then Ctrl+C, in a real terminal.
+cat >"$TEST_DIR/question.sh" <<'EOF'
+SCRIPT_DIR="$1"; VERBOSE=0
+source "$SCRIPT_DIR/lib/load.sh"
+start_script
+ask_yes_no "Apply Viresta's configs again anyway?" n
+echo "NOT STOPPED"
+EOF
+{ sleep 0.5; printf '\003'; sleep 0.3; } | script -qec "bash '$TEST_DIR/question.sh' '$VIRESTA'" /dev/null >"$TEST_DIR/ctrl-c" 2>/dev/null
+hasnt "Ctrl+C at a question: stops" "NOT STOPPED" "$(cat "$TEST_DIR/ctrl-c")"
+has "Ctrl+C at a question: the question was on screen" "anyway? [y/N]" "$(strip_colors <"$TEST_DIR/ctrl-c")"
+# The last visible thing on screen, which before was the ^C. The script also shows the
+# cursor again on its way out, which is a code and not text, so that is left out.
+is "Ctrl+C at a question: the line is finished, so the prompt starts on its own" \
+    "$(strip_colors <"$TEST_DIR/ctrl-c" | tr -d '\r' | tail -c 1 | od -An -c | tr -d ' ')" '\n'
+
+# ------------------------------------------------------------
 # What failed last time
 # ------------------------------------------------------------
 

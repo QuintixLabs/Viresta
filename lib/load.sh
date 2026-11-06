@@ -50,7 +50,9 @@ start_script() {
     ui_init
 
     trap run_cleanups EXIT
-    trap 'exit 130' INT
+    # Ctrl+C at a question stops in the middle of a line, so the prompt starts on its own
+    # line. A running step's spinner clears its own line on the way out, so it needs none.
+    trap '[ -n "$SPINNER_PID" ] || printf "\n"; exit 130' INT
     trap 'exit 143' TERM
     trap 'exit 129' HUP
 }
