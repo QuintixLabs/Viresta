@@ -11,8 +11,8 @@ KERNEL_MODULES_DIR="${KERNEL_MODULES_DIR:-/usr/lib/modules}"
 NVIDIA_MKINITCPIO_CONF="/etc/mkinitcpio.conf.d/10-viresta-nvidia.conf"
 # Which NVIDIA cards need which driver, from CachyOS's chwd (GPL-3.0). A card on neither
 # list is newer than both, and uses the current driver.
-NVIDIA_580XX_IDS="$SCRIPT_DIR/packages/nvidia/nvidia-580xx.ids"
-NVIDIA_OLD_IDS="$SCRIPT_DIR/packages/nvidia/nouveau.ids"
+NVIDIA_580XX_IDS="$SCRIPT_DIR/packages/drivers/nvidia/nvidia-580xx.ids"
+NVIDIA_OLD_IDS="$SCRIPT_DIR/packages/drivers/nvidia/nouveau.ids"
 
 # ------------------------------------------------------------
 # Choosing the driver
@@ -45,12 +45,27 @@ has_nvidia_to_install() {
     has_hardware nvidia || has_hardware nvidia-580xx
 }
 
-# Two NVIDIA cards share one driver, and the older one also runs newer cards.
+# The driver Viresta picks for the card, the one in its row in drivers.txt.
+nvidia_driver_for_card() {
+    if has_hardware nvidia-580xx; then
+        printf 'nvidia-580xx-dkms\n'
+    elif has_hardware nvidia; then
+        printf 'nvidia-open-dkms\n'
+    fi
+}
+
+nvidia_driver_missing() {
+    has_nvidia_to_install && ! is_installed "$(nvidia_driver_for_card)"
+}
+
+# Two NVIDIA cards share one driver, and the older one also runs newer cards. With the
+# driver Viresta picks already there, the card stays, so its other rows like the 32-bit
+# driver still come. Any other NVIDIA driver was chosen by the user and is left alone.
 settle_nvidia_hardware() {
     if has_hardware nvidia-580xx; then
         remove_hardware nvidia
     fi
-    if has_nvidia_driver; then
+    if has_nvidia_driver && ! is_installed "$(nvidia_driver_for_card)"; then
         remove_hardware nvidia
         remove_hardware nvidia-580xx
         remove_hardware nvidia-old

@@ -32,6 +32,8 @@ prepare_pacman_conf() {
         return 0
     fi
 
+    # Made again each time, so a repository turned on since then is in the copy too.
+    cleanup_pacman_conf
     PACMAN_CONF="$(mktemp /tmp/viresta-pacman.XXXXXX)"
     cp "$SYSTEM_PACMAN_CONF" "$PACMAN_CONF"
 
@@ -199,12 +201,15 @@ save_packages_before() {
     pacman -Qq >"$PACKAGES_BEFORE_FILE" 2>/dev/null || true
 }
 
+# The 32-bit drivers count too, so an update does not bring back one that was removed.
+# The Gaming row does not, since updates never add it.
 listed_packages() {
     local list
 
-    for list in base kde apps aur; do
+    for list in system/base system/kde apps/pacman apps/aur; do
         read_package_list "$SCRIPT_DIR/packages/$list.txt"
     done
+    read_package_list "$SCRIPT_DIR/packages/drivers/drivers.txt" | awk '$2 ~ /^lib32-/ { print $2 }'
 }
 
 save_known_packages() {

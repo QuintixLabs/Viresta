@@ -101,7 +101,7 @@ aur_build_with_flags() {
 }
 
 install_aur() {
-    local file="$SCRIPT_DIR/packages/aur.txt"
+    local file="$SCRIPT_DIR/packages/apps/aur.txt"
 
     if [ ! -f "$file" ]; then
         info "No AUR package list found"

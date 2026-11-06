@@ -53,8 +53,8 @@ printf 'mine\n' >"$HOME/Pictures/Wallpapers/Viresta Dark/my-wallpaper.jpg"
 sed -i 's/"workbench.colorTheme": "Vesper"/"workbench.colorTheme": "MyTheme"/' "$C/VSCodium/User/settings.json"
 sed -i '1i # my kitty comment' "$C/kitty/kitty.conf"
 rm "$C/kitty/light-theme.auto.conf"
-# An app the user removed must not come back.
-sed -i '/^haruna$/d' "$FAKE_DB"
+# Apps the user removed must not come back, and the Gaming row is never added by an update.
+sed -i '/^haruna$/d; /^steam$/d' "$FAKE_DB"
 
 # And a new version of Viresta.
 jq '."window.zoomLevel" = 1 | ."workbench.colorTheme" = "ViresTheme"' "$VIRESTA/config/vscodium/settings.json" >"$TEST_DIR/new.json"
@@ -64,8 +64,8 @@ printf '\n# new from viresta\nenable_audio_bell no\n' >>"$VIRESTA/config/kitty/k
 printf 'new from viresta\n' >"$VIRESTA/config/kitty/light-theme.auto.conf"
 printf 'new-wallpaper\n' >"$VIRESTA/config/wallpapers/Viresta Dark/10. Viresta.jpg"
 printf '# changed\n' >>"$VIRESTA/config/themes/viresta-theme-sync"
-printf '\nnewrepoapp\n' >>"$VIRESTA/packages/apps.txt"
-printf '\nnewauraapp\n' >>"$VIRESTA/packages/aur.txt"
+printf '\nnewrepoapp\n' >>"$VIRESTA/packages/apps/pacman.txt"
+printf '\nnewauraapp\n' >>"$VIRESTA/packages/apps/aur.txt"
 
 snapshot >"$TEST_DIR/before"
 : >"$FAKE_CALLS"
@@ -95,6 +95,7 @@ has "they are told about the theme" "Kept your workbench.colorTheme" "$OUT"
 has "kitty: their line stays" "# my kitty comment" "$(cat "$C/kitty/kitty.conf")"
 has "kitty: the new line arrives" "enable_audio_bell no" "$(cat "$C/kitty/kitty.conf")"
 missing "kitty: a file they deleted stays deleted" "$C/kitty/light-theme.auto.conf"
+hasnt "Steam they removed is not brought back" "steam" "$(cat "$FAKE_DB")"
 has "a new repo package is installed" "newrepoapp" "$(cat "$FAKE_DB")"
 has "a new AUR package is installed" "newauraapp" "$(cat "$FAKE_DB")"
 hasnt "a removed app is not brought back" "haruna" "$(cat "$FAKE_DB")"
@@ -145,7 +146,7 @@ has "and their line still stays" "enable_audio_bell maybe" "$(cat "$kitty")"
 # A new package that needs a system update
 # ------------------------------------------------------------
 
-printf 'needsupgrade\n' >>"$VIRESTA/packages/apps.txt"
+printf 'needsupgrade\n' >>"$VIRESTA/packages/apps/pacman.txt"
 export NEEDS_UPGRADE=needsupgrade
 rm -f "$FAKE_DB.upgraded"
 update "hunter2" "n"

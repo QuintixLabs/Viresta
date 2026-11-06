@@ -25,7 +25,7 @@ install_shell_packages() {
             info "$pkg: installing"
             run_pacman -S --needed --noconfirm "$pkg" || failure "$pkg: install failed - see $LOG_FILE"
         fi
-    done < <(read_package_list "$SCRIPT_DIR/packages/shell.txt")
+    done < <(read_package_list "$SCRIPT_DIR/packages/system/shell.txt")
 
     return 0
 }

@@ -11,6 +11,7 @@
 # What is ticked in the install menu. What the user chose last time is read over these.
 # Anything starting with USE_ is saved as an option, so only options should start with it.
 USE_VICINAE=1
+USE_GAMING=1
 USE_RENAME_WALLPAPERS=1
 USE_DRIVERS=1
 # Not in the menu. ./update.sh --notifications-off and --notifications-on change it.

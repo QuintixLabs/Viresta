@@ -54,9 +54,9 @@ is "vmware: replaces" "$(driver_replaces_for vmware open-vm-tools-clipway)" "ope
 is "vmware: build options" "$(driver_flags_for vmware open-vm-tools-clipway)" "--without-gtk4"
 is "kvm: service" "$(driver_services_for kvm)" "qemu-guest-agent.service"
 is "kvm: replaces nothing" "$(driver_replaces_for kvm qemu-guest-agent)" ""
-is "amd: packages" "$(driver_pkgs_for amd | paste -sd,)" "mesa,vulkan-radeon"
+is "amd: packages" "$(driver_pkgs_for amd | paste -sd,)" "mesa,vulkan-radeon,lib32-mesa,lib32-vulkan-radeon"
 is "amd: no service" "$(driver_services_for amd)" ""
-is "intel: packages" "$(driver_pkgs_for intel | paste -sd,)" "mesa,vulkan-intel,intel-media-driver,libva-intel-driver"
+is "intel: packages" "$(driver_pkgs_for intel | paste -sd,)" "mesa,vulkan-intel,intel-media-driver,libva-intel-driver,lib32-mesa,lib32-vulkan-intel"
 is "old nvidia: nothing" "$(driver_pkgs_for nvidia-old)" ""
 
 # ------------------------------------------------------------
@@ -112,14 +112,21 @@ is "part of an ID does not match" "$(card 0x0138)" "nvidia"
 no_gpus; gpu 0000:01:00.0 0x030000 0x10de 0x1f08; gpu 0000:02:00.0 0x030000 0x10de 0x1c03
 is "a new and a 580xx card share 580xx" "$(found)" "nvidia-580xx"
 
-for driver in nvidia-open-dkms nvidia-open nvidia nvidia-dkms nvidia-580xx-dkms nvidia-470xx-dkms nvidia-390xx-dkms; do
+# A driver the user chose is left alone, with the card dropped from the list.
+for driver in nvidia-open nvidia nvidia-dkms nvidia-580xx-dkms nvidia-470xx-dkms nvidia-390xx-dkms; do
     INSTALLED="$driver"
-    is "$driver already installed: nothing" "$(card 0x2786)" ""
+    is "their own $driver: the card is left alone" "$(card 0x2786)" ""
 done
-INSTALLED="nvidia-utils"
-is "nvidia-utils alone is not a driver" "$(card 0x2786)" "nvidia"
+# The one Viresta picks keeps the card, so its other rows like the 32-bit driver still come.
+INSTALLED="nvidia-open-dkms"
+is "Viresta's driver already there: the card stays" "$(card 0x2786)" "nvidia"
+INSTALLED="nvidia-580xx-dkms"
+is "Viresta's 580xx driver already there: the card stays" "$(card 0x1c03)" "nvidia-580xx"
 INSTALLED="nvidia-open-dkms"
 is "an old card with a driver: no nouveau warning" "$(card 0x1180)" ""
+INSTALLED="nvidia-utils"
+is "nvidia-utils alone is not a driver" "$(card 0x2786)" "nvidia"
+INSTALLED="nvidia-open"
 no_gpus; gpu 0000:00:02.0 0x030000 0x8086; gpu 0000:01:00.0 0x030200 0x10de 0x2786
 is "the other card is still handled" "$(found)" "intel"
 INSTALLED=""
@@ -151,33 +158,35 @@ printf '3\n' >"$CHASSIS_FILE"
 
 no_gpus; gpu 0000:01:00.0 0x030000 0x1002; detect_hardware
 LSPCI_LINES["0000:01:00.0"]='01:00.0 VGA compatible controller: Advanced Micro Devices, Inc. [AMD/ATI] Navi 23 [Radeon RX 6600/6600 XT/6600M] (rev c1)'
-is "amd row" "$(drivers_summary)" "Radeon RX 6600/6600 XT/6600M: mesa, vulkan-radeon"
+is "amd row" "$(drivers_summary)" "Radeon RX 6600/6600 XT/6600M: mesa, vulkan-radeon, lib32-mesa, lib32-vulkan-radeon"
 LSPCI_OK=0
-is "no lspci: the maker's name" "$(drivers_summary)" "AMD: mesa, vulkan-radeon"
+is "no lspci: the maker's name" "$(drivers_summary)" "AMD: mesa, vulkan-radeon, lib32-mesa, lib32-vulkan-radeon"
 LSPCI_OK=1
 INSTALLED="mesa"
-is "only what is missing" "$(drivers_summary)" "Radeon RX 6600/6600 XT/6600M: vulkan-radeon"
+is "only what is missing" "$(drivers_summary)" "Radeon RX 6600/6600 XT/6600M: vulkan-radeon, lib32-mesa, lib32-vulkan-radeon"
 INSTALLED="mesa vulkan-radeon"
+is "only the 32-bit ones missing" "$(drivers_summary)" "Radeon RX 6600/6600 XT/6600M: lib32-mesa, lib32-vulkan-radeon"
+INSTALLED="mesa vulkan-radeon lib32-mesa lib32-vulkan-radeon"
 is "all installed: no row" "$(drivers_summary)" ""
 INSTALLED=""
 
 no_gpus; gpu 0000:00:02.0 0x030000 0x8086; detect_hardware
 LSPCI_LINES["0000:00:02.0"]='00:02.0 VGA compatible controller: Intel Corporation HD Graphics 620 (rev 02)'
-is "no brackets: the maker's name" "$(drivers_summary)" "Intel: mesa, vulkan-intel, intel-media-driver, libva-intel-driver"
+is "no brackets: the maker's name" "$(drivers_summary)" "Intel: mesa, vulkan-intel, intel-media-driver, libva-intel-driver, lib32-mesa, lib32-vulkan-intel"
 no_gpus; gpu 0000:00:02.0 0x030000 0x8086; gpu 0000:01:00.0 0x030200 0x10de; detect_hardware
 unset 'LSPCI_LINES[0000:01:00.0]'
 is "Intel and NVIDIA: both named" "$(drivers_summary | cut -d: -f1)" "Intel + NVIDIA"
 no_gpus; gpu 0000:00:02.0 0x030000 0x8086; gpu 0000:01:00.0 0x030000 0x1002; detect_hardware
 LSPCI_LINES["0000:00:02.0"]='00:02.0 VGA: Intel Corporation Raptor Lake [UHD Graphics 770] (rev 04)'
 LSPCI_LINES["0000:01:00.0"]='01:00.0 VGA: Advanced Micro Devices, Inc. [AMD/ATI] Navi 23 [Radeon RX 6600/6600 XT/6600M] (rev c1)'
-is "two cards: no package twice" "$(drivers_summary)" "UHD Graphics 770 + Radeon RX 6600/6600 XT/6600M: mesa, vulkan-intel, intel-media-driver, libva-intel-driver, vulkan-radeon"
+is "two cards: no package twice" "$(drivers_summary)" "UHD Graphics 770 + Radeon RX 6600/6600 XT/6600M: mesa, vulkan-intel, intel-media-driver, libva-intel-driver, lib32-mesa, lib32-vulkan-intel, vulkan-radeon, lib32-vulkan-radeon"
 
 no_gpus; gpu 0000:01:00.0 0x030000 0x10de 0x1f08; detect_hardware
 LSPCI_LINES["0000:01:00.0"]='01:00.0 VGA compatible controller: NVIDIA Corporation TU106 [GeForce RTX 2060 Rev. A] (rev a1)'
-is "a new NVIDIA card" "$(drivers_summary)" "GeForce RTX 2060 Rev. A: nvidia-open-dkms, nvidia-utils, egl-wayland, nvidia-settings, libva-nvidia-driver"
+is "a new NVIDIA card" "$(drivers_summary)" "GeForce RTX 2060 Rev. A: nvidia-open-dkms, nvidia-utils, egl-wayland, nvidia-settings, libva-nvidia-driver, lib32-nvidia-utils"
 no_gpus; gpu 0000:01:00.0 0x030000 0x10de 0x1c03; detect_hardware
 LSPCI_LINES["0000:01:00.0"]='01:00.0 VGA: NVIDIA Corporation GP106 [GeForce GTX 1060 6GB] (rev a1)'
-is "a 580xx card" "$(drivers_summary)" "GeForce GTX 1060 6GB: nvidia-580xx-dkms, nvidia-580xx-utils, egl-wayland, libva-nvidia-driver"
+is "a 580xx card" "$(drivers_summary)" "GeForce GTX 1060 6GB: nvidia-580xx-dkms, nvidia-580xx-utils, egl-wayland, libva-nvidia-driver, lib32-nvidia-580xx-utils"
 no_gpus; gpu 0000:01:00.0 0x030000 0x10de 0x1180; detect_hardware
 is "an old card: no row" "$(drivers_summary)" ""
 unset 'LSPCI_LINES[0000:01:00.0]'
@@ -202,6 +211,43 @@ is "kvm row" "$(drivers_summary)" "QEMU/KVM: qemu-guest-agent"
 FAKE_VIRT=microsoft; detect_hardware
 is "a VM with nothing to install: no row" "$(drivers_summary)" ""
 FAKE_VIRT=none
+
+# ------------------------------------------------------------
+# 32-bit drivers
+# ------------------------------------------------------------
+
+no_gpus; gpu 0000:01:00.0 0x030000 0x1002; detect_hardware
+INSTALLED=""
+is "AMD: its two" "$(missing_32bit_drivers | paste -sd' ')" "lib32-mesa lib32-vulkan-radeon"
+INSTALLED="mesa vulkan-radeon lib32-mesa"
+is "only the ones missing" "$(missing_32bit_drivers)" "lib32-vulkan-radeon"
+
+# Viresta's NVIDIA driver already there: only its 32-bit part is missing.
+no_gpus; gpu 0000:01:00.0 0x030000 0x10de 0x2786
+INSTALLED="nvidia-open-dkms nvidia-utils egl-wayland nvidia-settings libva-nvidia-driver"; detect_hardware
+is "NVIDIA with its driver: the 32-bit one" "$(missing_32bit_drivers)" "lib32-nvidia-utils"
+LSPCI_LINES["0000:01:00.0"]='01:00.0 VGA: NVIDIA Corporation AD104 [GeForce RTX 4070] (rev a1)'
+is "NVIDIA with its driver: only that in the row" "$(drivers_summary)" "GeForce RTX 4070: lib32-nvidia-utils"
+unset 'LSPCI_LINES[0000:01:00.0]'
+INSTALLED="nvidia-580xx-dkms nvidia-580xx-utils"
+no_gpus; gpu 0000:01:00.0 0x030000 0x10de 0x1c03; detect_hardware
+is "580xx with its driver: its own 32-bit one" "$(missing_32bit_drivers)" "lib32-nvidia-580xx-utils"
+
+# Without the NVIDIA driver, its 32-bit part would turn nouveau off and leave a black screen.
+INSTALLED=""
+no_gpus; gpu 0000:01:00.0 0x030000 0x10de 0x2786; detect_hardware
+is "NVIDIA without its driver: not the 32-bit one" "$(missing_32bit_drivers)" ""
+INSTALLED="nvidia-open"
+is "their own driver: left alone" "$(card 0x2786; missing_32bit_drivers)" ""
+INSTALLED=""
+
+FAKE_VIRT=vmware; INSTALLED="mesa"; detect_hardware
+is "a VM: none" "$(missing_32bit_drivers)" ""
+FAKE_VIRT=none
+printf 'ID=cachyos\n' >"$OS_RELEASE_FILE"; detect_hardware
+is "CachyOS: left to chwd" "$(missing_32bit_drivers)" ""
+printf 'ID=arch\n' >"$OS_RELEASE_FILE"
+INSTALLED=""
 
 # ------------------------------------------------------------
 # Kernel headers

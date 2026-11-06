@@ -8,7 +8,7 @@
 # ------------------------------------------------------------
 
 STEP=0
-TOTAL_STEPS=9
+TOTAL_STEPS=10
 STEP_TITLE=''
 STEP_STARTED=0
 STEP_MARK=''

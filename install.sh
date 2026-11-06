@@ -13,6 +13,7 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 SETUP_DIR="$SCRIPT_DIR/setup"
 DRY_RUN=0
 DRIVERS_STEP=1
+GAMING_STEP=1
 
 # ------------------------------------------------------------
 # Libraries
@@ -84,6 +85,7 @@ ask_options() {
     drivers="$(drivers_summary)"
 
     add_option vicinae "Vicinae" "Faster, better looking app launcher than KDE's own" "$USE_VICINAE" "Applications"
+    add_option gaming "Gaming" "Steam, ProtonUp-Qt, GOverlay, GameMode and MangoHud" "$USE_GAMING" "Applications"
     add_option rename_wallpapers "rename_wallpapers.py" "Renames your wallpapers in ~/Pictures/Wallpapers" "$USE_RENAME_WALLPAPERS" "Scripts"
     if [ -n "$drivers" ]; then
         add_option drivers "Install drivers" "$drivers" "$USE_DRIVERS" "Drivers"
@@ -93,6 +95,8 @@ ask_options() {
 
     USE_VICINAE=0
     if option_enabled vicinae; then USE_VICINAE=1; fi
+    USE_GAMING=0
+    if option_enabled gaming; then USE_GAMING=1; fi
     USE_RENAME_WALLPAPERS=0
     if option_enabled rename_wallpapers; then USE_RENAME_WALLPAPERS=1; fi
     if [ -n "$drivers" ]; then
@@ -104,9 +108,13 @@ ask_options() {
 }
 
 # Decided here and not at the top, since the step count depends on the menu.
-plan_drivers() {
+plan_steps() {
     if [ "$USE_DRIVERS" -eq 0 ] || [ -z "$(missing_drivers)" ]; then
         DRIVERS_STEP=0
+        TOTAL_STEPS=$((TOTAL_STEPS - 1))
+    fi
+    if [ "$USE_GAMING" -eq 0 ]; then
+        GAMING_STEP=0
         TOTAL_STEPS=$((TOTAL_STEPS - 1))
     fi
 }
@@ -180,7 +188,7 @@ main() {
     fi
 
     ask_options
-    plan_drivers
+    plan_steps
     offer_backup
 
     step "Checking your system"
@@ -203,13 +211,13 @@ main() {
     update_system
 
     step "Installing system tools"
-    install_group "System" "$SCRIPT_DIR/packages/base.txt"
+    install_group "System" "$SCRIPT_DIR/packages/system/base.txt"
 
     step "Installing KDE Plasma"
-    install_group "KDE Plasma" "$SCRIPT_DIR/packages/kde.txt"
+    install_group "KDE Plasma" "$SCRIPT_DIR/packages/system/kde.txt"
 
     step "Installing apps"
-    install_group_optional "Applications" "$SCRIPT_DIR/packages/apps.txt"
+    install_group_optional "Applications" "$SCRIPT_DIR/packages/apps/pacman.txt"
 
     set_build_jobs
 
@@ -224,6 +232,12 @@ main() {
     if [ "$DRIVERS_STEP" -eq 1 ]; then
         step "Installing drivers"
         install_drivers
+    fi
+
+    # After the drivers, so Steam finds the right 32-bit ones already there.
+    if [ "$GAMING_STEP" -eq 1 ]; then
+        step "Installing gaming apps"
+        install_gaming
     fi
 
     step "Setting up your desktop"

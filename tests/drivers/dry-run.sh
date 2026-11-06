@@ -36,13 +36,13 @@ count() { grep -c -- "$1" <<<"$2"; }
 # ------------------------------------------------------------
 
 gpu 0x1002; out="$(dry_run)"
-is "AMD: 9 steps" "$(steps "$out")" "/9]"
+is "AMD: 10 steps" "$(steps "$out")" "/10]"
 is "AMD: a drivers step" "$(count 'Installing drivers' "$out")" "1"
 is "AMD: mesa" "$(count 'Would install mesa\|Would build mesa' "$out")" "1"
 is "AMD: no NVIDIA warning" "$(count NVIDIA "$out")" "0"
 
 gpu 0x10de; out="$(dry_run)"
-is "NVIDIA: 9 steps" "$(steps "$out")" "/9]"
+is "NVIDIA: 10 steps" "$(steps "$out")" "/10]"
 is "NVIDIA: a new card is not called untested" "$(count 'has not been tested' "$out")" "0"
 is "NVIDIA: the open driver" "$(count 'Would build nvidia-open-dkms' "$out")" "1"
 is "NVIDIA: the boot image" "$(count 'rebuild the boot image' "$out")" "1"
@@ -50,12 +50,12 @@ gpu 0x10de 0x1c03; out="$(dry_run)"
 is "GTX 1060: 580xx" "$(count 'Would build nvidia-580xx-dkms' "$out")" "1"
 is "GTX 1060: the untested warning" "$(count 'has not been tested' "$out")" "1"
 gpu 0x10de 0x1180; out="$(dry_run)"
-is "GTX 680: 8 steps" "$(steps "$out")" "/8]"
+is "GTX 680: 9 steps" "$(steps "$out")" "/9]"
 is "GTX 680: told it stays on nouveau" "$(count 'stays on nouveau' "$out")" "1"
 is "GTX 680: not called untested" "$(count 'has not been tested' "$out")" "0"
 
 rm -rf "$PCI_DEVICES_DIR"; mkdir "$PCI_DEVICES_DIR"; out="$(dry_run)"
-is "no gpu: 8 steps" "$(steps "$out")" "/8]"
+is "no gpu: 9 steps" "$(steps "$out")" "/9]"
 
 # ------------------------------------------------------------
 # CachyOS
@@ -63,10 +63,10 @@ is "no gpu: 8 steps" "$(steps "$out")" "/8]"
 
 gpu 0x1002
 printf 'ID=cachyos\n' >"$OS_RELEASE_FILE"; out="$(dry_run)"
-is "a CachyOS PC: 8 steps" "$(steps "$out")" "/8]"
+is "a CachyOS PC: 9 steps" "$(steps "$out")" "/9]"
 is "a CachyOS PC: no drivers step" "$(count 'Installing drivers' "$out")" "0"
 FAKE_VIRT=vmware; out="$(dry_run)"
-is "a CachyOS VM: 9 steps" "$(steps "$out")" "/9]"
+is "a CachyOS VM: 10 steps" "$(steps "$out")" "/10]"
 is "a CachyOS VM: clipway" "$(count 'Would build open-vm-tools-clipway' "$out")" "1"
 is "a CachyOS VM: its service" "$(count 'Would enable vmtoolsd.service' "$out")" "1"
 printf 'ID=arch\n' >"$OS_RELEASE_FILE"
@@ -76,7 +76,7 @@ printf 'ID=arch\n' >"$OS_RELEASE_FILE"
 # ------------------------------------------------------------
 
 printf 'vicinae=1\nrename_wallpapers=1\ndrivers=0\n' >"$OPTIONS"; out="$(dry_run)"
-is "drivers turned off: 8 steps" "$(steps "$out")" "/8]"
+is "drivers turned off: 9 steps" "$(steps "$out")" "/9]"
 is "drivers turned off: no clipway" "$(count open-vm-tools-clipway "$out")" "0"
 is "drivers turned off: no service" "$(count vmtoolsd "$out")" "0"
 
@@ -84,6 +84,22 @@ printf 'vicinae=0\nrename_wallpapers=0\ndrivers=1\n' >"$OPTIONS"; out="$(dry_run
 is "Vicinae turned off: not built" "$(count 'Would build vicinae-bin' "$out")" "0"
 rm -f "$OPTIONS"; out="$(dry_run)"
 is "by default: Vicinae is built" "$(count 'Would build vicinae-bin' "$out")" "1"
+
+# ------------------------------------------------------------
+# Gaming
+# ------------------------------------------------------------
+
+gpu 0x1002
+out="$(dry_run)"
+is "Gaming: on by default" "$(count 'Installing gaming apps' "$out")" "1"
+is "Gaming: after the drivers" "$(grep -oE 'Installing (drivers|gaming apps)' <<<"$out" | paste -sd'|')" "Installing drivers|Installing gaming apps"
+is "Gaming: Steam" "$(count 'steam' "$out")" "1"
+is "Gaming: ProtonUp-Qt" "$(count 'Would build protonup-qt-bin' "$out")" "1"
+is "Gaming: the gamemode group" "$(count 'to the gamemode group' "$out")" "1"
+printf 'gaming=0\n' >"$OPTIONS"; out="$(dry_run)"
+is "Gaming turned off: one step less" "$(steps "$out")" "/9]"
+is "Gaming turned off: no Steam" "$(count steam "$out")" "0"
+rm -f "$OPTIONS"
 
 sed -i 's/^USE_DRIVERS=1$/USE_DRIVERS=0/' "$VIRESTA/setup/shared/variables.sh"; out="$(dry_run)"
 is "the defaults come from variables.sh" "$(count open-vm-tools-clipway "$out")" "0"

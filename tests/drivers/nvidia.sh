@@ -80,8 +80,18 @@ INSTALLED=""; card 0x10de 0x2786
 got="$(install)"
 has "headers come first" "pacman linux-headers linux-lts-headers;pacman nvidia-open-dkms;" "$got"
 has "the boot setting is written" "write /etc/mkinitcpio.conf.d/10-viresta-nvidia.conf" "$got"
-has "the boot image is rebuilt after the driver" "libva-nvidia-driver;write /etc/mkinitcpio.conf.d/10-viresta-nvidia.conf;sudo mkinitcpio -P;" "$got"
+has "the boot image is rebuilt after the drivers" "lib32-nvidia-utils;write /etc/mkinitcpio.conf.d/10-viresta-nvidia.conf;sudo mkinitcpio -P;" "$got"
 is "the boot setting only drops kms" "$(cat "$TEST_DIR/conf")" 'HOOKS=(${HOOKS[@]/kms/})'
+
+has "the 32-bit driver comes last" "pacman libva-nvidia-driver;pacman lib32-nvidia-utils;write" "$got"
+
+# Run again with the driver there: only the 32-bit part, without the headers or a rebuild.
+INSTALLED="nvidia-open-dkms nvidia-utils egl-wayland nvidia-settings libva-nvidia-driver"
+card 0x10de 0x2786
+got="$(install)"
+has "the driver already there: the 32-bit part" "pacman lib32-nvidia-utils;" "$got"
+hasnt "the driver already there: no headers" "headers" "$got"
+hasnt "the driver already there: no boot image rebuild" "mkinitcpio" "$got"
 
 # ------------------------------------------------------------
 # A 580xx card

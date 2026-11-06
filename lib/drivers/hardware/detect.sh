@@ -89,6 +89,10 @@ is_hybrid_laptop() {
     esac
 }
 
+is_cachyos() {
+    grep -Eqs '^ID="?cachyos"?$' "$OS_RELEASE_FILE"
+}
+
 # A VM has no real graphics card, only its own tools to install. CachyOS sets up the
 # drivers of a real PC with chwd, which also knows its own kernels and packages.
 detect_hardware() {
@@ -102,7 +106,7 @@ detect_hardware() {
         return 0
     fi
 
-    if grep -Eqs '^ID="?cachyos"?$' "$OS_RELEASE_FILE"; then
+    if is_cachyos; then
         return 0
     fi
 

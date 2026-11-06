@@ -100,7 +100,20 @@ It's made for a minimal install, so that's the only setup it's tested on. If you
 <summary>Does it install drivers?</summary>
 <p></p>
 
-Yes, for AMD, Intel and NVIDIA graphics, and the tools for VMware, QEMU/KVM and VirtualBox. Very old NVIDIA cards stay on the `nouveau` driver. Drivers you already have are left alone. On CachyOS, Viresta leaves graphics drivers to CachyOS's own tool, [chwd](https://github.com/CachyOS/chwd).
+Yes, for AMD, Intel and NVIDIA graphics, and the tools for VMware, QEMU/KVM and VirtualBox. The 32-bit versions come too, which Steam and Wine need. Very old NVIDIA cards stay on the `nouveau` driver. Drivers you already have are left alone. On CachyOS, Viresta leaves graphics drivers to CachyOS's own tool, [chwd](https://github.com/CachyOS/chwd).
+</details>
+
+<details>
+<summary>Can I play games on it?</summary>
+<p></p>
+
+Yes. The **Gaming** option in the install menu, on by default, installs Steam, ProtonUp-Qt for more Proton versions, GOverlay, GameMode and MangoHud. To use GameMode and MangoHud in a Steam game, add this to its launch options:
+
+```sh
+gamemoderun mangohud %command%
+```
+
+If you already have Viresta, run `viresta install` and keep **Gaming** ticked. Updates never add it on their own.
 </details>
 
 <details>

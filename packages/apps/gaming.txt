@@ -1,0 +1,14 @@
+# The Gaming row in the install menu. Updates never add these, so someone who already
+# has Viresta gets them only by ticking the row in a new install.
+# Packages not in the official repositories are built from the AUR automatically.
+
+# Apps
+steam
+protonup-qt-bin
+goverlay
+
+# Tools, with the 32-bit parts for 32-bit games
+gamemode
+lib32-gamemode
+mangohud
+lib32-mangohud

@@ -7,7 +7,7 @@
 # Settings
 # ------------------------------------------------------------
 
-DRIVERS_FILE="$SCRIPT_DIR/packages/drivers.txt"
+DRIVERS_FILE="$SCRIPT_DIR/packages/drivers/drivers.txt"
 
 # ------------------------------------------------------------
 # drivers.txt

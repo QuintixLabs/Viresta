@@ -24,13 +24,20 @@ new_packages() {
 # Installing
 # ------------------------------------------------------------
 
-# A package can need a newer system than this one, and only then is a full update
-# worth asking about. Refreshing the package list alone would break Arch.
 install_new_repo_packages() {
     local -a pkgs=()
+
+    mapfile -t pkgs < <(new_packages system/base system/kde apps/pacman)
+    install_or_ask "${pkgs[@]}"
+}
+
+# A package can need a newer system than this one, and only then is a full update
+# worth asking about. Refreshing the package list alone would break Arch. A repository
+# that was just turned on, like multilib, also has no package list until then.
+install_or_ask() {
+    local -a pkgs=("$@")
     local update_system=1
 
-    mapfile -t pkgs < <(new_packages base kde apps)
     [ "${#pkgs[@]}" -gt 0 ] || return 0
 
     prepare_pacman_conf
@@ -49,11 +56,40 @@ install_new_repo_packages() {
     fi
 }
 
+# The 32-bit drivers someone does not have yet. Only when drivers are ticked in the
+# install menu, and one they removed on purpose stays removed. Everything else in
+# drivers.txt needs install.sh, which sets up what goes with it, like the NVIDIA boot
+# image. The Gaming row is never added by an update.
+install_new_32bit_drivers() {
+    local -a repo=() aur=()
+    local pkg
+
+    [ "${USE_DRIVERS:-1}" -eq 1 ] || return 0
+    detect_hardware
+
+    while IFS= read -r pkg; do
+        if grep -qxF "$pkg" "$KNOWN_PACKAGES_FILE" 2>/dev/null; then
+            continue
+        elif [ "$(pkg_source "$pkg")" = "repo" ]; then
+            repo+=("$pkg")
+        else
+            aur+=("$pkg")
+        fi
+    done < <(missing_32bit_drivers)
+    [ "$((${#repo[@]} + ${#aur[@]}))" -gt 0 ] || return 0
+
+    enable_multilib
+    install_or_ask "${repo[@]}"
+    for pkg in "${aur[@]}"; do
+        aur_install_one "$pkg" || true
+    done
+}
+
 install_new_aur_packages() {
     local -a pkgs=()
     local pkg
 
-    mapfile -t pkgs < <(new_packages aur)
+    mapfile -t pkgs < <(new_packages apps/aur)
     [ "${#pkgs[@]}" -gt 0 ] || return 0
 
     if ! command -v paru >/dev/null 2>&1; then

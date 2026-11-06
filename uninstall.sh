@@ -118,7 +118,7 @@ confirm_uninstall() {
 
     printf '\n'
     REMOVE_APPS=0
-    if ask_yes_no "Also remove the main apps Viresta installed? (Firefox, Kitty, VSCodium, Haruna, Fooyin and others)" n; then
+    if ask_yes_no "Also remove the main apps Viresta installed? (Firefox, Kitty, VSCodium, Steam, Haruna and others)" n; then
         REMOVE_APPS=1
     fi
     printf '\n'

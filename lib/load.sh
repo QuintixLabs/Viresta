@@ -39,6 +39,8 @@ source "$SCRIPT_DIR/lib/drivers/hardware/list.sh"
 source "$SCRIPT_DIR/lib/drivers/hardware/nvidia.sh"
 # shellcheck source=lib/drivers/install.sh
 source "$SCRIPT_DIR/lib/drivers/install.sh"
+# shellcheck source=lib/installers/gaming.sh
+source "$SCRIPT_DIR/lib/installers/gaming.sh"
 
 # ------------------------------------------------------------
 # Startup

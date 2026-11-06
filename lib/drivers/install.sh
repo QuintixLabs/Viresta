@@ -20,6 +20,17 @@ missing_drivers() {
     done | awk '!seen[$0]++'
 }
 
+# The lib32 rows in drivers.txt, which Steam needs and updates add. Never the NVIDIA one
+# before its driver: it brings nvidia-utils, which turns nouveau off, and without the
+# driver the desktop would not start.
+missing_32bit_drivers() {
+    if nvidia_driver_missing; then
+        missing_drivers | grep '^lib32-' | grep -v '^lib32-nvidia' || true
+    else
+        missing_drivers | grep '^lib32-' || true
+    fi
+}
+
 # The name of the card from lspci when it is there, as the last part in brackets:
 # Advanced Micro Devices, Inc. [AMD/ATI] Navi 23 [Radeon RX 6600] (rev c1)
 gpu_name() {
@@ -70,9 +81,12 @@ drivers_summary() {
 # ------------------------------------------------------------
 
 install_drivers() {
-    local hardware pkg old
+    local hardware pkg old nvidia_new=0
 
-    if has_nvidia_to_install; then
+    # The headers and the boot image are only for a first NVIDIA driver, and not when it
+    # is there already and only its 32-bit part is missing.
+    if nvidia_driver_missing; then
+        nvidia_new=1
         install_kernel_headers || true
     fi
 
@@ -88,11 +102,20 @@ install_drivers() {
         done < <(driver_pkgs_for "$hardware")
     done
 
-    if has_nvidia_to_install; then
+    if [ "$nvidia_new" -eq 1 ]; then
         setup_nvidia_boot || true
     fi
 
     return 0
+}
+
+# For Steam, when drivers were not ticked in the menu.
+install_32bit_drivers() {
+    local pkg
+
+    while IFS= read -r pkg; do
+        install_driver_package 32bit "$pkg" || true
+    done < <(missing_32bit_drivers)
 }
 
 install_driver_package() {

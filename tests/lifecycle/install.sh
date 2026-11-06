@@ -38,6 +38,10 @@ has "new packages are noted" "kitty" "$(cat "$V/known-packages")"
 hasnt "the password is never on screen" "hunter2" "$OUT"
 
 is "multilib is turned on" "$(grep -c '^\[multilib\]$' "$SYSTEM_PACMAN_CONF")" "1"
+has "Gaming is on by default: Steam" "steam" "$(cat "$FAKE_DB")"
+has "Gaming: ProtonUp-Qt" "protonup-qt-bin" "$(cat "$FAKE_DB")"
+has "Gaming: joins the gamemode group" "usermod -aG gamemode $(id -un)" "$(cat "$FAKE_CALLS")"
+is "Gaming is saved as chosen" "$(grep -c -x 'gaming=1' "$C/viresta/options")" "1"
 has "before the system update, so its packages are known" "pacman --config" "$(grep -m1 -- '-Sy' "$FAKE_CALLS")"
 
 run_script ./install.sh "" "hunter2"

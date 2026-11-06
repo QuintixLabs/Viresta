@@ -89,7 +89,7 @@ is "descriptions start in the same column" "$(grep -E '(one|two)$' <<<"$long" | 
     missing "nothing in the file gets run" "$TEST_DIR/pwned"
 
     fresh; USE_VICINAE=0; USE_DRIVERS=0; save_options
-    is "every option is saved" "$(sort "$SAVED_OPTIONS_FILE" | paste -sd,)" "drivers=0,rename_wallpapers=1,update_notifications=1,vicinae=0"
+    is "every option is saved" "$(sort "$SAVED_OPTIONS_FILE" | paste -sd,)" "drivers=0,gaming=1,rename_wallpapers=1,update_notifications=1,vicinae=0"
     fresh; USE_RENAME_WALLPAPERS=0; save_options; saved="$(cat "$SAVED_OPTIONS_FILE")"
     USE_RENAME_WALLPAPERS=1; load_saved_options
     is "saved and read back" "$(all)" "1 0 1"

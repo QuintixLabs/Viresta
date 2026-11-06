@@ -87,9 +87,9 @@ installs() {
 # ------------------------------------------------------------
 
 no_gpus; gpu 0000:01:00.0 0x030000 0x1002; detect_hardware
-installs "AMD installs its packages" "pacman -S mesa;pacman -S vulkan-radeon;" "installing"
+installs "AMD installs its packages, then their 32-bit versions" "pacman -S mesa;pacman -S vulkan-radeon;pacman -S lib32-mesa;pacman -S lib32-vulkan-radeon;" "installing"
 no_gpus; gpu 0000:00:02.0 0x030000 0x8086; gpu 0000:01:00.0 0x030000 0x1002; detect_hardware
-installs "AMD and Intel install both" "pacman -S mesa;pacman -S vulkan-intel;pacman -S intel-media-driver;pacman -S libva-intel-driver;pacman -S mesa;pacman -S vulkan-radeon;" "installing"
+installs "AMD and Intel install both" "pacman -S mesa;pacman -S vulkan-intel;pacman -S intel-media-driver;pacman -S libva-intel-driver;pacman -S lib32-mesa;pacman -S lib32-vulkan-intel;pacman -S mesa;pacman -S vulkan-radeon;pacman -S lib32-mesa;pacman -S lib32-vulkan-radeon;" "installing"
 no_gpus; detect_hardware
 installs "no hardware: nothing" "" ""
 : >"$CALLS"; configure_driver_services >/dev/null
@@ -150,7 +150,7 @@ SERVICE_OK=1
 # ------------------------------------------------------------
 
 # Nothing about a package is in the code, so made-up rows must work the same way.
-cat >"$VIRESTA/packages/drivers.txt" <<'EOF'
+cat >"$VIRESTA/packages/drivers/drivers.txt" <<'EOF'
 kvm newtool new.service oldtool
 oracle plaintool plain.service
 qemu flagtool flag.service - --one --two

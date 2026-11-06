@@ -27,6 +27,9 @@ source "$SCRIPT_DIR/lib/update/download.sh"
 # shellcheck source=lib/update/install-pkgs.sh
 source "$SCRIPT_DIR/lib/update/install-pkgs.sh"
 
+# What was chosen in the install menu, like whether drivers are wanted.
+load_saved_options
+
 TOTAL_STEPS=4
 
 # ------------------------------------------------------------
@@ -154,6 +157,7 @@ main() {
     install_new_repo_packages
     install_new_aur_packages
     install_shell_packages
+    install_new_32bit_drivers
 
     step "Updating Viresta"
     configure_kde_configs --update

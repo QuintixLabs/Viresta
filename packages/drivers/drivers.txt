@@ -11,18 +11,24 @@ qemu                qemu-guest-agent            qemu-guest-agent.service
 oracle              virtualbox-guest-utils      vboxservice.service
 amd                 mesa
 amd                 vulkan-radeon
+amd                 lib32-mesa
+amd                 lib32-vulkan-radeon
 intel               mesa
 intel               vulkan-intel
 intel               intel-media-driver
 intel               libva-intel-driver
+intel               lib32-mesa
+intel               lib32-vulkan-intel
 nvidia              nvidia-open-dkms
 nvidia              nvidia-utils
 nvidia              egl-wayland
 nvidia              nvidia-settings
 nvidia              libva-nvidia-driver
+nvidia              lib32-nvidia-utils
 nvidia-580xx        nvidia-580xx-dkms
 nvidia-580xx        nvidia-580xx-utils
 nvidia-580xx        egl-wayland
 nvidia-580xx        libva-nvidia-driver
+nvidia-580xx        lib32-nvidia-580xx-utils
 nvidia-laptop       nvidia-prime
 nvidia-laptop       switcheroo-control          switcheroo-control.service

@@ -233,7 +233,8 @@ EOF
 for a in "$@"; do case "$a" in -*) ;; outfit-font) echo otf-outfit >>"$FAKE_DB" ;; *) echo "$a" >>"$FAKE_DB" ;; esac; done
 EOF
     printf '#!/bin/sh\n[ -n "${PLASMA_RUNNING:-}" ]\n' >"$BIN/pgrep"
-    printf '#!/bin/sh\necho "frost:x:1000:1000::/home/frost:/bin/bash"\n' >"$BIN/getent"
+    printf '#!/bin/sh\nif [ "$1" = group ]; then echo "$2:x:999:"; else echo "frost:x:1000:1000::/home/frost:/bin/bash"; fi\n' >"$BIN/getent"
+    printf '#!/bin/sh\necho "usermod $*" >>"$FAKE_CALLS"\n' >"$BIN/usermod"
     printf '#!/bin/sh\nexit 0\n' | tee "$BIN/visudo" "$BIN/systemctl" "$BIN/vicinae" "$BIN/kbuildsycoca6" "$BIN/codium" >/dev/null
     printf '#!/bin/sh\nexit 1\n' >"$BIN/curl"
     chmod +x "$BIN"/*
