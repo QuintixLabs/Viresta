@@ -5,3 +5,4 @@ base-devel
 networkmanager
 curl
 jq
+less
