@@ -164,6 +164,8 @@ main() {
     remember_packages
 
     step_finish
+    # Done, even with something listed as failed, since those are in --logs.
+    rm -f -- "$UPDATE_PENDING_FILE"
     summary
 }
 

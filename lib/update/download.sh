@@ -27,13 +27,42 @@ follow_latest_commit() {
 }
 
 # Only ever forwards, so someone on a newer commit is not moved back to an older release.
+# Asks first, since after this the folder is on the new version.
 follow_releases() {
     local release="$1"
 
     if is_newer_version "${release#v}" "$(viresta_version)"; then
+        ask_to_update "$release"
         git -C "$SCRIPT_DIR" checkout -q "$release" >>"$LOG_FILE" 2>&1 \
             || die "Could not switch to $release. Nothing was changed."
     fi
+}
+
+# ------------------------------------------------------------
+# Questions
+# ------------------------------------------------------------
+
+# Only one of these is ever asked. Yes always means the whole update, configs too.
+ask_to_update() {
+    local version
+
+    version="$(viresta_version)"
+    step_finish
+    emit "$C_OK" "$S_OK Viresta ${1#v} is out (you're on ${version:-an older version})"
+    if ! ask_yes_no "Update now?" y; then
+        printf 'Nothing was changed.\n'
+        exit 0
+    fi
+    printf '\n'
+}
+
+ask_to_finish() {
+    step_finish
+    emit "$C_WARN" "! The last update to $(cat "$UPDATE_PENDING_FILE") didn't finish"
+    if ! ask_yes_no "Finish it now?" y; then
+        exit 0
+    fi
+    printf '\n'
 }
 
 ask_to_apply_again() {
@@ -73,13 +102,28 @@ pull_latest() {
         follow_releases "$release"
     fi
 
+    # Nothing new to download, but the last update may have stopped after its download, so
+    # the folder only looks up to date.
     if [ "$(git -C "$SCRIPT_DIR" rev-parse HEAD)" = "$before" ]; then
-        ask_to_apply_again
+        if [ -s "$UPDATE_PENDING_FILE" ]; then
+            ask_to_finish
+        else
+            ask_to_apply_again
+        fi
         return 0
     fi
 
     step_finish
     after_version="$(viresta_version)"
+
+    # The folder is on the new version now, and update.sh removes this once it is done.
+    mkdir -p "$(dirname "$UPDATE_PENDING_FILE")"
+    if [ "$DEV" -eq 1 ] || [ -z "$release" ]; then
+        printf 'the latest commit\n' >"$UPDATE_PENDING_FILE"
+    else
+        printf 'v%s\n' "$after_version" >"$UPDATE_PENDING_FILE"
+    fi
+
     if [ "$after_version" != "$before_version" ]; then
         emit "$C_OK" "$S_OK Updating Viresta${before_version:+ v$before_version} to v$after_version"
         if [ "$DEV" -eq 0 ]; then

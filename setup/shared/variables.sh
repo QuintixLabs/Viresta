@@ -58,6 +58,8 @@ INSTALLED_FILES="$VIRESTA_STATE_DIR/installed-files"
 BASE_DIR="$VIRESTA_STATE_DIR/base"
 BACKUP_DIR="$VIRESTA_STATE_DIR/backup"
 UPDATE_NOTES_FILE="$VIRESTA_STATE_DIR/update-notes"
+# There while an update has downloaded a new version but not finished installing it.
+UPDATE_PENDING_FILE="$VIRESTA_STATE_DIR/update-pending"
 BASHRC_ADDED_FILE="$VIRESTA_STATE_DIR/bashrc-added"
 VIRESTA_FOLDER_FILE="$VIRESTA_STATE_DIR/folder"
 NOTIFIED_VERSION_FILE="$VIRESTA_STATE_DIR/notified-version"

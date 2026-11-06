@@ -67,8 +67,22 @@ echo 9.9.9 >"$DEV/VERSION"
 git -C "$DEV" commit -qam "chore: release 9.9.9"
 git -C "$DEV" tag v9.9.9
 git -C "$DEV" push -q origin master v9.9.9
-run_script ./update.sh "hunter2"
+PENDING="$HOME/.local/state/viresta/update-pending"
+before="$(git -C "$VIRESTA" rev-parse HEAD)"
+
+run_script ./update.sh "n"
+has "a release: says what's out" "Viresta 9.9.9 is out (you're on " "$OUT"
+has "a release: asks first" "Update now? [Y/n]" "$OUT"
+is "said no: stops" "$STATUS" "0"
+is "said no: the folder is not moved" "$(git -C "$VIRESTA" rev-parse HEAD)" "$before"
+hasnt "said no: no password asked" "Password for" "$OUT"
+missing "said no: nothing is unfinished" "$PENDING"
+
+# Enter is yes, and that one answer is the whole update.
+run_script ./update.sh "" "hunter2"
 is "a release: finishes" "$STATUS" "0"
+hasnt "a release: no second question about the configs" "Apply Viresta's configs again" "$OUT"
+missing "a release: nothing left unfinished" "$PENDING"
 is "a release: on its tag" "$(git -C "$VIRESTA" describe --tags --exact-match 2>/dev/null)" "v9.9.9"
 has "a release: says the versions" "to v9.9.9" "$OUT"
 has "a release: links to what's new" "See what's new: https://github.com/QuintixLabs/Viresta/releases/tag/v9.9.9" "$OUT"
@@ -92,8 +106,24 @@ echo 9.9.10 >"$DEV/VERSION"
 git -C "$DEV" commit -qam "chore: release 9.9.10"
 git -C "$DEV" tag v9.9.10
 git -C "$DEV" push -q origin master v9.9.10
-run_script ./update.sh "hunter2"
+
+# Stopped at the password: the download is done, but nothing is installed yet.
+run_script ./update.sh "" ""
+is "stopped at the password: stops" "$STATUS" "1"
+is "stopped at the password: the folder is on the release" "$(git -C "$VIRESTA" describe --tags --exact-match 2>/dev/null)" "v9.9.10"
+is "stopped at the password: noted as unfinished" "$(cat "$PENDING" 2>/dev/null)" "v9.9.10"
+
+run_script ./update.sh "" "hunter2"
+has "the next update notices" "The last update to v9.9.10 didn't finish" "$OUT"
+has "and asks to finish it" "Finish it now? [Y/n]" "$OUT"
+hasnt "and does not call it up to date" "up to date" "$OUT"
+is "finishing: finishes" "$STATUS" "0"
+has "finishing: the whole update runs" "Update complete" "$OUT"
+missing "finishing: nothing left unfinished" "$PENDING"
 is "a newer release after --dev: back on releases" "$(git -C "$VIRESTA" describe --tags --exact-match 2>/dev/null)" "v9.9.10"
+
+run_script ./update.sh "n"
+has "after that: up to date again" "up to date" "$OUT"
 run_script "./update.sh --dev" "n"
 is "--dev with nothing new: asks and stops" "$STATUS" "0"
 
