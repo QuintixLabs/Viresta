@@ -36,6 +36,7 @@ TOTAL_STEPS=6
 usage() {
     help_header "${VIRESTA_RUN_AS:-./uninstall.sh} [options]"
     help_option "--dry-run" "Show what would be removed without changing anything"
+    help_option "--logs" "Show what failed in the last uninstall, without removing anything"
     help_option "--verbose" "Show everything on screen instead of only the steps"
     help_option "-h, --help" "Show this help"
     printf '\n'
@@ -47,6 +48,8 @@ usage() {
 for arg in "$@"; do
     case "$arg" in
         --dry-run) DRY_RUN=1; VERBOSE=1 ;;
+        # Works after an uninstall too, since its logs stay.
+        --logs) show_failures uninstall; exit 0 ;;
         --verbose) VERBOSE=1 ;;
         -h|--help) usage; exit 0 ;;
         *) printf 'Unknown option: %s\n\n' "$arg" >&2; usage; exit 2 ;;

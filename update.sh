@@ -41,6 +41,7 @@ usage() {
     help_option "--check" "Only say whether a new release is out, without updating"
     help_option "--notifications-off" "Stop alerting you about new releases, without updating"
     help_option "--notifications-on" "Alert you about new releases again, without updating"
+    help_option "--logs" "Show what failed in the last update, without updating anything"
     help_option "--verbose" "Show everything on screen instead of only the steps"
     help_option "-h, --help" "Show this help"
     printf '\n'
@@ -52,6 +53,7 @@ for arg in "$@"; do
         --check) CHECK=1 ;;
         --notifications-off) NOTIFICATIONS=0 ;;
         --notifications-on) NOTIFICATIONS=1 ;;
+        --logs) show_failures update; exit 0 ;;
         --verbose) VERBOSE=1 ;;
         -h|--help) usage; exit 0 ;;
         *) printf 'Unknown option: %s\n\n' "$arg" >&2; usage; exit 2 ;;

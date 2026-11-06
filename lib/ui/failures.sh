@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # failures.sh
-# Keeps track of what failed, for install.sh --logs.
+# Keeps track of what failed, for --logs.
 
 # ------------------------------------------------------------
 # Settings
@@ -48,13 +48,14 @@ print_failures() {
     fi
 }
 
+# show_failures <install, update or uninstall>: each script keeps its own list.
 show_failures() {
     if [ ! -f "$FAILURE_LOG" ]; then
-        printf 'No install has been recorded yet.\n'
+        printf 'No %s has been recorded yet.\n' "$1"
     elif [ ! -s "$FAILURE_LOG" ]; then
-        printf 'Nothing failed in the last install.\n'
+        printf 'Nothing failed in the last %s.\n' "$1"
     else
-        printf 'Failed in the last install:\n'
+        printf 'Failed in the last %s:\n' "$1"
         sed 's/^/  - /' "$FAILURE_LOG"
     fi
 }

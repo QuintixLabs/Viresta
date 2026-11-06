@@ -54,7 +54,7 @@ for arg in "$@"; do
         # A dry run's only output is what it would do, so it is always verbose.
         --dry-run) DRY_RUN=1; VERBOSE=1 ;;
         --verbose) VERBOSE=1 ;;
-        --logs) show_failures; exit 0 ;;
+        --logs) show_failures install; exit 0 ;;
         -h|--help) usage; exit 0 ;;
         *) printf 'Unknown option: %s\n\n' "$arg" >&2; usage; exit 2 ;;
     esac
