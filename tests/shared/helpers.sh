@@ -244,14 +244,21 @@ EOF
     sed -i -E "s#(^|[\" ])/(usr/share|usr/lib|usr/local|etc|var/lib)/#\1$SYS/\2/#g" "$VIRESTA/setup/shared/variables.sh"
     sed -i 's|\[ -f /etc/arch-release \]|true|; s|^    require_internet$|    true|; s|^    detect_virt$|    VIRT=none|' \
         "$VIRESTA/lib/system/checks.sh"
-    : >"$TEST_DIR/pacman.conf"
-    sed -i "s|cp /etc/pacman.conf|cp $TEST_DIR/pacman.conf|" "$VIRESTA/lib/installers/pacman.sh"
+    fake_pacman_conf
     fake_system_folders
 
     # install.sh checks for newer releases, and update.sh needs a clone to download into.
     git -C "$VIRESTA" init -q
     git -C "$VIRESTA" add -A
     git -C "$VIRESTA" commit -qm base
+}
+
+# The end of Arch's own pacman.conf, with multilib off like on a fresh install.
+export SYSTEM_PACMAN_CONF="$TEST_DIR/pacman.conf"
+fake_pacman_conf() {
+    printf '%s\n' '[options]' '#ParallelDownloads = 5' '' '[core]' 'Include = /etc/pacman.d/mirrorlist' '' \
+        '[extra]' 'Include = /etc/pacman.d/mirrorlist' '' '#[multilib-testing]' '#Include = /etc/pacman.d/mirrorlist' '' \
+        '#[multilib]' '#Include = /etc/pacman.d/mirrorlist' >"$SYSTEM_PACMAN_CONF"
 }
 
 fake_system_folders() {

@@ -35,6 +35,7 @@ The folders match the code they test:
 | `updates` | Releases, the update alerts and `update --check` |
 | `command` | The `viresta` command and its Tab completion |
 | `drivers` | Finding the hardware and installing its drivers |
+| `installers` | Changes to pacman's settings, like turning on multilib |
 | `shell` | The Bash and Fish setup |
 | `ui` | The banner, the install menu, saved options and help screens |
 

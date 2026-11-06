@@ -123,6 +123,7 @@ has "paru is kept" "paru" "$packages"
 has "a package that cannot go is reported" "vicinae-bin was kept" "$OUT"
 has "KDE's themes come back with a reinstall" "default-cursors" "$(grep -- '-S --noconfirm' "$FAKE_CALLS")"
 is "only the logs are left" "$(ls "$V" | tr '\n' ' ')" "uninstall-failures.log uninstall.log "
+is "multilib stays on, for what was installed from it" "$(grep -c '^\[multilib\]$' "$SYSTEM_PACMAN_CONF")" "1"
 
 run_script ./uninstall.sh
 is "run again: nothing to do" "$STATUS" "0"

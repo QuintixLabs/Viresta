@@ -8,6 +8,7 @@
 # ------------------------------------------------------------
 
 PACMAN_CONF=""
+SYSTEM_PACMAN_CONF="${SYSTEM_PACMAN_CONF:-/etc/pacman.conf}"
 # What was already on the system, so uninstall.sh keeps it.
 PACKAGES_BEFORE_FILE="$VIRESTA_STATE_DIR/packages-before"
 # What Viresta has offered, so update.sh only adds new ones and does not bring back
@@ -24,7 +25,7 @@ cleanup_pacman_conf() {
     PACMAN_CONF=""
 }
 
-# Uses a temporary config, so the real /etc/pacman.conf is never modified.
+# Uses a temporary copy, so the faster downloads only last for the install.
 prepare_pacman_conf() {
     if [ "${DRY_RUN:-0}" -eq 1 ]; then
         info "Would download 5 packages at a time"
@@ -32,7 +33,7 @@ prepare_pacman_conf() {
     fi
 
     PACMAN_CONF="$(mktemp /tmp/viresta-pacman.XXXXXX)"
-    cp /etc/pacman.conf "$PACMAN_CONF"
+    cp "$SYSTEM_PACMAN_CONF" "$PACMAN_CONF"
 
     if grep -qE '^[#[:space:]]*ParallelDownloads' "$PACMAN_CONF"; then
         sed -i -E 's|^[#[:space:]]*ParallelDownloads.*|ParallelDownloads = 5|' "$PACMAN_CONF"
@@ -68,10 +69,41 @@ run_pacman() {
 }
 
 # ------------------------------------------------------------
+# Repositories
+# ------------------------------------------------------------
+
+# Steam, Wine and many games need Arch's 32-bit repository, which is off by default. It
+# is turned on the Arch Wiki's way, by taking the # off its two lines, and added only if
+# those lines are not there. uninstall.sh leaves it on, since anything installed from it
+# would stop getting updates.
+enable_multilib() {
+    [ -f "$SYSTEM_PACMAN_CONF" ] || return 0
+    grep -q '^\[multilib\]' "$SYSTEM_PACMAN_CONF" && return 0
+
+    if [ "${DRY_RUN:-0}" -eq 1 ]; then
+        info "Would turn on the multilib repository, for 32-bit apps like Steam"
+        return 0
+    fi
+
+    sudo sed -i '/^#\[multilib\]$/{N;s/^#\[multilib\]\n#Include/[multilib]\nInclude/}' "$SYSTEM_PACMAN_CONF"
+    if ! grep -q '^\[multilib\]' "$SYSTEM_PACMAN_CONF"; then
+        printf '\n[multilib]\nInclude = /etc/pacman.d/mirrorlist\n' | sudo tee -a "$SYSTEM_PACMAN_CONF" >/dev/null
+    fi
+
+    if grep -q '^\[multilib\]' "$SYSTEM_PACMAN_CONF"; then
+        ok "multilib repository turned on"
+    else
+        failure "Could not turn on the multilib repository in $SYSTEM_PACMAN_CONF"
+    fi
+}
+
+# ------------------------------------------------------------
 # System update
 # ------------------------------------------------------------
 
+# multilib comes first, so the update below also downloads its package list.
 update_system() {
+    enable_multilib
     prepare_pacman_conf
 
     if [ "${DRY_RUN:-0}" -eq 1 ]; then

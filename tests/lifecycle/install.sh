@@ -37,9 +37,13 @@ has "firefox is noted as already there" "firefox" "$(cat "$V/packages-before")"
 has "new packages are noted" "kitty" "$(cat "$V/known-packages")"
 hasnt "the password is never on screen" "hunter2" "$OUT"
 
+is "multilib is turned on" "$(grep -c '^\[multilib\]$' "$SYSTEM_PACMAN_CONF")" "1"
+has "before the system update, so its packages are known" "pacman --config" "$(grep -m1 -- '-Sy' "$FAKE_CALLS")"
+
 run_script ./install.sh "" "hunter2"
 is "a second install finishes" "$STATUS" "0"
 hasnt "a second install does not ask about a backup" "Back them up first" "$OUT"
+is "a second install: multilib is still there once" "$(grep -c '^\[multilib\]$' "$SYSTEM_PACMAN_CONF")" "1"
 
 # ------------------------------------------------------------
 # What it put in place
