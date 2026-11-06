@@ -150,7 +150,8 @@ printf 'needsupgrade\n' >>"$VIRESTA/packages/apps/pacman.txt"
 export NEEDS_UPGRADE=needsupgrade
 rm -f "$FAKE_DB.upgraded"
 update "hunter2" "n"
-has "asks first" "may need a full system update" "$OUT"
+# Asked while the step's spinner runs, which can draw over it once answered.
+has "asks first" "may need a full system update" "$PRINTED"
 hasnt "said no: not installed" "needsupgrade" "$(cat "$FAKE_DB")"
 has "said no: listed as failed" "Could not install: needsupgrade" "$OUT"
 missing "said no: no system update" "$FAKE_DB.upgraded"

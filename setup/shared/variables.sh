@@ -36,7 +36,7 @@ SDDM_SOURCE_DIR="$CONFIG_SOURCE_DIR/sddm"
 WALLPAPERS_SOURCE_DIR="$CONFIG_SOURCE_DIR/wallpapers"
 SHELL_SOURCE_DIR="$CONFIG_SOURCE_DIR/shell"
 UPDATE_CHECK_SOURCE="$CONFIG_SOURCE_DIR/updates/viresta-update-check"
-VIRESTA_COMMAND_SOURCE="$CONFIG_SOURCE_DIR/commands/viresta"
+VIRESTA_COMMAND_SOURCE="$SHELL_SOURCE_DIR/commands/viresta"
 
 # ------------------------------------------------------------
 # User folders

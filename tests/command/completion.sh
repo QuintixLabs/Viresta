@@ -11,7 +11,7 @@ source "$(dirname "$0")/../shared/helpers.sh"
 
 copy_viresta
 mark_installed
-cp "$VIRESTA/config/commands/viresta" "$BIN/viresta"
+cp "$VIRESTA/config/shell/commands/viresta" "$BIN/viresta"
 chmod +x "$BIN/viresta"
 
 # ------------------------------------------------------------

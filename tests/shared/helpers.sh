@@ -129,7 +129,7 @@ mark_installed() {
 }
 
 viresta() {
-    bash "$VIRESTA/config/commands/viresta" "$@"
+    bash "$VIRESTA/config/shell/commands/viresta" "$@"
 }
 
 # ------------------------------------------------------------
@@ -271,6 +271,7 @@ fake_system_folders() {
 
 # run_script <script and options> [answers...]: runs it in a real terminal, and types
 # each answer after a pause. STATUS and OUT hold how it ended and what was on screen.
+# PRINTED is everything that was printed, even what the spinner drew over later.
 run_script() {
     local command="$1"
     shift
@@ -279,6 +280,7 @@ run_script() {
         | script -qec "cd '$VIRESTA' && bash $command" "$TEST_DIR/screen" >/dev/null 2>&1
     STATUS=$?
     OUT="$(sed -e 's/\r$//' -e 's/\x1b\[[0-9;?]*[a-zA-Z]//g' -e 's/.*\r//' "$TEST_DIR/screen")"
+    PRINTED="$(sed -e 's/\x1b\[[0-9;?]*[a-zA-Z]//g' -e 's/\r/\n/g' "$TEST_DIR/screen")"
 }
 
 # Every file in the home folder with a hash of its contents, to see what changed. The
