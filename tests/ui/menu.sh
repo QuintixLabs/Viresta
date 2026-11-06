@@ -100,6 +100,11 @@ is "descriptions start in the same column" "$(grep -E '(one|two)$' <<<"$long" | 
     unset USE_NEW_THING; load_saved_options
     is "and is read back" "${USE_NEW_THING:-unset}" "0"
 
+    # Like GitHub's USE_BAZEL_FALLBACK_VERSION, which once ended up in the file.
+    fresh; export USE_OTHER_PROGRAM=silent; save_options
+    is "another program's USE_ setting is not saved" "$(grep -c '^other_program=' "$SAVED_OPTIONS_FILE")" "0"
+    unset USE_OTHER_PROGRAM
+
     printf 'vicinae=0\ndrivers=1\n' >"$SAVED_OPTIONS_FILE"
     save_option drivers 0
     is "changing one option keeps the others" "$(sort "$SAVED_OPTIONS_FILE" | paste -sd,)" "drivers=0,vicinae=0"

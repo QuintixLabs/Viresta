@@ -37,11 +37,15 @@ usage() {
 }
 
 # Every variable starting with USE_, so a new option is saved without being listed here.
+# One that came from outside, like another program's USE_ setting, is not Viresta's.
 save_options() {
     local name option
 
     mkdir -p "$(dirname "$SAVED_OPTIONS_FILE")"
     for name in $(compgen -v USE_); do
+        if [[ "$(declare -p "$name")" == "declare -x"* ]]; then
+            continue
+        fi
         option="${name#USE_}"
         printf '%s=%s\n' "${option,,}" "${!name}"
     done >"$SAVED_OPTIONS_FILE"
