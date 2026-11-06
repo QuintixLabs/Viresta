@@ -30,6 +30,7 @@ If it helps, include the issue number:
 ## Before pushing
 
 - Make sure it works locally
+- Run the tests with `bash tests/run.sh`, see [the tests' README](/tests/README.md)
 - Keep commits focused (don't mix unrelated stuff)
 - Push with a clear message
 

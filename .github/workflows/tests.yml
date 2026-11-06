@@ -1,0 +1,23 @@
+name: Tests
+
+# Runs tests/run.sh on a fake system. Nothing is really installed, and a failing check
+# shows as a red cross on the pull request. It also runs before every release draft, and
+# from the Actions tab, to test a branch by hand.
+on:
+  pull_request:
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Run the tests
+        run: bash tests/run.sh

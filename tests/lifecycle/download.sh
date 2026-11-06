@@ -1,0 +1,123 @@
+#!/usr/bin/env bash
+
+# download.sh
+# Runs the real update.sh on a fake system after an install, with a fake GitHub to
+# download from: new commits, releases, --dev, local edits and a failed download.
+
+source "$(dirname "$0")/../shared/helpers.sh"
+
+need jq script
+
+copy_viresta all
+fake_system
+
+run_script ./install.sh "" "hunter2"
+is "the install before it finishes" "$STATUS" "0"
+
+# ------------------------------------------------------------
+# Downloading
+# ------------------------------------------------------------
+
+# The folder becomes a clone of a fake GitHub, with a maintainer's copy to push from.
+git -C "$VIRESTA" add -A
+git -C "$VIRESTA" commit -q --allow-empty -m "after the install"
+git clone -q --bare "$VIRESTA" "$ORIGIN"
+git -C "$VIRESTA" remote add origin "$ORIGIN"
+git -C "$VIRESTA" fetch -q origin
+git -C "$VIRESTA" branch -q -u origin/master master
+
+printf '# local edit\n' >"$VIRESTA/README-local"
+run_script ./update.sh "hunter2"
+is "local edits: stops" "$STATUS" "1"
+has "local edits: says why" "local edits" "$OUT"
+hasnt "local edits: no password asked" "Password for" "$OUT"
+rm "$VIRESTA/README-local"
+
+git clone -q "$ORIGIN" "$DEV"
+sed -i 's/^TOTAL_STEPS=4$/TOTAL_STEPS=4\n# NEW VERSION MARKER/' "$DEV/update.sh"
+sed -i 's/printf .%bUpdate complete%b.n. "$C_OK$C_BOLD" "$C_RESET"/&\n    printf "RAN THE NEW SCRIPT\\n"/' "$DEV/update.sh"
+git -C "$DEV" commit -qam new
+git -C "$DEV" push -q origin master
+run_script ./update.sh "hunter2"
+is "a new commit: finishes" "$STATUS" "0"
+has "a new commit: the file is updated" "NEW VERSION MARKER" "$(cat "$VIRESTA/update.sh")"
+has "a new commit: the new script is what ran" "RAN THE NEW SCRIPT" "$OUT"
+is "a new commit: the password is asked once" "$(grep -c 'Password for' <<<"$OUT")" "1"
+is "a new commit: the banner shows once" "$(grep -c 'The clean, stable' <<<"$OUT")" "1"
+is "a new commit: the download step shows once" "$(grep -c 'Downloading the latest' <<<"$OUT")" "1"
+is "a new commit: the steps in order" "$(grep -oE '^\[[0-9]/4\]' <<<"$OUT" | awk '!seen[$0]++' | tr -d '\n')" "[1/4][2/4][3/4][4/4]"
+is "a new commit: one line for each step" "$(grep -cE '^\[[0-9]/4\].*[✓!]' <<<"$OUT")" "4"
+
+run_script ./update.sh "n"
+is "nothing new: finishes" "$STATUS" "0"
+has "nothing new: says so" "up to date" "$OUT"
+hasnt "nothing new, no: no password" "Password for" "$OUT"
+run_script ./update.sh ""
+is "nothing new, Enter: stops" "$STATUS" "0"
+hasnt "nothing new, Enter: no password" "Password for" "$OUT"
+run_script ./update.sh "y" "hunter2"
+is "nothing new, yes: applies the configs again" "$(grep -c 'Update complete' <<<"$OUT")" "1"
+
+# ------------------------------------------------------------
+# Releases
+# ------------------------------------------------------------
+
+git -C "$DEV" pull -q origin master
+echo 9.9.9 >"$DEV/VERSION"
+git -C "$DEV" commit -qam "chore: release 9.9.9"
+git -C "$DEV" tag v9.9.9
+git -C "$DEV" push -q origin master v9.9.9
+run_script ./update.sh "hunter2"
+is "a release: finishes" "$STATUS" "0"
+is "a release: on its tag" "$(git -C "$VIRESTA" describe --tags --exact-match 2>/dev/null)" "v9.9.9"
+has "a release: says the versions" "to v9.9.9" "$OUT"
+has "a release: links to what's new" "See what's new: https://github.com/QuintixLabs/Viresta/releases/tag/v9.9.9" "$OUT"
+is "a release: the password is asked once" "$(grep -c 'Password for' <<<"$OUT")" "1"
+
+git -C "$DEV" commit -q --allow-empty -m "after the release"
+git -C "$DEV" push -q origin master
+run_script ./update.sh "n"
+is "a plain update ignores newer commits" "$(git -C "$VIRESTA" describe --tags --exact-match 2>/dev/null)" "v9.9.9"
+has "a plain update: up to date" "up to date" "$OUT"
+
+run_script "./update.sh --dev" "hunter2"
+is "--dev: finishes" "$STATUS" "0"
+is "--dev: on the latest commit" "$(git -C "$VIRESTA" rev-parse HEAD)" "$(git -C "$DEV" rev-parse HEAD)"
+is "--dev: on master" "$(git -C "$VIRESTA" symbolic-ref --short HEAD 2>/dev/null)" "master"
+hasnt "--dev: no what's new link" "See what's new" "$OUT"
+run_script ./update.sh "n"
+is "a plain update after --dev does not go back" "$(git -C "$VIRESTA" rev-parse HEAD)" "$(git -C "$DEV" rev-parse HEAD)"
+
+echo 9.9.10 >"$DEV/VERSION"
+git -C "$DEV" commit -qam "chore: release 9.9.10"
+git -C "$DEV" tag v9.9.10
+git -C "$DEV" push -q origin master v9.9.10
+run_script ./update.sh "hunter2"
+is "a newer release after --dev: back on releases" "$(git -C "$VIRESTA" describe --tags --exact-match 2>/dev/null)" "v9.9.10"
+run_script "./update.sh --dev" "n"
+is "--dev with nothing new: asks and stops" "$STATUS" "0"
+
+# Back to no releases, with master here and on GitHub gone different ways.
+git -C "$VIRESTA" checkout -q master
+git -C "$VIRESTA" pull -q --ff-only
+git -C "$VIRESTA" tag -d v9.9.9 v9.9.10 >/dev/null
+git -C "$DEV" tag -d v9.9.9 v9.9.10 >/dev/null
+git -C "$DEV" push -q origin :refs/tags/v9.9.9 :refs/tags/v9.9.10
+git -C "$DEV" commit -q --allow-empty -m other
+git -C "$DEV" push -q origin master
+git -C "$VIRESTA" commit -q --allow-empty -m diverged
+run_script ./update.sh "hunter2"
+is "it cannot move forward: stops" "$STATUS" "1"
+has "it cannot move forward: says nothing changed" "Nothing was changed" "$OUT"
+git -C "$VIRESTA" reset -q --hard origin/master
+
+run_script "./update.sh --no-pull"
+is "the old --no-pull is refused" "$STATUS" "2"
+
+mkdir "$TEST_DIR/no-clone"
+cp -r "$VIRESTA/lib" "$VIRESTA/update.sh" "$VIRESTA/packages" "$VIRESTA/setup" "$TEST_DIR/no-clone/"
+sleep 0.6 | script -qec "cd '$TEST_DIR/no-clone' && bash ./update.sh" "$TEST_DIR/screen" >/dev/null 2>&1
+is "not a git clone: stops" "$?" "1"
+has "not a git clone: says why" "not a git clone" "$(strip_colors <"$TEST_DIR/screen")"
+
+finish
