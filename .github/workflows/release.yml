@@ -12,7 +12,17 @@ on:
   workflow_dispatch:
 
 jobs:
+  # A version that fails these never becomes a draft, so it cannot be published by mistake.
+  shellcheck:
+    uses: ./.github/workflows/shellcheck.yml
+
+  tests:
+    uses: ./.github/workflows/tests.yml
+
   draft:
+    needs:
+      - shellcheck
+      - tests
     runs-on: ubuntu-latest
     permissions:
       contents: write

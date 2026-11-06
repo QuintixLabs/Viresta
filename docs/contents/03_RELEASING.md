@@ -88,7 +88,7 @@ Test everything on `dev` first, and make sure it's on `master`, because the draf
    git push origin master
    ```
 
-3. On GitHub, open **Releases**. The workflow has made a draft called `v1.1.0`, with the commits and contributors listed. Users get nothing yet.
+3. On GitHub, open **Releases**. The workflow runs ShellCheck and the tests first, then makes a draft called `v1.1.0`, with the commits and contributors listed. This takes a few minutes. Users get nothing yet.
 4. Edit the notes. Remove anything that doesn't matter to users.
 5. Click **Publish release**. This creates the tag, and users can now update.
 
@@ -121,4 +121,6 @@ The last command should print `v1.1.0`.
 - **New features:** `1.0.1` to `1.1.0`
 - **Big changes that break things for users:** `1.1.0` to `2.0.0`
 
-If the workflow fails, a draft isn't made and nothing reaches users. Fix it, then push a new number.
+If ShellCheck, the tests or the workflow fail, a draft isn't made and nothing reaches users. **Actions** shows what failed. Fix it and push the fix to `master`, then open **Actions**, then **Draft release**, and click **Run workflow** to try again with the same number.
+
+Before moving `dev` to `master`, you can also test it by hand: open **Actions**, then **Tests**, then **Run workflow**, and pick `dev`.
