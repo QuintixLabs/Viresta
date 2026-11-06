@@ -106,19 +106,6 @@ Yes, for AMD, Intel and NVIDIA graphics, and the tools for VMware, QEMU/KVM and 
 </details>
 
 <details>
-<summary>Can I play games on it?</summary>
-<p></p>
-
-Yes. The **Gaming** option in the install menu, on by default, installs Steam, ProtonUp-Qt for more Proton versions, GOverlay, GameMode and MangoHud. To use GameMode and MangoHud in a Steam game, add this to its launch options:
-
-```sh
-gamemoderun mangohud %command%
-```
-
-If you already have Viresta, run `viresta install` and keep **Gaming** ticked. Updates never add it on their own.
-</details>
-
-<details>
 <summary>The desktop doesn't start after installing NVIDIA drivers, what do I do?</summary>
 <p></p>
 
