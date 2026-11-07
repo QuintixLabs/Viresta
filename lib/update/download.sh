@@ -18,12 +18,27 @@ follow_latest_commit() {
             || die "Could not switch to the latest commit. Nothing was changed."
     fi
 
-    if ! git -C "$SCRIPT_DIR" pull --ff-only >>"$LOG_FILE" 2>&1; then
+    if ! download git -C "$SCRIPT_DIR" pull --ff-only; then
         if [ -n "$release" ]; then
             git -C "$SCRIPT_DIR" checkout -q "$release" >>"$LOG_FILE" 2>&1 || true
         fi
-        die "Could not download the latest Viresta. Nothing was changed."
+        die "$DOWNLOAD_ERROR"
     fi
+}
+
+download() {
+    local output status=0
+
+    output="$("$@" 2>&1)" || status=$?
+    [ -z "$output" ] || printf '%s\n' "$output" >>"$LOG_FILE"
+    [ "$status" -ne 0 ] || return 0
+
+    if grep -qiE 'could not resolve host|failed to connect|could not connect|connection timed out|network is unreachable|connection refused' <<<"$output"; then
+        DOWNLOAD_ERROR="Could not reach GitHub. Check your internet connection, then try again. Nothing was changed."
+    else
+        DOWNLOAD_ERROR="Could not download the latest Viresta. Nothing was changed."
+    fi
+    return "$status"
 }
 
 # Only ever forwards, so someone on a newer commit is not moved back to an older release.
@@ -92,8 +107,7 @@ pull_latest() {
     before="$(git -C "$SCRIPT_DIR" rev-parse HEAD)"
     before_version="$(viresta_version)"
 
-    git -C "$SCRIPT_DIR" fetch --tags origin >>"$LOG_FILE" 2>&1 \
-        || die "Could not download the latest Viresta. Nothing was changed."
+    download git -C "$SCRIPT_DIR" fetch --tags origin || die "$DOWNLOAD_ERROR"
     release="$(newest_release)"
 
     if [ "$DEV" -eq 1 ] || [ -z "$release" ]; then

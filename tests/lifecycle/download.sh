@@ -139,7 +139,19 @@ git -C "$VIRESTA" commit -q --allow-empty -m diverged
 run_script ./update.sh "hunter2"
 is "it cannot move forward: stops" "$STATUS" "1"
 has "it cannot move forward: says nothing changed" "Nothing was changed" "$OUT"
+hasnt "it cannot move forward: not blamed on the internet" "internet" "$OUT"
 git -C "$VIRESTA" reset -q --hard origin/master
+
+# No internet: .invalid is a name that never exists, so git cannot find it.
+git -C "$VIRESTA" remote set-url origin "https://github.invalid/QuintixLabs/Viresta.git"
+before="$(git -C "$VIRESTA" rev-parse HEAD)"
+run_script ./update.sh "hunter2"
+is "no internet: stops" "$STATUS" "1"
+has "no internet: says so" "Could not reach GitHub. Check your internet connection" "$OUT"
+has "no internet: nothing changed" "Nothing was changed" "$OUT"
+is "no internet: the folder is not moved" "$(git -C "$VIRESTA" rev-parse HEAD)" "$before"
+hasnt "no internet: no password asked" "Password for" "$OUT"
+git -C "$VIRESTA" remote set-url origin "$ORIGIN"
 
 run_script "./update.sh --no-pull"
 is "the old --no-pull is refused" "$STATUS" "2"
