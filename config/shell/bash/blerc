@@ -4,6 +4,9 @@
 # The prompt's arrow already turns red when a command fails.
 bleopt exec_errexit_mark=
 
+# No "[ble: elapsed ...]" line after long commands.
+bleopt exec_elapsed_mark=
+
 # No message or sound for keys ble.sh does not know.
 bleopt decode_error_kseq_vbell=
 bleopt decode_error_kseq_abell=
