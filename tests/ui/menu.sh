@@ -145,7 +145,18 @@ start_script
 ask_yes_no "Apply Viresta's configs again anyway?" n
 echo "NOT STOPPED"
 EOF
-{ sleep 0.5; printf '\003'; sleep 0.3; } | script -qec "bash '$TEST_DIR/question.sh' '$VIRESTA'" /dev/null >"$TEST_DIR/ctrl-c" 2>/dev/null
+# Ctrl+C only once the question is on screen. Sent any earlier, on a slow computer it lands
+# while the script is still starting, before it listens for Ctrl+C.
+: >"$TEST_DIR/ctrl-c"
+{
+    for _ in $(seq 100); do
+        grep -q 'anyway?' "$TEST_DIR/ctrl-c" && break
+        sleep 0.1
+    done
+    sleep 0.2
+    printf '\003'
+    sleep 0.3
+} | script -qec "bash '$TEST_DIR/question.sh' '$VIRESTA'" /dev/null >"$TEST_DIR/ctrl-c" 2>/dev/null
 hasnt "Ctrl+C at a question: stops" "NOT STOPPED" "$(cat "$TEST_DIR/ctrl-c")"
 has "Ctrl+C at a question: the question was on screen" "anyway? [y/N]" "$(strip_colors <"$TEST_DIR/ctrl-c")"
 # The last visible thing on screen, which before was the ^C. The script also shows the
