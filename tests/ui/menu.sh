@@ -146,7 +146,9 @@ ask_yes_no "Apply Viresta's configs again anyway?" n
 echo "NOT STOPPED"
 EOF
 # Ctrl+C only once the question is on screen. Sent any earlier, on a slow computer it lands
-# while the script is still starting, before it listens for Ctrl+C.
+# while the script is still starting, before it listens for Ctrl+C. Some computers, like
+# GitHub's, start the tests with Ctrl+C ignored, and Bash cannot listen for a signal it
+# started with ignored, so env turns it back on first.
 : >"$TEST_DIR/ctrl-c"
 {
     for _ in $(seq 100); do
@@ -156,7 +158,7 @@ EOF
     sleep 0.2
     printf '\003'
     sleep 0.3
-} | script -qec "bash '$TEST_DIR/question.sh' '$VIRESTA'" /dev/null >"$TEST_DIR/ctrl-c" 2>/dev/null
+} | script -qec "env --default-signal=INT bash '$TEST_DIR/question.sh' '$VIRESTA'" /dev/null >"$TEST_DIR/ctrl-c" 2>/dev/null
 hasnt "Ctrl+C at a question: stops" "NOT STOPPED" "$(cat "$TEST_DIR/ctrl-c")"
 has "Ctrl+C at a question: the question was on screen" "anyway? [y/N]" "$(strip_colors <"$TEST_DIR/ctrl-c")"
 # The last visible thing on screen, which before was the ^C. The script also shows the
