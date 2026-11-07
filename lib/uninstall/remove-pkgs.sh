@@ -26,6 +26,8 @@ packages_to_remove() {
             read_package_list "$SCRIPT_DIR/packages/apps/pacman.txt"
             read_package_list "$SCRIPT_DIR/packages/apps/aur.txt"
             read_package_list "$SCRIPT_DIR/packages/apps/gaming.txt"
+            # Apps Viresta stopped including that the user kept, which are still its own.
+            [ ! -f "$KEPT_APPS_FILE" ] || cat "$KEPT_APPS_FILE"
         fi
     } | sort -u | while IFS= read -r pkg; do
         real="$(pacman -Qq "$pkg" 2>/dev/null)" || continue

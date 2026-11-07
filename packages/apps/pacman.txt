@@ -9,7 +9,6 @@ ark
 firefox
 vim
 haruna
-merkuro
 gwenview
 
 # Everyday Applications

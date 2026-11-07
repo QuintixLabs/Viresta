@@ -211,6 +211,7 @@ case "$op" in
         if [ $# -eq 0 ]; then cat "$FAKE_DB"; exit 0; fi
         name="$1"; [ "$name" != outfit-font ] || name=otf-outfit
         grep -xF "$name" "$FAKE_DB" ;;
+    -Qlq) grep "^$1 " "$FAKE_DB.files" 2>/dev/null | cut -d' ' -f2- ;;
     -Si) exit 1 ;;
     -Syu|-Su|-Sy) touch "$FAKE_DB.upgraded"; exit 0 ;;
     -S)

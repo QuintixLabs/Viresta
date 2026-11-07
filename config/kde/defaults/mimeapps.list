@@ -58,8 +58,6 @@ video/x-ogm=org.kde.haruna.desktop;
 video/x-ogm+ogg=org.kde.haruna.desktop;
 video/x-theora=org.kde.haruna.desktop;
 video/x-theora+ogg=org.kde.haruna.desktop;
-text/calendar=org.kde.merkuro.desktop;
-x-scheme-handler/webcal=org.kde.merkuro.desktop;
 x-scheme-handler/geo=openstreetmap-geo-handler.desktop;
 
 [Default Applications]
@@ -122,6 +120,4 @@ video/x-ogm=org.kde.haruna.desktop;
 video/x-ogm+ogg=org.kde.haruna.desktop;
 video/x-theora=org.kde.haruna.desktop;
 video/x-theora+ogg=org.kde.haruna.desktop;
-text/calendar=org.kde.merkuro.desktop;
-x-scheme-handler/webcal=org.kde.merkuro.desktop;
 x-scheme-handler/geo=openstreetmap-geo-handler.desktop;

@@ -104,6 +104,111 @@ install_new_aur_packages() {
 }
 
 # ------------------------------------------------------------
+# Apps Viresta no longer includes
+# ------------------------------------------------------------
+
+# What the user said about them. Saved only once the update is done, so an update that
+# stops, like at the password, asks again next time.
+DROPPED_REMOVE=()
+DROPPED_KEEP=()
+DROPPED_REMOVED=()
+
+# app_name <package>: the short name from its menu entry, like "Music Player". Fonts,
+# libraries and tools have none, so they are never asked about.
+app_name() {
+    local file name
+
+    while IFS= read -r file; do
+        case "$file" in */share/applications/*.desktop) ;; *) continue ;; esac
+        name="$(sed -n 's/^GenericName=//p' "$file" 2>/dev/null | head -n 1)"
+        [ -n "$name" ] || name="$(sed -n 's/^Name=//p' "$file" 2>/dev/null | head -n 1)"
+        if [ -n "$name" ]; then
+            printf '%s\n' "$name"
+            return 0
+        fi
+    done < <(pacman -Qlq "$1" 2>/dev/null)
+    return 1
+}
+
+# Each app Viresta once listed and does not anymore, as "<package><tab><name>". Left out:
+# what is not installed, what was there before Viresta, and what was kept before.
+dropped_apps() {
+    local listed pkg real name
+
+    [ -f "$KNOWN_PACKAGES_FILE" ] || return 0
+    listed="$(listed_packages | sort -u)"
+
+    while IFS= read -r pkg; do
+        grep -qxF "$pkg" <<<"$listed" && continue
+        real="$(pacman -Qq "$pkg" 2>/dev/null)" || continue
+        grep -qxF "$real" "$PACKAGES_BEFORE_FILE" 2>/dev/null && continue
+        grep -qxF "$real" "$KEPT_APPS_FILE" 2>/dev/null && continue
+        name="$(app_name "$real")" || continue
+        printf '%s\t%s\n' "$real" "$name"
+    done <"$KNOWN_PACKAGES_FILE"
+}
+
+# One question for all of them, before the password. No is the default, and without a
+# terminal nothing is asked or remembered, so the next update in one asks.
+ask_about_dropped_apps() {
+    local -a rows=() pkgs=()
+    local row pkg name
+
+    [ -t 0 ] && [ -t 1 ] || return 0
+    mapfile -t rows < <(dropped_apps)
+    [ "${#rows[@]}" -gt 0 ] || return 0
+
+    printf '\n'
+    emit "$C_WARN" "! Viresta no longer includes these apps:"
+    for row in "${rows[@]}"; do
+        pkg="${row%%$'\t'*}"
+        name="${row#*$'\t'}"
+        pkgs+=("$pkg")
+        # The package is already on the line, so "fooyin Music Player" becomes "Music
+        # Player", and a name that only repeats it is left out.
+        if [[ "${name,,}" == "${pkg,,} "* ]]; then
+            name="${name:${#pkg}+1}"
+        fi
+        if [ "${name,,}" = "${pkg,,}" ]; then
+            printf '    %s\n' "$pkg"
+        else
+            printf '    %-14s %b%s%b\n' "$pkg" "$C_DIM" "$name" "$C_RESET"
+        fi
+    done
+    emit "$C_DIM" "  You can keep them. They still work and get updates as usual."
+
+    if ask_yes_no "Remove them?" n; then
+        DROPPED_REMOVE=("${pkgs[@]}")
+    else
+        DROPPED_KEEP=("${pkgs[@]}")
+        emit "$C_DIM" "  Kept. To remove them later: sudo pacman -Rs ${pkgs[*]}"
+    fi
+    printf '\n'
+}
+
+# One at a time, so one that something else needs does not stop the rest. That one is
+# kept, and not asked about again.
+remove_dropped_apps() {
+    local pkg
+
+    for pkg in "${DROPPED_REMOVE[@]}"; do
+        if run_pacman -Rs --noconfirm "$pkg"; then
+            DROPPED_REMOVED+=("$pkg")
+        else
+            failure "$pkg was kept - other packages need it"
+            DROPPED_KEEP+=("$pkg")
+        fi
+    done
+}
+
+remember_kept_apps() {
+    [ "${#DROPPED_KEEP[@]}" -gt 0 ] || return 0
+    mkdir -p "$(dirname "$KEPT_APPS_FILE")"
+    printf '%s\n' "${DROPPED_KEEP[@]}" >>"$KEPT_APPS_FILE"
+    sort -u -o "$KEPT_APPS_FILE" "$KEPT_APPS_FILE"
+}
+
+# ------------------------------------------------------------
 # Package record
 # ------------------------------------------------------------
 

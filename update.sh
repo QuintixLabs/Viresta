@@ -111,6 +111,9 @@ summary() {
     hr
     printf '%bUpdate complete%b\n' "$C_OK$C_BOLD" "$C_RESET"
     emit "$C_OK" "$S_OK Time taken: $(format_duration "$SECONDS")"
+    if [ "${#DROPPED_REMOVED[@]}" -gt 0 ]; then
+        emit "$C_OK" "$S_OK Removed: ${DROPPED_REMOVED[*]}"
+    fi
     if [ -n "${VIRESTA_NEW_RELEASE:-}" ]; then
         emit "$C_OK" "$S_OK See what's new: $RELEASES_URL/tag/$VIRESTA_NEW_RELEASE"
     fi
@@ -146,6 +149,9 @@ main() {
         STEP=1
     fi
 
+    # Asked before the password, so every question comes first.
+    ask_about_dropped_apps
+
     step "Getting permission to update"
     read_password
     enable_nopasswd
@@ -153,7 +159,12 @@ main() {
     # Starts here so the time spent typing the password does not count.
     SECONDS=0
 
-    step "Installing new packages"
+    if [ "${#DROPPED_REMOVE[@]}" -gt 0 ]; then
+        step "Installing and removing packages"
+        remove_dropped_apps
+    else
+        step "Installing new packages"
+    fi
     install_new_repo_packages
     install_new_aur_packages
     install_shell_packages
@@ -162,6 +173,7 @@ main() {
     step "Updating Viresta"
     configure_kde_configs --update
     remember_packages
+    remember_kept_apps
 
     step_finish
     # Done, even with something listed as failed, since those are in --logs.

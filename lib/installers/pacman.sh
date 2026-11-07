@@ -14,6 +14,8 @@ PACKAGES_BEFORE_FILE="$VIRESTA_STATE_DIR/packages-before"
 # What Viresta has offered, so update.sh only adds new ones and does not bring back
 # an app the user removed.
 KNOWN_PACKAGES_FILE="$VIRESTA_STATE_DIR/known-packages"
+# Apps Viresta stopped including that the user chose to keep, so they are not asked again.
+KEPT_APPS_FILE="$VIRESTA_STATE_DIR/kept-apps"
 
 # ------------------------------------------------------------
 # Pacman
