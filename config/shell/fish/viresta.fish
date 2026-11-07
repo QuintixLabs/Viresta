@@ -1,4 +1,4 @@
-# Viresta's prompt and autocomplete color for Fish.
+# Viresta's prompt, autocomplete color and update command for Fish.
 
 status is-interactive; or return
 
@@ -15,4 +15,19 @@ end
 if not set -q fish_color_autosuggestion
     or test "$fish_color_autosuggestion" = "555 brblack"
     set -g fish_color_autosuggestion brblack
+end
+
+# CachyOS has its own update shortcut, which ranks the mirrors and runs pacman, and it
+# hides Viresta's update command. CachyOS sets it in config.fish, which Fish runs after
+# this file, so it is removed at the first prompt instead. Only CachyOS's one goes, and
+# only while Viresta's command is there, so turning that off brings it back.
+function __viresta_update_command --on-event fish_prompt
+    functions -e __viresta_update_command
+    set -l command (command -s update)
+    if test -n "$command"
+        and grep -qs 'viresta update' $command
+        and functions -q update
+        and string match -q '*cachyos-rate-mirrors*' -- (functions update)
+        functions -e update
+    end
 end
