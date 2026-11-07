@@ -18,14 +18,57 @@ configure_networkmanager() {
         || failure "Could not enable NetworkManager"
 }
 
+# The login screen that is on now, like plasmalogin, or nothing.
+current_login_manager() {
+    local target
+
+    target="$(readlink "$DISPLAY_MANAGER_LINK" 2>/dev/null)" || return 0
+    target="${target##*/}"
+    printf '%s\n' "${target%.service}"
+}
+
+# systemd refuses a second login screen, so one that is on is turned off first, and
+# remembered for uninstall.sh.
 configure_sddm() {
+    local current
+
+    current="$(current_login_manager)"
     if [ "${DRY_RUN:-0}" -eq 1 ]; then
+        if [ -n "$current" ] && [ "$current" != sddm ]; then
+            info "Would switch the login screen from $current to SDDM"
+        fi
         info "Would enable sddm.service"
         return 0
     fi
+
+    if [ -n "$current" ] && [ "$current" != sddm ]; then
+        sudo systemctl disable "$current.service" >/dev/null 2>&1 \
+            || die "Could not turn off $current, the login screen that is on now."
+        mkdir -p "$(dirname "$LOGIN_MANAGER_BEFORE_FILE")"
+        printf '%s\n' "$current" >"$LOGIN_MANAGER_BEFORE_FILE"
+        ok "Switched the login screen from $current to SDDM"
+    fi
+
     sudo systemctl enable sddm.service >/dev/null 2>&1 \
         || die "Failed to enable sddm.service."
     ok "sddm enabled (starts on next boot)"
+}
+
+# For uninstall.sh. If the old one cannot be turned on, SDDM stays, so there is always
+# a login screen.
+restore_login_manager() {
+    local before
+
+    [ -s "$LOGIN_MANAGER_BEFORE_FILE" ] || return 0
+    before="$(cat "$LOGIN_MANAGER_BEFORE_FILE")"
+
+    sudo systemctl disable sddm.service >/dev/null 2>&1 || true
+    if sudo systemctl enable "$before.service" >/dev/null 2>&1; then
+        ok "Turned $before back on as your login screen"
+    else
+        sudo systemctl enable sddm.service >/dev/null 2>&1 || true
+        failure "Could not turn $before back on, so SDDM stays your login screen"
+    fi
 }
 
 # ------------------------------------------------------------

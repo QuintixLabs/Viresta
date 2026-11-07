@@ -200,6 +200,11 @@ SDDM_THEMES_DIR="/usr/share/sddm/themes"
 SDDM_THEME="breeze"
 SDDM_CONFIG_FILE="/etc/sddm.conf.d/viresta.conf"
 SDDM_USER_CONFIG_DIR="/var/lib/sddm/.config"
+# systemd allows one login screen, and this link says which. KDE 6.8 installs Plasma Login
+# Manager too, and some distros, like CachyOS with KDE, turn it on.
+DISPLAY_MANAGER_LINK="/etc/systemd/system/display-manager.service"
+# The login screen that was on before SDDM, so uninstall.sh can turn it back on.
+LOGIN_MANAGER_BEFORE_FILE="$VIRESTA_STATE_DIR/login-manager-before"
 LOGIN_WALLPAPER="/var/lib/viresta/login-wallpaper.jpg"
 LOGIN_COLORS="/var/lib/viresta/login-colors"
 LOGIN_PROFILE_PICTURE="/var/lib/viresta/login-profile"

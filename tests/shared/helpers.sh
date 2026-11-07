@@ -184,6 +184,7 @@ internet_back() {
 # packages in a file, so what got installed and removed can be checked.
 SYS="$HOME/.sysroot"
 export FAKE_DB="$TEST_DIR/packages" FAKE_CALLS="$TEST_DIR/calls"
+export FAKE_DM_LINK="$SYS/etc/systemd/system/display-manager.service"
 
 fake_system() {
     cat >"$BIN/sudo" <<'EOF'
@@ -236,7 +237,25 @@ EOF
     printf '#!/bin/sh\n[ -n "${PLASMA_RUNNING:-}" ]\n' >"$BIN/pgrep"
     printf '#!/bin/sh\nif [ "$1" = group ]; then echo "$2:x:999:"; else echo "frost:x:1000:1000::/home/frost:/bin/bash"; fi\n' >"$BIN/getent"
     printf '#!/bin/sh\necho "usermod $*" >>"$FAKE_CALLS"\n' >"$BIN/usermod"
-    printf '#!/bin/sh\nexit 0\n' | tee "$BIN/visudo" "$BIN/systemctl" "$BIN/vicinae" "$BIN/kbuildsycoca6" "$BIN/codium" >/dev/null
+    printf '#!/bin/sh\nexit 0\n' | tee "$BIN/visudo" "$BIN/vicinae" "$BIN/kbuildsycoca6" "$BIN/codium" >/dev/null
+    # Like the real one for login screens: one at a time, through one link, so turning on a
+    # second fails. Everything else just works.
+    cat >"$BIN/systemctl" <<'EOF'
+#!/usr/bin/env bash
+unit="${2:-}"
+case "$unit" in sddm.service|plasmalogin.service|gdm.service|lightdm.service) ;; *) exit 0 ;; esac
+echo "systemctl $1 $unit" >>"$FAKE_CALLS"
+current="$(readlink "$FAKE_DM_LINK" 2>/dev/null)"
+case "$1" in
+    enable)
+        [ "$unit" != "${FAKE_DM_BROKEN:-none}" ] || exit 1
+        [ -z "$current" ] || [ "${current##*/}" = "$unit" ] || exit 1
+        mkdir -p "$(dirname "$FAKE_DM_LINK")"
+        ln -sfn "/usr/lib/systemd/system/$unit" "$FAKE_DM_LINK" ;;
+    disable)
+        [ "${current##*/}" != "$unit" ] || rm -f "$FAKE_DM_LINK" ;;
+esac
+EOF
     printf '#!/bin/sh\nexit 1\n' >"$BIN/curl"
     chmod +x "$BIN"/*
 

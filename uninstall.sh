@@ -101,6 +101,9 @@ dry_run() {
     if [ -d "$BACKUP_DIR" ]; then
         info "Would put back your configs from before Viresta"
     fi
+    if [ -s "$LOGIN_MANAGER_BEFORE_FILE" ]; then
+        info "Would turn $(cat "$LOGIN_MANAGER_BEFORE_FILE") back on as your login screen"
+    fi
     printf '\n%bDry run complete - nothing was changed%b\n\n' "$C_WARN$C_BOLD" "$C_RESET"
 }
 
@@ -171,6 +174,8 @@ main() {
     step "Stopping Viresta's services"
     systemctl --user disable --now "$THEME_SYNC_UNIT" "$VICINAE_UNIT" >/dev/null 2>&1 || true
     systemctl --user disable --now "$UPDATE_CHECK_UNIT" >/dev/null 2>&1 || true
+    # Before the files go, since that removes the note of which one it was.
+    restore_login_manager
 
     step "Removing Viresta's files"
     remove_viresta_files
