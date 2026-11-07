@@ -54,6 +54,13 @@ broken=0
 # terminal you run this in, since two tests using it at once can get each other stuck.
 # Tests that need a terminal make their own with script.
 TEST_TIMEOUT="${TEST_TIMEOUT:-240}"
+
+# Each test starts with only these, so nothing set on this computer, like a USE_ variable
+# that looks like one of Viresta's options, can change what it does. The tests set HOME,
+# TERM and LANG themselves.
+CLEAN_ENV=(HOME="$HOME" PATH="$PATH")
+[ -z "${TMPDIR:-}" ] || CLEAN_ENV+=(TMPDIR="$TMPDIR")
+[ -z "${LD_LIBRARY_PATH:-}" ] || CLEAN_ENV+=(LD_LIBRARY_PATH="$LD_LIBRARY_PATH")
 RESULTS="$(mktemp -d)"
 trap 'rm -rf "$RESULTS"' EXIT
 
@@ -68,7 +75,7 @@ for i in "${!tests[@]}"; do
         test_started="$EPOCHREALTIME"
         # A stuck test is stopped after a while, so the run still ends and says which one.
         status=0
-        timeout -k 10 "$TEST_TIMEOUT" setsid bash "${tests[$i]}" </dev/null >"$RESULTS/$i.out" 2>&1 || status=$?
+        timeout -k 10 "$TEST_TIMEOUT" env -i "${CLEAN_ENV[@]}" setsid bash "${tests[$i]}" </dev/null >"$RESULTS/$i.out" 2>&1 || status=$?
         if [ "$status" -eq 124 ] || [ "$status" -eq 137 ]; then
             printf 'Stuck, so it was stopped after %ss\n' "$TEST_TIMEOUT" >>"$RESULTS/$i.out"
         fi
