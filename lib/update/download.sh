@@ -14,7 +14,7 @@ follow_latest_commit() {
 
     if ! git -C "$SCRIPT_DIR" symbolic-ref -q HEAD >/dev/null; then
         release="$(git -C "$SCRIPT_DIR" rev-parse HEAD)"
-        git -C "$SCRIPT_DIR" checkout -q "$DEV_BRANCH" >>"$LOG_FILE" 2>&1 \
+        git -C "$SCRIPT_DIR" checkout -q "$RELEASE_BRANCH" >>"$LOG_FILE" 2>&1 \
             || die "Could not switch to the latest commit. Nothing was changed."
     fi
 

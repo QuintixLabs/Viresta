@@ -7,7 +7,7 @@
 # Settings
 # ------------------------------------------------------------
 
-DEV_BRANCH="master"
+RELEASE_BRANCH="master"
 RELEASES_URL="https://github.com/QuintixLabs/Viresta/releases"
 
 # ------------------------------------------------------------
@@ -40,7 +40,7 @@ follows_releases() {
     local branch
 
     branch="$(git -C "$SCRIPT_DIR" symbolic-ref -q --short HEAD || true)"
-    [ -z "$branch" ] || [ "$branch" = "$DEV_BRANCH" ]
+    [ -z "$branch" ] || [ "$branch" = "$RELEASE_BRANCH" ]
 }
 
 # An older folder has no VERSION file, so any release counts as newer.
