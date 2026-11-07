@@ -100,8 +100,10 @@ is "no shortcut at all: Viresta's update" "$(update_is "$TEST_DIR/viresta-update
 # Scripts do nothing, so nothing slows them down or prints.
 out="$(env -i HOME="$TEST_DIR/fish-home" XDG_CONFIG_HOME="$TEST_DIR/fish-home/.config" PATH="$WITH" TERM=xterm \
     ${LD_LIBRARY_PATH:+LD_LIBRARY_PATH="$LD_LIBRARY_PATH"} \
-    "$FISH" -c 'source $XDG_CONFIG_HOME/fish/conf.d/viresta.fish; echo PROMPT=(fish_prompt); echo "COLOR=$fish_color_autosuggestion"' 2>&1)"
+    "$FISH" -c 'echo "BEFORE=$fish_color_autosuggestion"; source $XDG_CONFIG_HOME/fish/conf.d/viresta.fish; echo PROMPT=(fish_prompt); echo "AFTER=$fish_color_autosuggestion"' 2>&1)"
 hasnt "not interactive: starship does not run" "FROM_STARSHIP" "$out"
-is "not interactive: no color set" "$(tail -n 1 <<<"$out")" "COLOR="
+# Fish 4 has a color of its own even here, so only a change counts.
+is "not interactive: the color is not changed" \
+    "$(sed -n 's/^AFTER=//p' <<<"$out")" "$(sed -n 's/^BEFORE=//p' <<<"$out")"
 
 finish
