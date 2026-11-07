@@ -87,8 +87,20 @@ hasnt "the same kernel: no reboot hint" "Reboot" "$OUT"
 waiting 2 0 0
 run_update "" --yes
 is "--yes: no question" "$(grep -c 'Update now?' <<<"$OUT")" "0"
-is "nothing for Flatpak: only paru" "$(calls)" "paru -Syu"
+is "nothing for Flatpak: only paru, with no questions" "$(calls)" "paru -Syu --noconfirm"
 has "one step" "[1/1] Updating official and AUR packages" "$OUT"
+
+rm "$BIN/paru"
+waiting 2 0 0
+run_update "" --yes
+is "--yes without paru: pacman with no questions" "$(calls)" "sudo pacman -Syu --noconfirm"
+fake paru 'if [ "$1" = -Qua ]; then n="$(cat "$FAKE/aur" 2>/dev/null || echo 0)"; for i in $(seq "$n"); do echo "aur$i 1 -> 2"; done; else echo "paru $*" >>"$CALLS"; [ ! -e "$FAKE/fail-pacman" ]; fi'
+
+waiting 2 0 0
+: >"$FAKE/fail-pacman"
+run_update "" --yes
+has "--yes and it stops: says to run it without --yes" "without --yes" "$OUT"
+rm "$FAKE/fail-pacman"
 
 rm "$BIN/paru"
 waiting 2 0 0

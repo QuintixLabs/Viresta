@@ -47,7 +47,7 @@ usage() {
     printf '\n%bUsage:%b update [options]\n\n' "$C_ACCENT$C_BOLD" "$C_RESET"
     printf '%bOptions:%b\n' "$C_ACCENT$C_BOLD" "$C_RESET"
     row "-c, --check" "Only show what is waiting, without updating"
-    row "-y, --yes" "Update without asking first"
+    row "-y, --yes" "Update without any questions, taking the default answers"
     row "-h, --help" "Show this help"
     printf '\n%bUpdates the official packages, the AUR and Flatpak apps. Viresta itself is%b\n' "$C_DIM" "$C_RESET"
     printf '%bupdated with viresta update.%b\n\n' "$C_DIM" "$C_RESET"
@@ -181,13 +181,20 @@ format_duration() {
 }
 
 # paru updates the official packages first and then the AUR ones, in one go, so the two
-# are never out of step. pacman's own questions, like replacing a package, still come up.
+# are never out of step. pacman's and paru's own questions still come up, unless --yes
+# was given. Then they take the default answer, which is no for replacing or removing a
+# package, so an update that needs that stops and plain update lets you answer it.
+NOCONFIRM=()
+[ "$ASK" -eq 1 ] || NOCONFIRM=(--noconfirm)
+STOPPED="The package update stopped. Nothing else was updated."
+[ "$ASK" -eq 1 ] || STOPPED="$STOPPED Run update without --yes to answer pacman's questions."
+
 if [ "$HAS_PARU" -eq 1 ]; then
     step "Updating official and AUR packages"
-    paru -Syu || fail "The package update stopped. Nothing else was updated."
+    paru -Syu "${NOCONFIRM[@]}" || fail "$STOPPED"
 else
     step "Updating official packages"
-    sudo pacman -Syu || fail "The package update stopped. Nothing else was updated."
+    sudo pacman -Syu "${NOCONFIRM[@]}" || fail "$STOPPED"
 fi
 
 if [ "$TOTAL" -eq 2 ]; then
