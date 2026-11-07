@@ -63,7 +63,12 @@ ask_to_update() {
 
     version="$(viresta_version)"
     step_finish
-    emit "$C_OK" "$S_OK Viresta ${1#v} is out (you're on ${version:-an older version})"
+    # After an update that stopped halfway, the folder is on a version the system is not.
+    if [ -s "$UPDATE_PENDING_FILE" ]; then
+        emit "$C_OK" "$S_OK Viresta ${1#v} is out (the last update, to $(cat "$UPDATE_PENDING_FILE"), didn't finish)"
+    else
+        emit "$C_OK" "$S_OK Viresta ${1#v} is out (you're on ${version:-an older version})"
+    fi
     if ! ask_yes_no "Update now?" y; then
         printf 'Nothing was changed.\n'
         exit 0

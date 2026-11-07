@@ -100,8 +100,19 @@ is "1.10.0 beats 1.2.0, and odd tags are ignored" "$(title)" "Viresta 1.10.0 is 
 clean
 echo update >"$FAKE/click"
 is "update button: exits fine" "$(check)" "0"
-is "update button: opens kitty" "$(tr '\n' ' ' <"$FAKE/kitty-args")" "--hold --directory $VIRESTA $VIRESTA/update.sh "
+is "update button: opens kitty in the folder" "$(sed -n '1,2p' "$FAKE/kitty-args" | tr '\n' ' ')" "--directory $VIRESTA "
 is "update button: remembered" "$(cat "$STATE/notified-version")" "1.10.0"
+
+# What kitty runs, with an update that stops like Ctrl+C does and a shell that says it
+# started. The window ends up in the shell, and nothing failed as far as kitty knows.
+mapfile -t kitty_args <"$FAKE/kitty-args"
+printf '#!/bin/sh\necho UPDATE RAN\nexit 130\n' >"$TEST_DIR/stopped-update"
+printf '#!/bin/sh\necho SHELL STARTED\n' >"$TEST_DIR/fake-shell"
+chmod +x "$TEST_DIR/stopped-update" "$TEST_DIR/fake-shell"
+kitty_args[$((${#kitty_args[@]} - 1))]="$TEST_DIR/stopped-update"
+out="$(SHELL="$TEST_DIR/fake-shell" "${kitty_args[@]:2}")"
+is "update button: kitty sees no failure" "$?" "0"
+is "update button: the update runs, then the shell" "$(tr '\n' ' ' <<<"$out")" "UPDATE RAN SHELL STARTED "
 
 mkdir -p "$(dirname "$OPTIONS")"
 printf 'vicinae=0\ndrivers=1\n' >"$OPTIONS"

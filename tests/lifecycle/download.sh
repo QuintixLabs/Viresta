@@ -113,6 +113,24 @@ is "stopped at the password: stops" "$STATUS" "1"
 is "stopped at the password: the folder is on the release" "$(git -C "$VIRESTA" describe --tags --exact-match 2>/dev/null)" "v9.9.10"
 is "stopped at the password: noted as unfinished" "$(cat "$PENDING" 2>/dev/null)" "v9.9.10"
 
+# A newer release while that one is unfinished. The folder is on 9.9.10 but the system
+# is not, so it does not say "you're on 9.9.10". The release is only a tag, gone after.
+git -C "$DEV" checkout -q --detach
+echo 9.9.11 >"$DEV/VERSION"
+git -C "$DEV" commit -qam "chore: release 9.9.11"
+git -C "$DEV" tag v9.9.11
+git -C "$DEV" push -q origin v9.9.11
+run_script ./update.sh "n"
+has "unfinished, then a newer release: says the last one didn't finish" \
+    "Viresta 9.9.11 is out (the last update, to v9.9.10, didn't finish)" "$OUT"
+hasnt "unfinished, then a newer release: not on 9.9.10" "you're on" "$OUT"
+is "unfinished, said no: still unfinished" "$(cat "$PENDING" 2>/dev/null)" "v9.9.10"
+git -C "$DEV" push -q origin :refs/tags/v9.9.11
+git -C "$DEV" tag -d v9.9.11 >/dev/null
+git -C "$VIRESTA" tag -d v9.9.11 >/dev/null
+git -C "$DEV" checkout -q master
+git -C "$DEV" reset -q --hard origin/master
+
 run_script ./update.sh "" "hunter2"
 has "the next update notices" "The last update to v9.9.10 didn't finish" "$OUT"
 has "and asks to finish it" "Finish it now? [Y/n]" "$OUT"

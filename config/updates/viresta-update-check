@@ -62,7 +62,10 @@ action="$(notify-send \
 
 printf '%s\n' "$version" >"$NOTIFIED_VERSION_FILE"
 
+# After the update, the window turns into the user's own shell, so it stays open. kitty
+# only sees that, so it never adds its own "failed" line, even after Ctrl+C. Viresta's
+# own message about what went wrong is still on screen.
 case "$action" in
-    update) exec kitty --hold --directory "$SCRIPT_DIR" "$SCRIPT_DIR/update.sh" ;;
+    update) exec kitty --directory "$SCRIPT_DIR" sh -c '"$1"; exec "${SHELL:-bash}"' sh "$SCRIPT_DIR/update.sh" ;;
     off) save_option update_notifications 0 ;;
 esac
