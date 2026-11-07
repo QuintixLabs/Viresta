@@ -59,6 +59,7 @@ blank_lines_before() {
     awk -v text="$1" 'index($0, text) { print n; exit } /^$/ { n++; next } { n = 0 }' <<<"$OUT"
 }
 is "one blank line above the list" "$(blank_lines_before 'no longer includes')" "1"
+is "one blank line above the question" "$(blank_lines_before 'Remove them?')" "1"
 is "one blank line below the answer" "$(blank_lines_before 'Password for')" "1"
 has "kept: says how to remove them later" "sudo pacman -Rs" "$OUT"
 is "kept: still installed" "$(installed haruna)$(installed gwenview)$(installed fooyin)" "yesyesyes"

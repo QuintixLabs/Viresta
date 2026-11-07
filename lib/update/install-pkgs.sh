@@ -176,6 +176,7 @@ ask_about_dropped_apps() {
         fi
     done
     emit "$C_DIM" "  You can keep them. They still work and get updates as usual."
+    printf '\n'
 
     if ask_yes_no "Remove them?" n; then
         DROPPED_REMOVE=("${pkgs[@]}")
