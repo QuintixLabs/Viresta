@@ -158,7 +158,7 @@ ask_about_dropped_apps() {
     mapfile -t rows < <(dropped_apps)
     [ "${#rows[@]}" -gt 0 ] || return 0
 
-    printf '\n'
+    [ -z "${VIRESTA_PULLED:-}" ] || printf '\n'
     emit "$C_WARN" "! Viresta no longer includes these apps:"
     for row in "${rows[@]}"; do
         pkg="${row%%$'\t'*}"

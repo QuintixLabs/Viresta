@@ -214,10 +214,16 @@ listed_packages() {
     read_package_list "$SCRIPT_DIR/packages/drivers/drivers.txt" | awk '$2 ~ /^lib32-/ { print $2 }'
 }
 
+# Added to, never started over, so running install.sh again does not forget an app
+# Viresta stopped including, which update.sh then offers to remove.
 save_known_packages() {
     [ "${DRY_RUN:-0}" -eq 0 ] || return 0
     mkdir -p "$(dirname "$KNOWN_PACKAGES_FILE")"
-    listed_packages | sort -u >"$KNOWN_PACKAGES_FILE"
+    {
+        [ ! -f "$KNOWN_PACKAGES_FILE" ] || cat "$KNOWN_PACKAGES_FILE"
+        listed_packages
+    } | sort -u >"$KNOWN_PACKAGES_FILE.new"
+    mv "$KNOWN_PACKAGES_FILE.new" "$KNOWN_PACKAGES_FILE"
 }
 
 # ------------------------------------------------------------

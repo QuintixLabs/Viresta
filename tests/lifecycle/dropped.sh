@@ -54,6 +54,12 @@ is "the question" "$(grep -c 'Remove them? \[y/N\]' <<<"$OUT")" "1"
 hasnt "not what was there before Viresta" "firefox" "$OUT"
 hasnt "not what is no app" "jq" "$(grep -A6 'no longer includes' <<<"$OUT")"
 has "asked before the password" "Remove them?" "$(sed -n '/Password for/q;p' <<<"$OUT")"
+# blank_lines_before <text>: how many empty lines come right before the line with it.
+blank_lines_before() {
+    awk -v text="$1" 'index($0, text) { print n; exit } /^$/ { n++; next } { n = 0 }' <<<"$OUT"
+}
+is "one blank line above the list" "$(blank_lines_before 'no longer includes')" "1"
+is "one blank line below the answer" "$(blank_lines_before 'Password for')" "1"
 has "kept: says how to remove them later" "sudo pacman -Rs" "$OUT"
 is "kept: still installed" "$(installed haruna)$(installed gwenview)$(installed fooyin)" "yesyesyes"
 is "kept: remembered" "$(tr '\n' ' ' <"$V/kept-apps")" "fooyin gwenview haruna "
@@ -98,5 +104,17 @@ update "hunter2"
 is "after that: finishes" "$STATUS" "0"
 hasnt "after that: nothing to ask" "no longer includes" "$OUT"
 has "after that: the usual step" "Installing new packages" "$OUT"
+
+# ------------------------------------------------------------
+# The install run again
+# ------------------------------------------------------------
+
+# It must not forget the apps Viresta stopped including, or they are never offered.
+echo haruna >>"$FAKE_DB"
+run_script ./install.sh "" "hunter2"
+is "installed again: finishes" "$STATUS" "0"
+has "installed again: still knows the dropped app" "haruna" "$(cat "$V/known-packages")"
+update "n" "hunter2"
+has "installed again: the update still asks" "haruna" "$(grep -A4 'no longer includes' <<<"$OUT")"
 
 finish
