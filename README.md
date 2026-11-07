@@ -48,8 +48,6 @@ viresta update
 
 To only check whether a new release is out, without updating, add `--check`.
 
-To update your apps, the official packages, the AUR and Flatpak, all at once, run `update`. It shows what's waiting first and asks before changing anything.
-
 Viresta also shows a notification once when a new release is out, and nothing updates until you click **Update** or run `viresta update` yourself.
 
 To stop these notifications, click **Don't show again** on one or just turn them off or back on with:
