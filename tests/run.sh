@@ -53,6 +53,7 @@ broken=0
 # are still shown in order, once each one is done. setsid keeps each test away from the
 # terminal you run this in, since two tests using it at once can get each other stuck.
 # Tests that need a terminal make their own with script.
+TEST_TIMEOUT="${TEST_TIMEOUT:-240}"
 RESULTS="$(mktemp -d)"
 trap 'rm -rf "$RESULTS"' EXIT
 
@@ -65,8 +66,13 @@ started="$EPOCHREALTIME"
 for i in "${!tests[@]}"; do
     {
         test_started="$EPOCHREALTIME"
-        setsid bash "${tests[$i]}" </dev/null >"$RESULTS/$i.out" 2>&1
-        echo $? >"$RESULTS/$i.status"
+        # A stuck test is stopped after a while, so the run still ends and says which one.
+        status=0
+        timeout -k 10 "$TEST_TIMEOUT" setsid bash "${tests[$i]}" </dev/null >"$RESULTS/$i.out" 2>&1 || status=$?
+        if [ "$status" -eq 124 ] || [ "$status" -eq 137 ]; then
+            printf 'Stuck, so it was stopped after %ss\n' "$TEST_TIMEOUT" >>"$RESULTS/$i.out"
+        fi
+        echo "$status" >"$RESULTS/$i.status"
         seconds_since "$test_started" >"$RESULTS/$i.time"
     } &
 done

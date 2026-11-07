@@ -158,7 +158,7 @@ EOF
     sleep 0.2
     printf '\003'
     sleep 0.3
-} | script -qec "env --default-signal=INT bash '$TEST_DIR/question.sh' '$VIRESTA'" /dev/null >"$TEST_DIR/ctrl-c" 2>/dev/null
+} | timeout -k 5 30 script -qec "env --default-signal=INT bash '$TEST_DIR/question.sh' '$VIRESTA'" /dev/null >"$TEST_DIR/ctrl-c" 2>/dev/null
 hasnt "Ctrl+C at a question: stops" "NOT STOPPED" "$(cat "$TEST_DIR/ctrl-c")"
 has "Ctrl+C at a question: the question was on screen" "anyway? [y/N]" "$(strip_colors <"$TEST_DIR/ctrl-c")"
 # The last visible thing on screen, which before was the ^C. The script also shows the
