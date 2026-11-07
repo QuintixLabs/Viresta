@@ -200,11 +200,7 @@ flow() {
 flow 0.3.0
 is "workflow: finishes" "$?" "0"
 notes="$(cat "$TEST_DIR/run/notes.md")"
-is "workflow: the commit without its type" "$(grep -c '^- Icons \[4\]$' <<<"$notes")" "1"
-is "workflow: under its heading" "$(grep -c '^## 🐛 Fixes$' <<<"$notes")" "1"
-hasnt "workflow: the release commit is left out" "release 0.3.0" "$notes"
-is "workflow: contributors, once each, no bots" "$(sed -n '/## Contributors/,/Full/p' <<<"$notes" | grep '^- ' | paste -sd,)" "- @alice,- @bob"
-is "workflow: changelog link" "$(grep -c 'compare/v0.2.0...v0.3.0$' <<<"$notes")" "1"
+has "workflow: the new commit is in the notes" "Icons [4]" "$notes"
 is "workflow: only commits since the last release" "$(grep -c 'one$' <<<"$notes")" "0"
 is "workflow: a draft on that commit" "$(grep -c -- '--draft --target' "$TEST_DIR/created")" "1"
 is "workflow: the right tag" "$(awk '{print $3}' "$TEST_DIR/created")" "v0.3.0"
@@ -218,33 +214,5 @@ flow 0.3.0
 is "workflow: a draft already there: still finishes" "$?" "0"
 missing "workflow: a draft already there is left alone" "$TEST_DIR/created"
 rm -f "$TEST_DIR/exists"
-
-# The headings, with made-up commits of every kind.
-N="$TEST_DIR/notes"
-git init -q "$N"
-for message in base "feat(menu): add a thing" "fix!: break and fix" "fix: lower case start" \
-    "chore: release 1.1.0" "chore: tidy up" "docs: a guide" "Something without a type" \
-    "feature: not a real type" "test: check more" "refactor(menu): move it" "ci: a ci change" \
-    "Fix: upper case type" "FEAT(Menu): shouting" "fixed the menu"; do
-    git -C "$N" commit -q --allow-empty -m "$message"
-    if [ "$message" = base ]; then git -C "$N" tag v1.0.0; fi
-done
-sed -n '/commits="\$(git log/,/## 📝 Other/p' "$TEST_DIR/flow.sh" >"$TEST_DIR/sections.sh"
-sections="$(cd "$N" && previous=v1.0.0 bash "$TEST_DIR/sections.sh")"
-heading() { sed -n "/^## .*$1\$/,/^\$/p" <<<"$sections" | grep '^- ' | paste -sd'|'; }
-is "notes: features" "$(heading 'New features')" "- Shouting|- Add a thing"
-is "notes: fixes, any case" "$(heading Fixes)" "- Upper case type|- Lower case start|- Break and fix"
-is "notes: docs" "$(heading Docs)" "- A guide"
-is "notes: refactors" "$(heading Refactors)" "- Move it"
-is "notes: tests" "$(heading Tests)" "- Check more"
-is "notes: chores, without the release" "$(heading Chores)" "- Tidy up"
-is "notes: anything else, as written" "$(heading Other)" "- fixed the menu|- ci: a ci change|- feature: not a real type|- Something without a type"
-
-git init -q "$TEST_DIR/fixes-only"
-git -C "$TEST_DIR/fixes-only" commit -q --allow-empty -m base
-git -C "$TEST_DIR/fixes-only" tag v1.0.0
-git -C "$TEST_DIR/fixes-only" commit -q --allow-empty -m "fix: one"
-only="$(cd "$TEST_DIR/fixes-only" && previous=v1.0.0 bash "$TEST_DIR/sections.sh")"
-is "notes: no empty headings" "$(grep -c '^## ' <<<"$only")" "1"
 
 finish

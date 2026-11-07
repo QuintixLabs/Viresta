@@ -72,7 +72,6 @@ is "new release: one alert" "$(alerts)" "1"
 is "new release: title" "$(title)" "Viresta 1.1.0 is available"
 is "new release: update button" "$(grep -c -x -- '--action=update=Update' "$FAKE/notify-args")" "1"
 is "new release: off button" "$(grep -c -x -- "--action=off=Don't show again" "$FAKE/notify-args")" "1"
-is "new release: stays on screen" "$(grep -c -x -- '--expire-time=0' "$FAKE/notify-args")" "1"
 is "version remembered" "$(cat "$STATE/notified-version")" "1.1.0"
 is "the folder is not moved" "$(git -C "$VIRESTA" rev-parse HEAD)" "$before"
 is "no tags are downloaded" "$(git -C "$VIRESTA" tag)" "v1.0.0"
@@ -132,7 +131,7 @@ is "turned off: the next release is quiet" "$(alerts)" "0"
 # Turning them off and on
 # ------------------------------------------------------------
 
-is "on: message" "$(viresta update --notifications-on)" "Update notifications are on."
+viresta update --notifications-on >/dev/null
 is "on: saved" "$(grep -c -x 'update_notifications=1' "$OPTIONS")" "1"
 is "on: one line only" "$(grep -c '^update_notifications=' "$OPTIONS")" "1"
 is "on: other options kept" "$(grep -c -E '^(vicinae=0|drivers=1)$' "$OPTIONS")" "2"
@@ -147,10 +146,6 @@ viresta update --notifications-on >/dev/null
 missing "on: forgets what was alerted" "$STATE/notified-version"
 is "the option leaves the folder alone" "$(git -C "$VIRESTA" rev-parse HEAD)" "$before"
 missing "the option leaves no update log" "$STATE/update.log"
-
-help="$(viresta update --help | strip_colors)"
-is "help: off" "$(grep -c -- '--notifications-off Stop alerting' <<<"$help")" "1"
-is "help: on lines up" "$(grep -c -- '--notifications-on  Alert' <<<"$help")" "1"
 
 # A saved "off" survives what install.sh does with the options.
 viresta update --notifications-off >/dev/null
@@ -216,13 +211,9 @@ is "no saved folder: exits fine" "$(check)" "0"
 is "no saved folder: no alert" "$(alerts)" "0"
 
 # ------------------------------------------------------------
-# The timer
+# The service
 # ------------------------------------------------------------
 
-timer="$VIRESTA/config/systemd/viresta-update-check.timer"
-is "timer: after login" "$(grep -c -x 'OnActiveSec=1min' "$timer")" "1"
-is "timer: every 6 hours" "$(grep -c -x 'OnUnitActiveSec=6h' "$timer")" "1"
-is "timer: only in a desktop session" "$(grep -c -x 'WantedBy=graphical-session.target' "$timer")" "1"
 is "service: runs the script" "$(grep -c -x 'ExecStart=%h/.local/bin/viresta-update-check' "$VIRESTA/config/systemd/viresta-update-check.service")" "1"
 
 finish

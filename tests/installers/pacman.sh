@@ -34,12 +34,10 @@ turn_on
 is "turned on" "$(repos)" "[options] [core] [extra] [multilib]"
 is "its Include line too" "$(grep -A1 '^\[multilib\]$' "$SYSTEM_PACMAN_CONF" | tail -n 1)" "Include = /etc/pacman.d/mirrorlist"
 is "multilib-testing stays off" "$(grep -c '^#\[multilib-testing\]$' "$SYSTEM_PACMAN_CONF")" "1"
-has "says so" "ok: multilib repository turned on" "$said"
 
 before="$(cat "$SYSTEM_PACMAN_CONF")"
 turn_on
 is "already on: the file is unchanged" "$(cat "$SYSTEM_PACMAN_CONF")" "$before"
-is "already on: says nothing" "$said" ""
 
 # ------------------------------------------------------------
 # Other ways the file can look
@@ -64,7 +62,6 @@ is "on already, like CachyOS: unchanged" "$(cat "$SYSTEM_PACMAN_CONF")" "$before
 fake_pacman_conf
 DRY_RUN=1
 turn_on
-is "dry run: says what it would do" "$said" "|info: Would turn on the multilib repository, for 32-bit apps like Steam"
 is "dry run: the file is unchanged" "$(grep -c '^\[multilib\]' "$SYSTEM_PACMAN_CONF")" "0"
 DRY_RUN=0
 

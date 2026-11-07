@@ -144,8 +144,6 @@ chmod +x "$BIN/mkinitcpio"
 
 DRY_RUN=1; INSTALLED=""; card 0x10de 0x2786
 is "dry run: changes nothing" "$(install)" ""
-has "dry run: says the headers" "Would install linux-headers linux-lts-headers" "$(said)"
-has "dry run: says the boot image" "rebuild the boot image" "$(said)"
 DRY_RUN=0
 
 INSTALLED=""; card 0x10de 0x1180

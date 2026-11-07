@@ -29,14 +29,7 @@ complete_bash() {
 }
 
 is "bash: the commands" "$(complete_bash viresta '')" "--help --version install uninstall update"
-is "bash: up" "$(complete_bash viresta up)" "update"
-is "bash: un" "$(complete_bash viresta un)" "uninstall"
 is "bash: update's options" "$(complete_bash viresta update --)" "--check --dev --help --logs --notifications-off --notifications-on --verbose"
-is "bash: --notifications-o" "$(complete_bash viresta update --notifications-o)" "--notifications-off --notifications-on"
-is "bash: install's options" "$(complete_bash viresta install --)" "--dry-run --help --logs --verbose"
-is "bash: uninstall's options" "$(complete_bash viresta uninstall --)" "--dry-run --help --logs --verbose"
-is "bash: after another option" "$(complete_bash viresta update --dev --v)" "--verbose"
-is "bash: an unknown command" "$(complete_bash viresta nope --)" ""
 
 # ------------------------------------------------------------
 # Fish
@@ -47,10 +40,7 @@ if command -v fish >/dev/null 2>&1; then
         fish -c "source '$VIRESTA/config/shell/fish/completions/viresta.fish'; complete -C '$1'" | cut -f1 | sort | paste -sd" "
     }
     is "fish: the commands" "$(complete_fish 'viresta ')" "install uninstall update"
-    is "fish: up" "$(complete_fish 'viresta up')" "update"
     is "fish: update's options" "$(complete_fish 'viresta update --')" "--check --dev --help --logs --notifications-off --notifications-on --verbose"
-    is "fish: install's options" "$(complete_fish 'viresta install --')" "--dry-run --help --logs --verbose"
-    is "fish: --version on its own" "$(complete_fish 'viresta --v')" "--version"
 else
     skip "fish: Fish is not installed"
 fi

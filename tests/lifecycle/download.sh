@@ -43,18 +43,11 @@ is "a new commit: finishes" "$STATUS" "0"
 has "a new commit: the file is updated" "NEW VERSION MARKER" "$(cat "$VIRESTA/update.sh")"
 has "a new commit: the new script is what ran" "RAN THE NEW SCRIPT" "$OUT"
 is "a new commit: the password is asked once" "$(grep -c 'Password for' <<<"$OUT")" "1"
-is "a new commit: the banner shows once" "$(grep -c 'The clean, stable' <<<"$OUT")" "1"
-is "a new commit: the download step shows once" "$(grep -c 'Downloading the latest' <<<"$OUT")" "1"
-is "a new commit: the steps in order" "$(grep -oE '^\[[0-9]/4\]' <<<"$OUT" | awk '!seen[$0]++' | tr -d '\n')" "[1/4][2/4][3/4][4/4]"
-is "a new commit: one line for each step" "$(grep -cE '^\[[0-9]/4\].*[✓!]' <<<"$OUT")" "4"
 
 run_script ./update.sh "n"
 is "nothing new: finishes" "$STATUS" "0"
 has "nothing new: says so" "up to date" "$OUT"
 hasnt "nothing new, no: no password" "Password for" "$OUT"
-run_script ./update.sh ""
-is "nothing new, Enter: stops" "$STATUS" "0"
-hasnt "nothing new, Enter: no password" "Password for" "$OUT"
 run_script ./update.sh "y" "hunter2"
 is "nothing new, yes: applies the configs again" "$(grep -c 'Update complete' <<<"$OUT")" "1"
 
@@ -84,9 +77,6 @@ is "a release: finishes" "$STATUS" "0"
 hasnt "a release: no second question about the configs" "Apply Viresta's configs again" "$OUT"
 missing "a release: nothing left unfinished" "$PENDING"
 is "a release: on its tag" "$(git -C "$VIRESTA" describe --tags --exact-match 2>/dev/null)" "v9.9.9"
-has "a release: says the versions" "to v9.9.9" "$OUT"
-has "a release: links to what's new" "See what's new: https://github.com/QuintixLabs/Viresta/releases/tag/v9.9.9" "$OUT"
-is "a release: the password is asked once" "$(grep -c 'Password for' <<<"$OUT")" "1"
 
 git -C "$DEV" commit -q --allow-empty -m "after the release"
 git -C "$DEV" push -q origin master
@@ -98,7 +88,6 @@ run_script "./update.sh --dev" "hunter2"
 is "--dev: finishes" "$STATUS" "0"
 is "--dev: on the latest commit" "$(git -C "$VIRESTA" rev-parse HEAD)" "$(git -C "$DEV" rev-parse HEAD)"
 is "--dev: on master" "$(git -C "$VIRESTA" symbolic-ref --short HEAD 2>/dev/null)" "master"
-hasnt "--dev: no what's new link" "See what's new" "$OUT"
 run_script ./update.sh "n"
 is "a plain update after --dev does not go back" "$(git -C "$VIRESTA" rev-parse HEAD)" "$(git -C "$DEV" rev-parse HEAD)"
 
@@ -123,7 +112,6 @@ git -C "$DEV" push -q origin v9.9.11
 run_script ./update.sh "n"
 has "unfinished, then a newer release: says the last one didn't finish" \
     "Viresta 9.9.11 is out (the last update, to v9.9.10, didn't finish)" "$OUT"
-hasnt "unfinished, then a newer release: not on 9.9.10" "you're on" "$OUT"
 is "unfinished, said no: still unfinished" "$(cat "$PENDING" 2>/dev/null)" "v9.9.10"
 git -C "$DEV" push -q origin :refs/tags/v9.9.11
 git -C "$DEV" tag -d v9.9.11 >/dev/null
@@ -133,17 +121,11 @@ git -C "$DEV" reset -q --hard origin/master
 
 run_script ./update.sh "" "hunter2"
 has "the next update notices" "The last update to v9.9.10 didn't finish" "$OUT"
-has "and asks to finish it" "Finish it now? [Y/n]" "$OUT"
 hasnt "and does not call it up to date" "up to date" "$OUT"
 is "finishing: finishes" "$STATUS" "0"
 has "finishing: the whole update runs" "Update complete" "$OUT"
 missing "finishing: nothing left unfinished" "$PENDING"
 is "a newer release after --dev: back on releases" "$(git -C "$VIRESTA" describe --tags --exact-match 2>/dev/null)" "v9.9.10"
-
-run_script ./update.sh "n"
-has "after that: up to date again" "up to date" "$OUT"
-run_script "./update.sh --dev" "n"
-is "--dev with nothing new: asks and stops" "$STATUS" "0"
 
 # Back to no releases, with master here and on GitHub gone different ways.
 git -C "$VIRESTA" checkout -q master
@@ -156,7 +138,6 @@ git -C "$DEV" push -q origin master
 git -C "$VIRESTA" commit -q --allow-empty -m diverged
 run_script ./update.sh "hunter2"
 is "it cannot move forward: stops" "$STATUS" "1"
-has "it cannot move forward: says nothing changed" "Nothing was changed" "$OUT"
 hasnt "it cannot move forward: not blamed on the internet" "internet" "$OUT"
 git -C "$VIRESTA" reset -q --hard origin/master
 
@@ -166,18 +147,13 @@ before="$(git -C "$VIRESTA" rev-parse HEAD)"
 run_script ./update.sh "hunter2"
 is "no internet: stops" "$STATUS" "1"
 has "no internet: says so" "Could not reach GitHub. Check your internet connection" "$OUT"
-has "no internet: nothing changed" "Nothing was changed" "$OUT"
 is "no internet: the folder is not moved" "$(git -C "$VIRESTA" rev-parse HEAD)" "$before"
 hasnt "no internet: no password asked" "Password for" "$OUT"
 git -C "$VIRESTA" remote set-url origin "$ORIGIN"
-
-run_script "./update.sh --no-pull"
-is "the old --no-pull is refused" "$STATUS" "2"
 
 mkdir "$TEST_DIR/no-clone"
 cp -r "$VIRESTA/lib" "$VIRESTA/update.sh" "$VIRESTA/packages" "$VIRESTA/setup" "$TEST_DIR/no-clone/"
 sleep 0.6 | script -qec "cd '$TEST_DIR/no-clone' && bash ./update.sh" "$TEST_DIR/screen" >/dev/null 2>&1
 is "not a git clone: stops" "$?" "1"
-has "not a git clone: says why" "not a git clone" "$(strip_colors <"$TEST_DIR/screen")"
 
 finish

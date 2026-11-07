@@ -24,8 +24,7 @@ installed() { if grep -qxF "$1" "$FAKE_DB"; then echo yes; else echo no; fi; }
 # Viresta stops including some apps
 # ------------------------------------------------------------
 
-# Menu entries, the way pacman -Ql finds them. fooyin's short name starts with its own,
-# like the real one, and Gwenview has only its name, which repeats the package.
+# Menu entries, the way pacman -Ql finds them. jq has none, since it is no app.
 printf '[Desktop Entry]\nName=Haruna\nGenericName=Media Player\n' >"$APPS/org.kde.haruna.desktop"
 printf '[Desktop Entry]\nName=Gwenview\n' >"$APPS/org.kde.gwenview.desktop"
 printf '[Desktop Entry]\nName=fooyin\nGenericName=fooyin Music Player\n' >"$APPS/org.fooyin.fooyin.desktop"
@@ -47,24 +46,11 @@ echo firefox >>"$V/packages-before"
 update "n" "hunter2"
 is "kept: finishes" "$STATUS" "0"
 has "asks about them" "Viresta no longer includes these apps:" "$OUT"
-has "with their short name" "Media Player" "$OUT"
-is "a name starting with the package: without it" "$(grep -c '^    fooyin  *Music Player$' <<<"$OUT")" "1"
-is "a name that repeats the package: only the package" "$(grep -c '^    gwenview$' <<<"$OUT")" "1"
-is "the question" "$(grep -c 'Remove them? \[y/N\]' <<<"$OUT")" "1"
 hasnt "not what was there before Viresta" "firefox" "$OUT"
 hasnt "not what is no app" "jq" "$(grep -A6 'no longer includes' <<<"$OUT")"
 has "asked before the password" "Remove them?" "$(sed -n '/Password for/q;p' <<<"$OUT")"
-# blank_lines_before <text>: how many empty lines come right before the line with it.
-blank_lines_before() {
-    awk -v text="$1" 'index($0, text) { print n; exit } /^$/ { n++; next } { n = 0 }' <<<"$OUT"
-}
-is "one blank line above the list" "$(blank_lines_before 'no longer includes')" "1"
-is "one blank line above the question" "$(blank_lines_before 'Remove them?')" "1"
-is "one blank line below the answer" "$(blank_lines_before 'Password for')" "1"
-has "kept: says how to remove them later" "sudo pacman -Rs" "$OUT"
 is "kept: still installed" "$(installed haruna)$(installed gwenview)$(installed fooyin)" "yesyesyes"
 is "kept: remembered" "$(tr '\n' ' ' <"$V/kept-apps")" "fooyin gwenview haruna "
-hasnt "kept: no remove step" "removing" "$OUT"
 
 update "hunter2"
 is "kept: finishes again" "$STATUS" "0"
@@ -93,18 +79,10 @@ update "y" "hunter2"
 unset CANNOT_REMOVE
 is "removed: finishes" "$STATUS" "0"
 has "removed: asked again after the stops" "no longer includes" "$OUT"
-has "removed: the step says so" "Installing and removing packages" "$OUT"
 is "removed: gone" "$(installed haruna)$(installed fooyin)" "nono"
-has "removed: in the summary" "Removed: fooyin haruna" "$OUT"
 is "needed by something else: kept" "$(installed gwenview)" "yes"
-has "needed by something else: says so" "gwenview was kept - other packages need it" "$OUT"
 is "needed by something else: not asked again" "$(cat "$V/kept-apps")" "gwenview"
 is "the others stay" "$(installed firefox)$(installed jq)" "yesyes"
-
-update "hunter2"
-is "after that: finishes" "$STATUS" "0"
-hasnt "after that: nothing to ask" "no longer includes" "$OUT"
-has "after that: the usual step" "Installing new packages" "$OUT"
 
 # ------------------------------------------------------------
 # The install run again

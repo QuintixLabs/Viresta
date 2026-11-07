@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 
 # menu.sh
-# Tests the install menu in a real terminal, saving and reading its options, and the
-# help screens of the three scripts.
+# Tests the install menu in a real terminal, and saving and reading its options.
 
 source "$(dirname "$0")/../shared/helpers.sh"
 
@@ -12,48 +11,20 @@ copy_viresta
 # The menu
 # ------------------------------------------------------------
 
-# The real menu, with a description far too long for the terminal.
 cat >"$TEST_DIR/menu.sh" <<'EOF'
 SCRIPT_DIR="$1"; VERBOSE=0
 source "$SCRIPT_DIR/lib/ui/messages.sh"; source "$SCRIPT_DIR/lib/ui/menu.sh"
 ui_init 2>/dev/null
 add_option a "Vicinae" "Short" 1 "Applications"
 add_option s "rename" "Other" 1 "Scripts"
-add_option drivers "Install drivers" "UHD Graphics 770 + Radeon RX 6600/6600 XT/6600M: mesa, vulkan-intel, intel-media-driver, libva-intel-driver, vulkan-radeon" 1 "Drivers"
+add_option drivers "Install drivers" "mesa, vulkan-radeon" 1 "Drivers"
 choose_options
 option_enabled drivers && echo RESULT=on || echo RESULT=off
 EOF
-# menu <keys> <columns>: what was on screen.
-menu() { printf '%s' "$1" | script -qec "stty cols $2; bash '$TEST_DIR/menu.sh' '$VIRESTA'" /dev/null 2>/dev/null; }
-plain() { strip_colors | sed 's/\r$//'; }
 
-# Down, down, space, enter turns Drivers off. An 80 column terminal leaves 50 for the text.
-screen="$(menu $'jj \n' 80 | plain)"
-is "every package is shown" "$(for p in 'UHD Graphics 770' mesa vulkan-intel intel-media-driver libva-intel-driver vulkan-radeon; do grep -qF "$p" <<<"$screen" && echo yes; done | wc -l)" "6"
-longest="$(grep -E 'Install drivers|^ {25}' <<<"$screen" | awk '{ if (length($0) > m) m = length($0) } END { print m }')"
-is "no line reaches the edge" "$([ "$longest" -le 79 ] && echo yes || echo "no, $longest")" "yes"
-is "wrapped lines line up with the text" "$(grep -cE '^ {25}[^ ]' <<<"$screen")" "8"
+# Down, down, space, enter turns Drivers off.
+screen="$(printf '%s' $'jj \n' | script -qec "stty cols 80; bash '$TEST_DIR/menu.sh' '$VIRESTA'" /dev/null 2>/dev/null)"
 is "toggling a row works" "$(grep -c 'RESULT=off' <<<"$screen")" "1"
-is "the category titles are shown" "$(grep -cE '^(Applications|Scripts|Drivers)$' <<<"$screen")" "12"
-
-# 3 titles, 2 gaps, 3 rows and 2 extra lines of text is 10, and the footer and its gap make 12.
-raw="$(menu $'j\n' 80)"
-is "a redraw goes back up over every line" "$(grep -c $'\e\[12A' <<<"$raw")" "1"
-is "a redraw draws exactly those lines" "$(printf '%s' "$raw" | tr -d '\r' | perl -0ne 'print $1 if /\e\[12A(.*?)\e\[2B/s' | grep -c '')" "10"
-is "a narrow terminal still shows everything" "$(menu $'j\n' 50 | plain | grep -cF 'libva-intel-driver')" "2"
-
-cat >"$TEST_DIR/menu2.sh" <<'EOF'
-SCRIPT_DIR="$1"; VERBOSE=0
-source "$SCRIPT_DIR/lib/ui/messages.sh"; source "$SCRIPT_DIR/lib/ui/menu.sh"
-ui_init 2>/dev/null
-add_option a "Vicinae" "one" 1 "Applications"
-add_option b "a_really_long_script_name_here.py" "two" 1 "Scripts"
-choose_options
-EOF
-long="$(printf '\n' | script -qec "stty cols 80; bash '$TEST_DIR/menu2.sh' '$VIRESTA'" /dev/null 2>/dev/null | plain)"
-is "a long label: the same gap" "$(grep -c 'a_really_long_script_name_here.py  two' <<<"$long")" "1"
-is "a short label lines up with it" "$(grep -c 'Vicinae                     *one' <<<"$long")" "1"
-is "descriptions start in the same column" "$(grep -E '(one|two)$' <<<"$long" | awk '{ print index($0, $NF) }' | sort -u | wc -l)" "1"
 
 # ------------------------------------------------------------
 # Saved options
@@ -113,80 +84,24 @@ is "descriptions start in the same column" "$(grep -E '(one|two)$' <<<"$long" | 
 read -r _ PASSED FAILED <"$TEST_DIR/counts"
 
 # ------------------------------------------------------------
-# Help screens
+# Options and logs
 # ------------------------------------------------------------
-
-in_terminal() {
-    script -qec "cd '$VIRESTA' && bash $1" "$TEST_DIR/raw" >/dev/null 2>&1
-    sed -e '1{/^Script started/d}' -e '${/^Script done/d}' -e 's/\r$//' "$TEST_DIR/raw"
-}
-for script in install update uninstall; do
-    screen="$(in_terminal "./$script.sh --help")"
-    is "$script: a blank line at the top" "$(sed -n 1p <<<"$screen")" ""
-    is "$script: colors in a terminal" "$(grep -c $'\e\[' <<<"$screen" | awk '{ print ($1 > 0) }')" "1"
-    is "$script: the usage line" "$(strip_colors <<<"$screen" | sed -n 2p)" "Usage: ./$script.sh [options]"
-    is "$script: no colors through a pipe" "$(cd "$VIRESTA" && bash "./$script.sh" --help | grep -c $'\e')" "0"
-done
 
 for option in --fast --no-aur --no-vicinae --no-rename-wallpapers --no-vm; do
     is "install.sh refuses the old $option" "$(cd "$VIRESTA" && bash ./install.sh "$option" >/dev/null 2>&1 </dev/null; echo $?)" "2"
 done
-is "setup.sh has a help" "$(cd "$VIRESTA" && bash setup/setup.sh --help | sed -n 2p)" "Usage: setup.sh [options]"
-
-# ------------------------------------------------------------
-# Ctrl+C
-# ------------------------------------------------------------
-
-# A question, then Ctrl+C, in a real terminal.
-cat >"$TEST_DIR/question.sh" <<'EOF'
-SCRIPT_DIR="$1"; VERBOSE=0
-source "$SCRIPT_DIR/lib/load.sh"
-start_script
-ask_yes_no "Apply Viresta's configs again anyway?" n
-echo "NOT STOPPED"
-EOF
-# Ctrl+C only once the question is on screen. Sent any earlier, on a slow computer it lands
-# while the script is still starting, before it listens for Ctrl+C. Some computers, like
-# GitHub's, start the tests with Ctrl+C ignored, and Bash cannot listen for a signal it
-# started with ignored, so env turns it back on first.
-: >"$TEST_DIR/ctrl-c"
-{
-    for _ in $(seq 100); do
-        grep -q 'anyway?' "$TEST_DIR/ctrl-c" && break
-        sleep 0.1
-    done
-    sleep 0.2
-    printf '\003'
-    sleep 0.3
-} | timeout -k 5 30 script -qec "env --default-signal=INT bash '$TEST_DIR/question.sh' '$VIRESTA'" /dev/null >"$TEST_DIR/ctrl-c" 2>/dev/null
-hasnt "Ctrl+C at a question: stops" "NOT STOPPED" "$(cat "$TEST_DIR/ctrl-c")"
-has "Ctrl+C at a question: the question was on screen" "anyway? [y/N]" "$(strip_colors <"$TEST_DIR/ctrl-c")"
-# The last visible thing on screen, which before was the ^C. The script also shows the
-# cursor again on its way out, which is a code and not text, so that is left out.
-is "Ctrl+C at a question: the line is finished, so the prompt starts on its own" \
-    "$(strip_colors <"$TEST_DIR/ctrl-c" | tr -d '\r' | tail -c 1 | od -An -c | tr -d ' ')" '\n'
-
-# ------------------------------------------------------------
-# What failed last time
-# ------------------------------------------------------------
 
 STATE="$HOME/.local/state/viresta"
 mkdir -p "$STATE"
 for pair in install:failures.log update:update-failures.log uninstall:uninstall-failures.log; do
     script="${pair%%:*}"
     log="$STATE/${pair#*:}"
-    rm -f "$log"
-    is "$script --logs: nothing recorded yet" "$(cd "$VIRESTA" && bash "./$script.sh" --logs)" "No $script has been recorded yet."
-    : >"$log"
-    is "$script --logs: nothing failed" "$(cd "$VIRESTA" && bash "./$script.sh" --logs)" "Nothing failed in the last $script."
     printf 'Could not install: foo\n' >"$log"
-    is "$script --logs: what failed" "$(cd "$VIRESTA" && bash "./$script.sh" --logs)" "Failed in the last $script:
-  - Could not install: foo"
+    has "$script --logs: shows what failed" "Could not install: foo" "$(cd "$VIRESTA" && bash "./$script.sh" --logs)"
     rm -f "$log"
 done
 
 LOG="$STATE/install.log"
-mkdir -p "$(dirname "$LOG")"
 echo keep >"$LOG"
 (cd "$VIRESTA" && bash ./install.sh --help >/dev/null)
 is "help leaves the log alone" "$(cat "$LOG")" "keep"

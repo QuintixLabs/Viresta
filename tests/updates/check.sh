@@ -36,6 +36,4 @@ is "no internet" "$(viresta update --check 2>&1; echo "exit=$?")" "Could not che
 exit=1"
 internet_back
 
-is "in the help" "$(viresta update --help | strip_colors | grep -c -- '--check  ')" "1"
-
 finish

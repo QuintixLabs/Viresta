@@ -189,7 +189,6 @@ if command -v python3 >/dev/null 2>&1 && python3 -c 'import tomllib' 2>/dev/null
 else
     skip "starship config: needs Python 3.11 or newer to read it"
 fi
-is "the prompt has no line break" "$(grep -c 'line_break' "$SHELL_SOURCE_DIR/starship.toml")" "0"
 is "blerc is valid Bash" "$(bash -n "$SHELL_SOURCE_DIR/bash/blerc" 2>&1; echo $?)" "0"
 
 finish

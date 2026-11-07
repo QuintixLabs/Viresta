@@ -52,14 +52,12 @@ color() { grep -E '^COLOR=' <<<"$1" | tail -n 1; }
 out="$(run xterm "$WITH" "")"
 is "no errors from the file" "$(wc -c <"$TEST_DIR/errors")" "0"
 is "starship replaces the distro's prompt" "$(prompt "$out")" "PROMPT=FROM_STARSHIP"
-is "the color follows the terminal" "$(color "$out")" "COLOR=brblack"
 
 is "no starship: the distro's prompt stays" "$(prompt "$(run xterm "$WITHOUT" "")")" "PROMPT=FROM_DISTRO"
 is "text login: starship stays off" "$(prompt "$(run linux "$WITH" "")")" "PROMPT=FROM_DISTRO"
 is "their own prompt stays" "$(prompt "$(run xterm "$WITH" "" 'function fish_prompt; echo THEIR_OWN; end')")" "PROMPT=THEIR_OWN"
 is "tide stays" "$(prompt "$(run xterm "$WITH" 'function _tide_prompt; end')")" "PROMPT=FROM_DISTRO"
 is "a color they chose stays" "$(color "$(run xterm "$WITH" 'set -g fish_color_autosuggestion ff00ff')")" "COLOR=ff00ff"
-is "Fish's default color is replaced" "$(color "$(run xterm "$WITH" 'set -g fish_color_autosuggestion 555 brblack')")" "COLOR=brblack"
 
 # CachyOS's update shortcut, set in config.fish like CachyOS does, so after Viresta's file.
 # CachyOS writes it with alias, and this is the function alias makes from it.

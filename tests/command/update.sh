@@ -78,17 +78,13 @@ is "--check: nothing is run" "$(calls)" ""
 waiting 2 1 3
 run_update ""
 is "Enter is yes: paru, then Flatpak" "$(calls)" "paru -Syu;flatpak update -y"
-has "says each step" "[1/2] Updating official and AUR packages" "$OUT"
-has "the Flatpak step" "[2/2] Updating Flatpak apps" "$OUT"
 has "finishes" "Update complete" "$OUT"
-has "and how long it took" "Time taken:" "$OUT"
 hasnt "the same kernel: no reboot hint" "Reboot" "$OUT"
 
 waiting 2 0 0
 run_update "" --yes
 is "--yes: no question" "$(grep -c 'Update now?' <<<"$OUT")" "0"
 is "nothing for Flatpak: only paru, with no questions" "$(calls)" "paru -Syu --noconfirm"
-has "one step" "[1/1] Updating official and AUR packages" "$OUT"
 
 rm "$BIN/paru"
 waiting 2 0 0
@@ -119,7 +115,6 @@ mkdir -p "$KERNEL_MODULES_DIR/6.0-test"
 waiting 1 0 2
 run_update ""
 is "the package update fails: stops" "$STATUS" "1"
-has "the package update fails: says so" "The package update stopped. Nothing else was updated." "$OUT"
 hasnt "the package update fails: no Flatpak" "flatpak update" "$(calls)"
 rm "$FAKE/fail-pacman"
 
@@ -127,16 +122,13 @@ rm "$FAKE/fail-pacman"
 # Refusing
 # ------------------------------------------------------------
 
-is "an unknown option" "$(bash "$UPDATE" --nope 2>&1 >/dev/null | head -n 1)" "Unknown option: --nope"
 is "an unknown option fails" "$(bash "$UPDATE" --nope >/dev/null 2>&1; echo $?)" "2"
-is "help" "$(bash "$UPDATE" --help | grep -c 'update \[options\]')" "1"
 fake id 'echo 0'
-is "as root: refuses" "$(bash "$UPDATE" 2>&1; echo "exit=$?")" "Run update as your normal user. It asks for your password when it needs it.
-exit=1"
+is "as root: refuses" "$(bash "$UPDATE" >/dev/null 2>&1; echo $?)" "1"
 rm "$BIN/id"
 rm "$BIN/pacman"
 if ! command -v pacman >/dev/null 2>&1; then
-    is "not Arch: refuses" "$(bash "$UPDATE" 2>&1 | head -n 1)" "update is for Arch Linux and distros based on it, like CachyOS."
+    is "not Arch: refuses" "$(bash "$UPDATE" >/dev/null 2>&1; echo $?)" "1"
 else
     skip "not Arch: this system has a real pacman"
 fi

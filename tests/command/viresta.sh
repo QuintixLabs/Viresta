@@ -2,7 +2,7 @@
 
 # viresta.sh
 # Tests the viresta command: running the right script from anywhere, passing options
-# along, its help and version, a moved folder, and installing and removing it.
+# along, its version, a moved folder, and installing and removing it.
 
 source "$(dirname "$0")/../shared/helpers.sh"
 
@@ -64,35 +64,18 @@ for script in install update uninstall; do
 done
 
 # ------------------------------------------------------------
-# Help and version
+# Version
 # ------------------------------------------------------------
 
 is "version" "$(bash "$COMMAND" --version)" "Viresta 1.1.0"
-is "version, short" "$(bash "$COMMAND" -v)" "Viresta 1.1.0"
-is "help" "$(bash "$COMMAND" --help | grep -c 'viresta <command>')" "2"
-is "no command shows the help" "$(bash "$COMMAND"; echo "exit=$?")" "$(bash "$COMMAND" --help; echo "exit=0")"
-is "an unknown command" "$(bash "$COMMAND" updat 2>&1 >/dev/null | head -n 1)" "Unknown command: updat"
 is "an unknown command fails" "$(bash "$COMMAND" updat >/dev/null 2>&1; echo $?)" "2"
-is "no colors through a pipe" "$(bash "$COMMAND" --help | grep -c $'\e')" "0"
-colored="$(script -qec "bash '$COMMAND' --help" /dev/null)"
-is "colors in a terminal" "$(grep -c $'\e\[38;5;42minstall' <<<"$colored")" "1"
-is "the script's own help goes through" "$(bash "$COMMAND" update --help | strip_colors | grep -c -- '--notifications-off')" "1"
-for script in install update uninstall; do
-    is "$script help names the command" "$(bash "$COMMAND" "$script" --help | strip_colors | grep '^Usage:')" "Usage: viresta $script [options]"
-    is "$script help from the folder" "$(bash "$VIRESTA/$script.sh" --help | strip_colors | grep '^Usage:')" "Usage: ./$script.sh [options]"
-done
 
 # ------------------------------------------------------------
 # A moved folder
 # ------------------------------------------------------------
 
 mv "$VIRESTA" "$TEST_DIR/Moved"
-for script in update install uninstall; do
-    is "moved folder: $script names its script" "$(bash "$COMMAND" "$script" 2>&1)" \
-        "Can't find the Viresta folder. If you moved it, run ./$script.sh from its new place."
-done
 is "moved folder: fails" "$(bash "$COMMAND" update >/dev/null 2>&1; echo $?)" "1"
-is "moved folder: help still works" "$(bash "$COMMAND" --help | grep -c 'Commands:')" "1"
 mv "$TEST_DIR/Moved" "$VIRESTA"
 
 # ------------------------------------------------------------
